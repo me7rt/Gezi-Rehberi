@@ -47,7 +47,7 @@
   async function wiki(titles, { full = true } = {}) {
     const out = {}, need = [];
     for (const t of titles) {
-      const c = store.get((full ? "wk2:" : "wc:") + t);
+      const c = store.get((full ? "wk4:" : "wc:") + t);
       if (c) out[t] = c; else need.push(t);
     }
     const size = full ? 20 : 50;
@@ -60,7 +60,7 @@
       });
       if (full) {
         p.set("exintro", "1"); p.set("explaintext", "1"); p.set("exlimit", "20");
-        p.set("piprop", "thumbnail"); p.set("pithumbsize", "900"); p.set("pilimit", "20"); p.set("inprop", "url"); p.set("ppprop", "wikibase_item");
+        p.set("piprop", "thumbnail"); p.set("pithumbsize", "900"); p.set("pilimit", "20"); p.set("inprop", "url"); p.set("ppprop", "wikibase_item|disambiguation");
       }
       let j;
       try { j = await (await fetch(API + "?" + p)).json(); } catch { continue; }
@@ -76,21 +76,27 @@
         if (!pg || pg.missing) { out[t] = { yok: true }; continue; }
         const v = pageInfo(pg);
         out[t] = v;
-        store.set((full ? "wk2:" : "wc:") + t, v);
+        store.set((full ? "wk4:" : "wc:") + t, v);
       }
     }
     return out;
   }
 
 
+  // Sadece gerçek fotoğraf: jpg olmalı, adında harita/logo/uydu vb. olmamalı
+  const BADIMG = /(map|harita|karte|locator|location|lokasyon|konum|relief|topo|landsat|sentinel|satellite|uydu|nasa|iss0|modis|flag|bayrak|logo|amblem|emblem|arma|coat_of_arms|seal|mühür|tabela|sign|plan|kroki|diagram|şema|chart|grafik)/i;
+  const goodImg = (u) => { if (!u) return false; const d = decodeURIComponent(u); return /\.(jpe?g)(\?|\/|$)/i.test(d) && !BADIMG.test(d); };
+  const KOTU_BASLIK = /(anlam ayrımı|\(il\)$| ili$|bölgesi$)/i;
   function pageInfo(pg) {
     const co = pg.coordinates && pg.coordinates[0];
+    const pp = pg.pageprops || {};
     return {
       baslik: pg.title,
       lat: co ? co.lat : null, lng: co ? co.lon : null,
-      foto: pg.thumbnail ? pg.thumbnail.source : null,
+      foto: pg.thumbnail && goodImg(pg.thumbnail.source) ? pg.thumbnail.source : null,
       metin: pg.extract || "",
-      qid: pg.pageprops && pg.pageprops.wikibase_item || null,
+      qid: pp.wikibase_item || null,
+      anlam: "disambiguation" in pp,
       url: pg.fullurl || "https://tr.wikipedia.org/wiki/" + encodeURIComponent(pg.title)
     };
   }
@@ -99,48 +105,117 @@
     catch { return null; }
   }
   const filePath = (f) => "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(f.replace(/^(File|Dosya):/, "")) + "?width=900";
+  const fotoKey = (u) => decodeURIComponent(u || "").replace(/^.*\//, "").replace(/^\d+px-/, "").replace(/\?.*$/, "").replace(/_/g, " ").toLowerCase();
   async function pool(items, n, fn) {
     let i = 0;
     await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => { while (i < items.length) await fn(items[i++]); }));
   }
 
-  // Vikipedi'de bulunamayan yeri arayarak bul (ilin yakınında olmalı)
+  const GENEL = new Set(["kalesi","camii","cami","müzesi","müze","gölü","göl","dağı","dağları","vadisi","şelalesi","şelaleleri","mağarası","mağaraları","medresesi","köprüsü","tepesi","yaylası","sarayı","kanyonu","adası","millî","milli","parkı","tabiat","ulu","eski","antik","kent","harabeleri","türbesi","çarşısı","hanı","manastırı","kilisesi","koyu","burnu","feneri","evi","sokağı","caddesi","yeraltı","şehri"]);
+  const kelimeler = (t) => t.toLocaleLowerCase("tr").replace(/[(),.\-]/g, " ").split(/\s+/).filter((w) => w.length > 2);
+  const IL_KUCUK = new Set(IL_ADLARI.map((n) => n.toLocaleLowerCase("tr")));
+  // Başlık bir il/bölge/anlam ayrımı sayfası mı?
+  const genelSayfa = (t) => { const b = t.toLocaleLowerCase("tr"); return IL_KUCUK.has(b) || KOTU_BASLIK.test(t); };
+  function uygunBaslik(aranan, bulunan) {
+    if (genelSayfa(bulunan)) return false;
+    const b = bulunan.toLocaleLowerCase("tr");
+    const kw = kelimeler(aranan).filter((w) => !GENEL.has(w) && !IL_KUCUK.has(w));
+    return kw.length ? kw.some((w) => b.includes(w)) : kelimeler(aranan).every((w) => b.includes(w));
+  }
+  const ilinde = (p, lat, lng, r = 150) => { const c = ilMerkez[p.il]; return !c || km(c, { lat, lng }) < r; };
+  const BOS = { yok: true, lat: null, lng: null, foto: null, metin: "", qid: null, url: null, baslik: null, anlam: false };
+
+  // 1) Vikipedi'de bulunamayan yeri arayarak bul (ilin içinde olmalı, adı tutmalı)
   async function searchPlace(p) {
     const j = await getJSON(API, {
-      action: "query", formatversion: "2", generator: "search", gsrsearch: p.w + " " + p.il, gsrlimit: "3", gsrnamespace: "0",
-      prop: "coordinates|pageimages|extracts|info|pageprops", exintro: "1", explaintext: "1", exlimit: "3",
-      piprop: "thumbnail", pithumbsize: "900", inprop: "url", ppprop: "wikibase_item", colimit: "max"
+      action: "query", formatversion: "2", generator: "search", gsrsearch: p.w + " " + p.il, gsrlimit: "6", gsrnamespace: "0",
+      prop: "coordinates|pageimages|extracts|info|pageprops", exintro: "1", explaintext: "1", exlimit: "6",
+      piprop: "thumbnail", pithumbsize: "900", inprop: "url", ppprop: "wikibase_item|disambiguation", colimit: "max"
     });
     const pages = ((j && j.query && j.query.pages) || []).sort((a, b) => a.index - b.index);
-    const c = ilMerkez[p.il];
-    const ok = pages.find((pg) => { const co = pg.coordinates && pg.coordinates[0]; return co && (!c || km(c, { lat: co.lat, lng: co.lon }) < 120); });
+    const ok = pages.find((pg) => {
+      const co = pg.coordinates && pg.coordinates[0];
+      return !(pg.pageprops && "disambiguation" in pg.pageprops) && uygunBaslik(p.w, pg.title) && (!co || ilinde(p, co.lat, co.lon, 120));
+    });
     if (ok) Object.assign(p, pageInfo(ok), { yok: false });
   }
-  // Fotoğrafı olmayanlar: önce Vikiveri (Wikidata) resmi, sonra konumun yakınındaki Commons fotoğrafı
-  async function wikidataPhotos(list) {
-    const need = list.filter((p) => !p.foto && p.qid);
+  // 2) Vikiveri: resim (P18), koordinat (P625), Türkçe açıklama, İngilizce Vikipedi adı
+  async function wikidata(list) {
+    const need = list.filter((p) => p.qid);
     for (let i = 0; i < need.length; i += 50) {
       const part = need.slice(i, i + 50);
-      const j = await getJSON("https://www.wikidata.org/w/api.php", { action: "wbgetentities", ids: part.map((p) => p.qid).join("|"), props: "claims" });
+      const j = await getJSON("https://www.wikidata.org/w/api.php", {
+        action: "wbgetentities", ids: part.map((p) => p.qid).join("|"), props: "claims|descriptions|sitelinks", languages: "tr|en", sitefilter: "enwiki"
+      });
       const ents = (j && j.entities) || {};
       part.forEach((p) => {
-        const c = ents[p.qid] && ents[p.qid].claims && ents[p.qid].claims.P18;
-        const f = c && c[0] && c[0].mainsnak && c[0].mainsnak.datavalue && c[0].mainsnak.datavalue.value;
-        if (f) p.foto = filePath(f);
+        const e = ents[p.qid]; if (!e) return;
+        const val = (prop) => { const c = e.claims && e.claims[prop]; return c && c[0] && c[0].mainsnak && c[0].mainsnak.datavalue && c[0].mainsnak.datavalue.value; };
+        p.adaylar = ((e.claims && e.claims.P18) || []).map((c) => c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.value).filter((f) => f && goodImg(f)).map(filePath);
+        const co = val("P625");
+        if (p.lat == null && co && ilinde(p, co.latitude, co.longitude)) { p.lat = co.latitude; p.lng = co.longitude; }
+        const d = e.descriptions && (e.descriptions.tr || e.descriptions.en);
+        if (d) p.aciklama = d.value;
+        if (e.sitelinks && e.sitelinks.enwiki) p.en = e.sitelinks.enwiki.title;
       });
     }
   }
-  async function nearbyPhoto(p) {
+  // 3) İngilizce Vikipedi: fotoğraf ve (Türkçesi yoksa) metin
+  async function enwiki(list) {
+    const need = list.filter((p) => p.en && (!p.foto || !p.metin));
+    for (let i = 0; i < need.length; i += 20) {
+      const part = need.slice(i, i + 20);
+      const j = await getJSON("https://en.wikipedia.org/w/api.php", {
+        action: "query", formatversion: "2", redirects: "1", prop: "pageimages|extracts", piprop: "thumbnail", pithumbsize: "900", pilimit: "20",
+        exintro: "1", explaintext: "1", exlimit: "20", titles: part.map((p) => p.en).join("|")
+      });
+      const pages = {}; ((j && j.query && j.query.pages) || []).forEach((pg) => (pages[pg.title] = pg));
+      const red = {}; ((j && j.query && j.query.redirects) || []).forEach((r) => (red[r.from] = r.to));
+      part.forEach((p) => {
+        const pg = pages[red[p.en] || p.en]; if (!pg) return;
+        if (pg.thumbnail && goodImg(pg.thumbnail.source)) (p.adaylar = p.adaylar || []).push(pg.thumbnail.source);
+        if (!p.metin && pg.extract) p.metinEn = pg.extract;
+      });
+    }
+  }
+  // 4) Commons: konumun yakınında çekilmiş fotoğraflar, 5) Commons'ta adıyla arama
+  async function commonsNear(p) {
+    if (p.lat == null) return;
     const j = await getJSON("https://commons.wikimedia.org/w/api.php", {
-      action: "query", list: "geosearch", gscoord: p.lat + "|" + p.lng, gsradius: "400", gsnamespace: "6", gslimit: "10"
+      action: "query", list: "geosearch", gscoord: p.lat + "|" + p.lng, gsradius: "2000", gsnamespace: "6", gslimit: "25"
     });
-    const f = ((j && j.query && j.query.geosearch) || []).find((g) => /\.(jpe?g)$/i.test(g.title));
-    if (f) p.foto = filePath(f.title);
+    const kw = kelimeler(p.w).filter((w) => !IL_KUCUK.has(w));
+    const files = ((j && j.query && j.query.geosearch) || []).map((g) => g.title).filter(goodImg);
+    // Adı geçen dosyalar önce
+    files.sort((a, b) => (kw.some((w) => b.toLocaleLowerCase("tr").includes(w)) ? 1 : 0) - (kw.some((w) => a.toLocaleLowerCase("tr").includes(w)) ? 1 : 0));
+    (p.adaylar = p.adaylar || []).push(...files.slice(0, 8).map(filePath));
+  }
+  async function commonsSearch(p) {
+    const j = await getJSON("https://commons.wikimedia.org/w/api.php", {
+      action: "query", list: "search", srsearch: (p.baslik || p.w).replace(/\s*\(.*\)$/, "") + " " + p.il + " filetype:bitmap", srnamespace: "6", srlimit: "10"
+    });
+    const files = ((j && j.query && j.query.search) || []).map((r) => r.title).filter(goodImg);
+    (p.adaylar = p.adaylar || []).push(...files.map(filePath));
+  }
+  // Aynı ildeki yerler aynı fotoğrafı paylaşmasın
+  function fotoDagit(list) {
+    const used = new Set();
+    list.forEach((p) => { if (p.foto) { const k = fotoKey(p.foto); if (used.has(k)) p.foto = null; else used.add(k); } });
+    list.forEach((p) => {
+      if (p.foto) return;
+      const f = (p.adaylar || []).find((u) => !used.has(fotoKey(u)));
+      if (f) { p.foto = f; used.add(fotoKey(f)); }
+    });
   }
   async function improve(list, redraw) {
     await pool(list.filter((p) => p.yok), 4, searchPlace); redraw();
-    await wikidataPhotos(list); redraw();
-    await pool(list.filter((p) => !p.foto && p.lat != null), 4, nearbyPhoto); redraw();
+    await wikidata(list);
+    await enwiki(list);
+    fotoDagit(list); redraw();
+    await pool(list.filter((p) => !p.foto), 4, commonsNear);
+    fotoDagit(list); redraw();
+    await pool(list.filter((p) => !p.foto), 4, commonsSearch);
+    fotoDagit(list); redraw();
   }
 
   // ---------- durum ----------
@@ -152,6 +227,7 @@
   let cat = "hepsi";
   let open = null;          // açık yer
   let map = null, layer = null, meMarker = null, fitted = false;
+  let ilMerkezHazir = Promise.resolve();
 
   // ---------- konum ----------
   function startLocation(cb) {
@@ -221,7 +297,9 @@
     current = { mode: "il", il }; cat = "hepsi"; fitted = false;
     $("eyebrow").textContent = "Gezilecek yerler"; $("title").textContent = il;
     places = ILLER[il].map((p) => ({ ...p, il }));
-    show("city"); ensureMap(); renderChips(); renderList(); drawPins();
+    show("city"); ensureMap();
+    if (ilMerkez[il]) map.setView([ilMerkez[il].lat, ilMerkez[il].lng], 9);
+    renderChips(); renderList(); drawPins();
     await fill(places);
   }
   async function openNear() {
@@ -235,22 +313,39 @@
     show("city"); ensureMap(); renderChips(); renderList(); drawPins();
     await fill(places);
   }
-  const KEEP = ["baslik", "lat", "lng", "foto", "metin", "url", "qid", "yok"];
+  const KEEP = ["baslik", "lat", "lng", "foto", "metin", "metinEn", "aciklama", "url", "qid", "yok", "en"];
+  let token = 0;
   async function fill(list) {
+    const my = ++token;
     $("sortInfo").textContent = "Bilgiler yükleniyor…";
-    const todo = list.filter((p) => { const c = store.get("wf:" + p.w + "|" + p.il); if (c) { Object.assign(p, c); return false; } return true; });
-    const redraw = () => { renderList(); drawPins(); if (open && todo.includes(open)) openDetail(open); };
+    await ilMerkezHazir;
+    const todo = list.filter((p) => { const c = store.get("wf3:" + p.w + "|" + p.il); if (c) { Object.assign(p, c); return false; } return true; });
+    const redraw = () => { if (my !== token) return; renderList(); drawPins(); if (open && todo.includes(open)) openDetail(open); };
     if (todo.length) {
       const r = await wiki(todo.map((p) => p.w));
-      todo.forEach((p) => Object.assign(p, r[p.w] || {}));
+      todo.forEach((p) => {
+        Object.assign(p, r[p.w] || {});
+        // Aynı adlı başka bir yere gittiyse (il dışında) yok say, aramaya bırak
+        if (p.baslik && (p.anlam || genelSayfa(p.baslik) || (p.lat != null && ilMerkez[p.il] && !ilinde(p, p.lat, p.lng)))) Object.assign(p, BOS);
+      });
       redraw();
       await improve(todo, redraw);
-      todo.filter((p) => p.baslik || p.yok).forEach((p) => { const o = {}; KEEP.forEach((k) => (o[k] = p[k])); store.set("wf:" + p.w + "|" + p.il, o); });
+      todo.filter((p) => p.baslik || p.yok).forEach((p) => { const o = {}; KEEP.forEach((k) => (o[k] = p[k])); store.set("wf3:" + p.w + "|" + p.il, o); });
     }
+    if (my !== token) return;
     $("sortInfo").textContent = "";
     renderList(); drawPins();
   }
-  const visible = () => places.filter((p) => cat === "hepsi" || p.k === cat);
+  const visible = () => {
+    const seen = new Set();
+    return places.filter((p) => {
+      if (cat !== "hepsi" && p.k !== cat) return false;
+      const key = p.baslik ? p.baslik + "|" + p.il : null;
+      if (key && seen.has(key)) return false;
+      if (key) seen.add(key);
+      return true;
+    });
+  };
   const dist = (p) => (me && p.lat != null ? km(me, p) : null);
 
   function renderChips() {
@@ -321,14 +416,18 @@
     ph.style.backgroundColor = p.foto ? "" : CATS[p.k].renk;
     renderFacts(p);
     $("dTip").hidden = !p.ip; $("dTip").innerHTML = p.ip ? "<b>İpucu:</b> " + esc(p.ip) : "";
-    const txt = p.metin || (p.yok ? "Bu yer için henüz bilgi eklenmedi." : "Bilgi yükleniyor…");
+    const ad = (p.baslik || p.w).replace(/\s*\(.*\)$/, "");
+    let txt = p.metin || p.metinEn || "";
+    if (!txt && p.aciklama) txt = ad + ": " + p.aciklama + ".";
+    if (!txt) txt = p.yok === undefined && !p.baslik ? "Bilgi yükleniyor…" : `${ad}, ${p.il} ilinde görülmeye değer ${CATS[p.k].ad.toLocaleLowerCase("tr")} noktalarından biri. Ayrıntılar için aşağıdaki bağlantıya bakabilirsin.`;
+    if (!p.metin && p.metinEn) txt = "(İngilizce kaynaktan) " + txt;
     $("dText").textContent = txt.length > 900 ? txt.slice(0, 900).replace(/\s\S*$/, "") + "…" : txt;
-    const q = p.lat != null ? `${p.lat},${p.lng}` : encodeURIComponent((p.baslik || p.w) + " " + p.il);
-    $("dMap").href = p.lat != null
-      ? `https://www.google.com/maps/search/?api=1&query=${q}`
-      : `https://www.google.com/maps/search/?api=1&query=${q}`;
+    const q = p.lat != null ? `${p.lat},${p.lng}` : encodeURIComponent(ad + " " + p.il);
+    $("dMap").href = `https://www.google.com/maps/search/?api=1&query=${q}`;
     $("dDir").href = `https://www.google.com/maps/dir/?api=1&destination=${q}`;
-    $("dWiki").hidden = !p.url; if (p.url) $("dWiki").href = p.url;
+    const link = p.url || (p.en ? "https://en.wikipedia.org/wiki/" + encodeURIComponent(p.en) : "https://www.google.com/search?q=" + encodeURIComponent(ad + " " + p.il));
+    $("dWiki").href = link;
+    $("dWiki").textContent = p.url ? "Vikipedi'de devamını oku" : p.en ? "Vikipedi'de (İngilizce) oku" : "İnternette daha fazla bilgi ara";
     $("sheet").hidden = false;
     $("dClose").focus();
   }
@@ -347,7 +446,7 @@
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDetail(); });
 
   renderIls();
-  loadIlMerkez();
+  ilMerkezHazir = loadIlMerkez();
   // Konum izni daha önce verildiyse sessizce başlat
   if (navigator.permissions) navigator.permissions.query({ name: "geolocation" }).then((s) => { if (s.state === "granted") startLocation(); }).catch(() => {});
 })();
