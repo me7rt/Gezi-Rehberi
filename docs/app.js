@@ -47,7 +47,7 @@
   async function wiki(titles, { full = true } = {}) {
     const out = {}, need = [];
     for (const t of titles) {
-      const c = store.get((full ? "wk:" : "wc:") + t);
+      const c = store.get((full ? "wk2:" : "wc:") + t);
       if (c) out[t] = c; else need.push(t);
     }
     const size = full ? 20 : 50;
@@ -55,12 +55,12 @@
       const part = need.slice(i, i + size);
       const p = new URLSearchParams({
         action: "query", format: "json", formatversion: "2", redirects: "1", origin: "*",
-        prop: full ? "coordinates|pageimages|extracts|info" : "coordinates",
+        prop: full ? "coordinates|pageimages|extracts|info|pageprops" : "coordinates",
         colimit: "max", titles: part.join("|")
       });
       if (full) {
         p.set("exintro", "1"); p.set("explaintext", "1"); p.set("exlimit", "20");
-        p.set("piprop", "thumbnail"); p.set("pithumbsize", "900"); p.set("pilimit", "20"); p.set("inprop", "url");
+        p.set("piprop", "thumbnail"); p.set("pithumbsize", "900"); p.set("pilimit", "20"); p.set("inprop", "url"); p.set("ppprop", "wikibase_item");
       }
       let j;
       try { j = await (await fetch(API + "?" + p)).json(); } catch { continue; }
@@ -74,19 +74,73 @@
       for (const t of part) {
         const pg = pages[map[t]];
         if (!pg || pg.missing) { out[t] = { yok: true }; continue; }
-        const co = pg.coordinates && pg.coordinates[0];
-        const v = {
-          baslik: pg.title,
-          lat: co ? co.lat : null, lng: co ? co.lon : null,
-          foto: pg.thumbnail ? pg.thumbnail.source : null,
-          metin: pg.extract || "",
-          url: pg.fullurl || "https://tr.wikipedia.org/wiki/" + encodeURIComponent(pg.title)
-        };
+        const v = pageInfo(pg);
         out[t] = v;
-        store.set((full ? "wk:" : "wc:") + t, v);
+        store.set((full ? "wk2:" : "wc:") + t, v);
       }
     }
     return out;
+  }
+
+
+  function pageInfo(pg) {
+    const co = pg.coordinates && pg.coordinates[0];
+    return {
+      baslik: pg.title,
+      lat: co ? co.lat : null, lng: co ? co.lon : null,
+      foto: pg.thumbnail ? pg.thumbnail.source : null,
+      metin: pg.extract || "",
+      qid: pg.pageprops && pg.pageprops.wikibase_item || null,
+      url: pg.fullurl || "https://tr.wikipedia.org/wiki/" + encodeURIComponent(pg.title)
+    };
+  }
+  async function getJSON(url, params) {
+    try { return await (await fetch(url + "?" + new URLSearchParams({ format: "json", origin: "*", ...params }))).json(); }
+    catch { return null; }
+  }
+  const filePath = (f) => "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(f.replace(/^(File|Dosya):/, "")) + "?width=900";
+  async function pool(items, n, fn) {
+    let i = 0;
+    await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => { while (i < items.length) await fn(items[i++]); }));
+  }
+
+  // Vikipedi'de bulunamayan yeri arayarak bul (ilin yakınında olmalı)
+  async function searchPlace(p) {
+    const j = await getJSON(API, {
+      action: "query", formatversion: "2", generator: "search", gsrsearch: p.w + " " + p.il, gsrlimit: "3", gsrnamespace: "0",
+      prop: "coordinates|pageimages|extracts|info|pageprops", exintro: "1", explaintext: "1", exlimit: "3",
+      piprop: "thumbnail", pithumbsize: "900", inprop: "url", ppprop: "wikibase_item", colimit: "max"
+    });
+    const pages = ((j && j.query && j.query.pages) || []).sort((a, b) => a.index - b.index);
+    const c = ilMerkez[p.il];
+    const ok = pages.find((pg) => { const co = pg.coordinates && pg.coordinates[0]; return co && (!c || km(c, { lat: co.lat, lng: co.lon }) < 120); });
+    if (ok) Object.assign(p, pageInfo(ok), { yok: false });
+  }
+  // Fotoğrafı olmayanlar: önce Vikiveri (Wikidata) resmi, sonra konumun yakınındaki Commons fotoğrafı
+  async function wikidataPhotos(list) {
+    const need = list.filter((p) => !p.foto && p.qid);
+    for (let i = 0; i < need.length; i += 50) {
+      const part = need.slice(i, i + 50);
+      const j = await getJSON("https://www.wikidata.org/w/api.php", { action: "wbgetentities", ids: part.map((p) => p.qid).join("|"), props: "claims" });
+      const ents = (j && j.entities) || {};
+      part.forEach((p) => {
+        const c = ents[p.qid] && ents[p.qid].claims && ents[p.qid].claims.P18;
+        const f = c && c[0] && c[0].mainsnak && c[0].mainsnak.datavalue && c[0].mainsnak.datavalue.value;
+        if (f) p.foto = filePath(f);
+      });
+    }
+  }
+  async function nearbyPhoto(p) {
+    const j = await getJSON("https://commons.wikimedia.org/w/api.php", {
+      action: "query", list: "geosearch", gscoord: p.lat + "|" + p.lng, gsradius: "400", gsnamespace: "6", gslimit: "10"
+    });
+    const f = ((j && j.query && j.query.geosearch) || []).find((g) => /\.(jpe?g)$/i.test(g.title));
+    if (f) p.foto = filePath(f.title);
+  }
+  async function improve(list, redraw) {
+    await pool(list.filter((p) => p.yok), 4, searchPlace); redraw();
+    await wikidataPhotos(list); redraw();
+    await pool(list.filter((p) => !p.foto && p.lat != null), 4, nearbyPhoto); redraw();
   }
 
   // ---------- durum ----------
@@ -97,7 +151,7 @@
   let places = [];          // gösterilen yerler
   let cat = "hepsi";
   let open = null;          // açık yer
-  let map = null, layer = null, meMarker = null;
+  let map = null, layer = null, meMarker = null, fitted = false;
 
   // ---------- konum ----------
   function startLocation(cb) {
@@ -164,7 +218,7 @@
     renderIls();
   }
   async function openIl(il) {
-    current = { mode: "il", il }; cat = "hepsi";
+    current = { mode: "il", il }; cat = "hepsi"; fitted = false;
     $("eyebrow").textContent = "Gezilecek yerler"; $("title").textContent = il;
     places = ILLER[il].map((p) => ({ ...p, il }));
     show("city"); ensureMap(); renderChips(); renderList(); drawPins();
@@ -175,16 +229,24 @@
     if (!Object.keys(ilMerkez).length) await loadIlMerkez();
     const near = Object.keys(ilMerkez).sort((a, b) => km(me, ilMerkez[a]) - km(me, ilMerkez[b])).slice(0, 3);
     if (!near.length) { toast("İnternet bağlantını kontrol et."); return; }
-    current = { mode: "near" }; cat = "hepsi";
+    current = { mode: "near" }; cat = "hepsi"; fitted = false;
     $("eyebrow").textContent = "Sana en yakın"; $("title").textContent = "Yakınımdaki yerler";
     places = near.flatMap((il) => ILLER[il].map((p) => ({ ...p, il })));
     show("city"); ensureMap(); renderChips(); renderList(); drawPins();
     await fill(places);
   }
+  const KEEP = ["baslik", "lat", "lng", "foto", "metin", "url", "qid", "yok"];
   async function fill(list) {
     $("sortInfo").textContent = "Bilgiler yükleniyor…";
-    const r = await wiki(list.map((p) => p.w));
-    list.forEach((p) => Object.assign(p, r[p.w] || {}));
+    const todo = list.filter((p) => { const c = store.get("wf:" + p.w + "|" + p.il); if (c) { Object.assign(p, c); return false; } return true; });
+    const redraw = () => { renderList(); drawPins(); if (open && todo.includes(open)) openDetail(open); };
+    if (todo.length) {
+      const r = await wiki(todo.map((p) => p.w));
+      todo.forEach((p) => Object.assign(p, r[p.w] || {}));
+      redraw();
+      await improve(todo, redraw);
+      todo.filter((p) => p.baslik || p.yok).forEach((p) => { const o = {}; KEEP.forEach((k) => (o[k] = p[k])); store.set("wf:" + p.w + "|" + p.il, o); });
+    }
     $("sortInfo").textContent = "";
     renderList(); drawPins();
   }
@@ -234,7 +296,7 @@
     });
     drawMe();
     if (current && current.mode === "near" && me) pts.push([me.lat, me.lng]);
-    if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 14 });
+    if (pts.length && !fitted) { map.fitBounds(pts, { padding: [30, 30], maxZoom: 14 }); fitted = pts.length > 2; }
     setTimeout(() => map.invalidateSize(), 50);
   }
   function drawMe() {
@@ -278,7 +340,7 @@
   $("nearBtn").addEventListener("click", openNear);
   $("locBtn").addEventListener("click", () => startLocation());
   $("back").addEventListener("click", goHome);
-  $("chips").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; cat = b.dataset.k; renderChips(); renderList(); drawPins(); });
+  $("chips").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; cat = b.dataset.k; fitted = false; renderChips(); renderList(); drawPins(); });
   $("list").addEventListener("click", (e) => { const b = e.target.closest(".row"); if (b) openDetail(places[+b.dataset.i]); });
   $("dClose").addEventListener("click", closeDetail);
   $("sheet").addEventListener("click", (e) => { if (e.target === $("sheet")) closeDetail(); });
