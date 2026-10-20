@@ -1,0 +1,23 @@
+name: Veri hazirla
+on:
+  workflow_dispatch:
+    inputs:
+      gorev:
+        description: "teshis veya uret"
+        default: "uret"
+  push:
+    branches: [main]
+    paths: ["scripts/**", "data/**", ".github/workflows/veri.yml"]
+permissions:
+  contents: write
+concurrency: { group: veri, cancel-in-progress: true }
+jobs:
+  veri:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Teshis
+        run: node scripts/teshis.mjs
