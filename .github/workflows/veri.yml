@@ -14,10 +14,40 @@ concurrency: { group: veri, cancel-in-progress: true }
 jobs:
   veri:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - name: Teshis
+        if: ${{ github.event.inputs.gorev == 'teshis' }}
         run: node scripts/teshis.mjs
+      - name: Veriyi uret
+        if: ${{ github.event.inputs.gorev != 'teshis' }}
+        run: node scripts/uret.mjs
+      - name: Fotograf kontrol sayfalari
+        if: ${{ github.event.inputs.gorev != 'teshis' }}
+        run: |
+          pip install --quiet pillow
+          python3 scripts/kontrol.py
+      - name: Veriyi main'e yukle
+        if: ${{ github.event.inputs.gorev != 'teshis' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add docs/data
+          if git diff --cached --quiet; then echo "degisiklik yok"; exit 0; fi
+          git commit -m "Veri guncellendi (otomatik)"
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && break; sleep 5; done
+      - name: Kontrol sayfalarini kontrol dalina yukle
+        if: ${{ github.event.inputs.gorev != 'teshis' }}
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd kontrol
+          git init -q -b kontrol
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Fotograf kontrol sayfalari"
+          git push -f "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git" kontrol
