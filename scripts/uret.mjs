@@ -56,7 +56,7 @@ function dosyaKotu(name) {
 }
 
 // ---------- Ağ yardımcıları ----------
-async function sparql(q, deneme = 0) {
+async function sparql(q, deneme = 0, hizli = false) {
   let r, t;
   try {
     r = await fetch("https://query.wikidata.org/sparql", {
@@ -67,8 +67,8 @@ async function sparql(q, deneme = 0) {
     if (r.ok) return (await r.json()).results.bindings;
     t = (await r.text()).slice(0, 400);
   } catch (e) { t = String(e); }
-  if (/TimeoutException|timeout/i.test(t || "") && deneme >= 1) throw Object.assign(new Error("ZAMAN_ASIMI"), { zaman: true });
-  if (deneme < 4) { console.log("  SPARQL tekrar", r && r.status, t.slice(0, 120)); await sleep(6000 * (deneme + 1)); return sparql(q, deneme + 1); }
+  if (/TimeoutException|timeout/i.test(t || "") && (hizli || deneme >= 1)) throw Object.assign(new Error("ZAMAN_ASIMI"), { zaman: true });
+  if (deneme < 4) { console.log("  SPARQL tekrar", r && r.status, (t || "").slice(0, 120)); await sleep(6000 * (deneme + 1)); return sparql(q, deneme + 1, hizli); }
   throw new Error("SPARQL " + (r && r.status) + " " + t);
 }
 async function api(host, params, deneme = 0) {
@@ -170,10 +170,13 @@ rapor("il sayısı", iller.size, "| eşleşmeyen seçkin il:", [...seckinAnahtar
 rapor("== İlçeler");
 const ilceler = new Map();
 for (const b of await sparql(`SELECT ?ilce ?ilceLabel ?il ?coord ?img ?trA ?cat ?alan WHERE {
-  ?ilce wdt:P31 wd:Q1147395 ; wdt:P131 ?il . ?il wdt:P31 wd:Q48336 .
+  ?ilce p:P31 ?s1 . ?s1 ps:P31 wd:Q1147395 . FILTER NOT EXISTS { ?s1 pq:P582 [] } FILTER NOT EXISTS { ?s1 wikibase:rank wikibase:DeprecatedRank }
+  ?ilce p:P131 ?s2 . ?s2 ps:P131 ?il . FILTER NOT EXISTS { ?s2 pq:P582 [] } FILTER NOT EXISTS { ?s2 wikibase:rank wikibase:DeprecatedRank }
+  ?il wdt:P31 wd:Q48336 .
   FILTER NOT EXISTS { ?ilce wdt:P576 [] }
-  OPTIONAL { ?ilce wdt:P625 ?coord } OPTIONAL { ?ilce wdt:P18 ?img } OPTIONAL { ?ilce wdt:P2046 ?alan } OPTIONAL { ?ilce wdt:P373 ?cat }
-  OPTIONAL { ?trA schema:about ?ilce ; schema:isPartOf <https://tr.wikipedia.org/> }
+  ?ilce wdt:P625 ?coord .
+  ?trA schema:about ?ilce ; schema:isPartOf <https://tr.wikipedia.org/> .
+  OPTIONAL { ?ilce wdt:P18 ?img } OPTIONAL { ?ilce wdt:P2046 ?alan } OPTIONAL { ?ilce wdt:P373 ?cat }
   ${LBL} }`)) {
   const q = qid(val(b, "ilce")); const ilq = qid(val(b, "il"));
   if (!iller.has(ilq)) continue;
@@ -181,6 +184,13 @@ for (const b of await sparql(`SELECT ?ilce ?ilceLabel ?il ?coord ?img ?trA ?cat 
   o.koor ||= nokta(val(b, "coord")); o.alan ||= +val(b, "alan") || 0; o.cat ||= val(b, "cat"); o.trA ||= makale(val(b, "trA"));
   const f = dosyaAdi(val(b, "img")); if (f && !o.imgs.includes(f)) o.imgs.push(f);
   ilceler.set(q, o);
+}
+// Aynı ilde aynı adlı ikinci kayıtları ele
+const ilceAd = new Map();
+for (const o of [...ilceler.values()]) {
+  const k = o.il + "|" + nrm(o.ad);
+  if (ilceAd.has(k) || /^Q\d+$/.test(o.ad)) { ilceler.delete(o.q); continue; }
+  ilceAd.set(k, o.q);
 }
 for (const o of ilceler.values()) iller.get(o.il).ilceler.push(o);
 rapor("ilçe sayısı", ilceler.size, "| koordinatsız:", [...ilceler.values()].filter((o) => !o.koor).map((o) => o.ad).join(",") || "yok");
@@ -201,21 +211,17 @@ async function nufusDoldur(nesneler) {
 await nufusDoldur([...iller.values()]);
 await nufusDoldur([...ilceler.values()]);
 
-// ---------- 3. Yerler (il il) ----------
-const YER_ALAN = `?p wdt:P31 ?cls . VALUES ?cls { ${TUM_SINIF} }
-  ?p wdt:P625 ?coord ; wikibase:sitelinks ?sl .
+// ---------- 3. Yerler: Türkiye geneli, sınıf grupları halinde ----------
+const YER_VERI = `?p wdt:P625 ?coord ; wikibase:sitelinks ?sl .
   OPTIONAL { ?p wdt:P18 ?img }
   OPTIONAL { ?trA schema:about ?p ; schema:isPartOf <https://tr.wikipedia.org/> }
-  OPTIONAL { ?enA schema:about ?p ; schema:isPartOf <https://en.wikipedia.org/> }
-  FILTER(BOUND(?trA) || BOUND(?enA))
-  FILTER NOT EXISTS { ?p wdt:P576 [] }`;
-const YER_EK = `OPTIONAL { ?p wdt:P131* ?ilce . ?ilce wdt:P31 wd:Q1147395 . }
-  OPTIONAL { ?p p:P571/psv:P571 [ wikibase:timeValue ?yil ; wikibase:timePrecision ?yilP ] }
+  OPTIONAL { ?enA schema:about ?p ; schema:isPartOf <https://en.wikipedia.org/> }`;
+const YER_EK = `OPTIONAL { ?p p:P571/psv:P571 [ wikibase:timeValue ?yil ; wikibase:timePrecision ?yilP ] }
   OPTIONAL { ?p wdt:P2044 ?rakim }
   OPTIONAL { ?p wdt:P1435 wd:Q9259 . BIND(1 AS ?unesco) }
   OPTIONAL { ?p wdt:P373 ?cat }
   ${LBL}`;
-const SECIM = "?p ?pLabel ?pDescription ?cls ?coord ?img ?sl ?trA ?enA ?ilce ?yil ?yilP ?rakim ?unesco ?cat";
+const SECIM = "?p ?pLabel ?pDescription ?cls ?coord ?img ?sl ?trA ?enA ?yil ?yilP ?rakim ?unesco ?cat";
 function satirlariTopla(rows, harita) {
   for (const b of rows) {
     const q = qid(val(b, "p"));
@@ -223,7 +229,6 @@ function satirlariTopla(rows, harita) {
     if (val(b, "cls")) o.siniflar.add(qid(val(b, "cls")));
     o.koor ||= nokta(val(b, "coord")); o.sl = Math.max(o.sl || 0, +val(b, "sl") || 0);
     o.trA ||= makale(val(b, "trA")); o.enA ||= makale(val(b, "enA")); o.cat ||= val(b, "cat");
-    if (val(b, "ilce")) o.ilceler.add(qid(val(b, "ilce")));
     if (!o.yil && val(b, "yil")) o.yil = tarih(val(b, "yil"), val(b, "yilP"));
     if (!o.rakim && val(b, "rakim")) o.rakim = Math.round(+val(b, "rakim"));
     if (val(b, "unesco")) o.unesco = 1;
@@ -232,21 +237,61 @@ function satirlariTopla(rows, harita) {
   }
 }
 rapor("== Yerler");
-let sorguSay = 0;
-for (const il of iller.values()) {
-  const h = new Map();
+const HAM = new Map();
+async function sinifSorgu(grup) {
   try {
-    satirlariTopla(await sparql(`SELECT ${SECIM} WHERE { ?p wdt:P131+ wd:${il.q} . ${YER_ALAN} ${YER_EK} }`), h);
+    satirlariTopla(await sparql(`SELECT ${SECIM} WHERE {
+      VALUES ?cls { ${grup.map((q) => "wd:" + q).join(" ")} }
+      ?p wdt:P31 ?cls ; wdt:P17 wd:Q43 .
+      ${YER_VERI}
+      FILTER(BOUND(?trA) || BOUND(?enA))
+      FILTER NOT EXISTS { ?p wdt:P576 [] }
+      ${YER_EK} }`, 0, true), HAM);
   } catch (e) {
-    if (!e.zaman) throw e;
-    rapor("  zaman aşımı, ilçe ilçe soruluyor:", il.ad);
-    satirlariTopla(await sparql(`SELECT ${SECIM} WHERE { ?p wdt:P131 wd:${il.q} . ${YER_ALAN} ${YER_EK} }`), h);
-    for (const ic of il.ilceler) { satirlariTopla(await sparql(`SELECT ${SECIM} WHERE { ?p wdt:P131+ wd:${ic.q} . ${YER_ALAN} ${YER_EK} }`), h); await sleep(400); }
+    if (!e.zaman || grup.length === 1) { rapor("  UYARI sınıf sorgusu başarısız:", grup.join(","), e.message.slice(0, 100)); return; }
+    const y = Math.ceil(grup.length / 2);
+    await sinifSorgu(grup.slice(0, y)); await sinifSorgu(grup.slice(y));
   }
-  il.ham = h; sorguSay++;
-  console.log(`  ${il.ad}: ${h.size} aday`);
-  await sleep(700);
+  await sleep(500);
 }
+for (const grup of parca([...SINIF_KAT.keys()], 10)) await sinifSorgu(grup);
+rapor("Türkiye geneli aday yer:", HAM.size);
+
+// Her yerin ilini ve ilçesini yukarı doğru (P131 zinciri) bul
+async function ataBul(qids) {
+  const out = new Map();
+  for (const p of parca(qids, 200)) {
+    const rows = await sparql(`SELECT ?p ?u WHERE { hint:Query hint:optimizer "None" .
+      VALUES ?p { ${p.map((q) => "wd:" + q).join(" ")} }
+      ?p wdt:P131* ?u . ?u wdt:P31 ?ut . FILTER(?ut IN (wd:Q1147395, wd:Q48336)) }`);
+    for (const b of rows) { const q = qid(val(b, "p")); const s = out.get(q) || new Set(); s.add(qid(val(b, "u"))); out.set(q, s); }
+    await sleep(300);
+  }
+  return out;
+}
+function enYakinIlce(koor, ilq, sinir) {
+  let en = null, d = 1e9;
+  for (const z of ilceler.values()) if (z.koor && (!ilq || z.il === ilq)) { const m = mesafe(koor[0], koor[1], z.koor[0], z.koor[1]); if (m < d) { d = m; en = z; } }
+  return en && d < sinir ? en : null;
+}
+function ilIlceAta(o, atalar) {
+  const s = atalar || new Set();
+  o.ilceler = new Set([...s].filter((q) => ilceler.has(q)));
+  let ilq = [...s].find((q) => iller.has(q));
+  if (!ilq && o.ilceler.size) ilq = ilceler.get([...o.ilceler][0]).il;
+  if (!ilq && o.koor) { const z = enYakinIlce(o.koor, null, 15); if (z) ilq = z.il; }
+  return ilq;
+}
+const ATA = await ataBul([...HAM.keys()]);
+for (const il of iller.values()) il.ham = new Map();
+let ilsiz = 0;
+for (const o of HAM.values()) {
+  const ilq = ilIlceAta(o, ATA.get(o.q));
+  if (!ilq) { ilsiz++; continue; }
+  iller.get(ilq).ham.set(o.q, o);
+}
+rapor("ili bulunamayan yer:", ilsiz);
+for (const il of iller.values()) console.log(`  ${il.ad}: ${il.ham.size} aday`);
 
 // ---------- 4. Seçkin (elle seçilmiş) yerler ----------
 rapor("== Seçkin yerler");
@@ -261,20 +306,21 @@ for (const p of parca([...new Set(seckinListe.map((x) => x.w))], 50)) {
 const seckinQ = [...new Set([...trSayfa.values()].map((s) => s && s.pageprops && s.pageprops.wikibase_item).filter(Boolean))];
 const seckinVeri = new Map(); const seckinIl = new Map(); const seckinSinif = new Map();
 for (const p of parca(seckinQ, 60)) {
-  const rows = await sparql(`SELECT ${SECIM} ?pil WHERE { VALUES ?p { ${p.map((q) => "wd:" + q).join(" ")} }
+  const rows = await sparql(`SELECT ${SECIM} WHERE { VALUES ?p { ${p.map((q) => "wd:" + q).join(" ")} }
     OPTIONAL { ?p wdt:P31 ?cls } OPTIONAL { ?p wdt:P625 ?coord } OPTIONAL { ?p wikibase:sitelinks ?sl } OPTIONAL { ?p wdt:P18 ?img }
     OPTIONAL { ?trA schema:about ?p ; schema:isPartOf <https://tr.wikipedia.org/> }
     OPTIONAL { ?enA schema:about ?p ; schema:isPartOf <https://en.wikipedia.org/> }
-    OPTIONAL { ?p wdt:P131+ ?pil . ?pil wdt:P31 wd:Q48336 . }
     ${YER_EK} }`);
   satirlariTopla(rows, seckinVeri);
   for (const b of rows) {
     const q = qid(val(b, "p"));
-    if (val(b, "pil")) { const s = seckinIl.get(q) || new Set(); s.add(qid(val(b, "pil"))); seckinIl.set(q, s); }
     if (val(b, "cls")) { const s = seckinSinif.get(q) || new Set(); s.add(qid(val(b, "cls"))); seckinSinif.set(q, s); }
   }
   await sleep(600);
 }
+const seckinAta = await ataBul(seckinQ);
+for (const [q, s] of seckinAta) seckinIl.set(q, new Set([...s].filter((x) => iller.has(x))));
+for (const [q, o] of seckinVeri) if (!HAM.has(q)) o.ilceler = new Set([...(seckinAta.get(q) || [])].filter((x) => ilceler.has(x)));
 let seckinTamam = 0;
 for (const { il, w, k } of seckinListe) {
   const s = trSayfa.get(w);
