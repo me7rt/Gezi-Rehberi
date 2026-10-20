@@ -1,0 +1,8 @@
+{
+  "name": "gezi-rehberi",
+  "version": "0.2.0",
+  "private": true,
+  "description": "81 il gezi rehberi: canlı konum, harita, Vikipedi'den foto ve bilgi",
+  "scripts": { "start": "npx serve docs" },
+  "dependencies": { "leaflet": "1.9.4" }
+}

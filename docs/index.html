@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f4fa3">
+<title>Gezi Rehberi</title>
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <button class="back" id="back" hidden aria-label="Geri">‹</button>
+  <div class="titles">
+    <div class="eyebrow" id="eyebrow">Gezi Rehberi</div>
+    <h1 id="title">Nereye gidiyorsun?</h1>
+  </div>
+  <button class="loc" id="locBtn" aria-label="Konumumu kullan"><i></i><span id="locText">Konum kapalı</span></button>
+</header>
+
+<main id="home" class="view">
+  <input id="search" type="search" placeholder="İl ara… (ör. Mardin)" autocomplete="off">
+  <button class="near" id="nearBtn">
+    <b>Yakınımdaki yerler</b>
+    <small id="nearSub">Konumunu aç, bulunduğun ildeki yerleri en yakından sıralayalım</small>
+  </button>
+  <ul class="ils" id="ilList"></ul>
+</main>
+
+<main id="city" class="view" hidden>
+  <div id="map" class="map"></div>
+  <div class="chips" id="chips" role="group" aria-label="Kategori"></div>
+  <div class="sort"><span id="count"></span><span id="sortInfo"></span></div>
+  <ul class="list" id="list"></ul>
+  <p class="credit">Bilgi ve fotoğraflar: Vikipedi / Wikimedia Commons (CC BY-SA). Harita: © OpenStreetMap katkıcıları.</p>
+</main>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <div class="photo" id="dPhoto">
+      <span class="tag" id="dTag"></span>
+      <button class="close" id="dClose" aria-label="Kapat">×</button>
+    </div>
+    <div class="body">
+      <h2 id="dTitle"></h2>
+      <div class="facts" id="dFacts"></div>
+      <div class="tip" id="dTip" hidden></div>
+      <p id="dText" class="text"></p>
+      <div class="btns">
+        <a class="btn" id="dMap" target="_blank" rel="noopener">Haritada aç</a>
+        <a class="btn primary" id="dDir" target="_blank" rel="noopener">Yol tarifi</a>
+      </div>
+      <a class="more" id="dWiki" target="_blank" rel="noopener">Vikipedi'de devamını oku</a>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/leaflet.js"></script>
+<script src="yerler.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
