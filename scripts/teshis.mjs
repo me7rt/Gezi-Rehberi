@@ -1,5 +1,5 @@
 // Wikidata yapısını anlamak için tek seferlik teşhis sorguları
-const UA = "RotaCepte/0.3 (https://github.com/me7rt/RotaCepte)";
+const UA = "RotaCepte/0.3 (https://github.com/me7rt/Rota-Cepte)";
 async function sparql(q) {
   const r = await fetch("https://query.wikidata.org/sparql?format=json&query=" + encodeURIComponent(q), { headers: { "User-Agent": UA, Accept: "application/sparql-results+json" } });
   if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0, 300));

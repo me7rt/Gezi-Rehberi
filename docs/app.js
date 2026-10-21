@@ -568,7 +568,7 @@
   }
   // ---------- paylaş ----------
   function paylas(p) {
-    const url = `https://me7rt.github.io/RotaCepte/#/il/${p.ilS}/yer/${p.q}`;
+    const url = `https://me7rt.github.io/Rota-Cepte/#/il/${p.ilS}/yer/${p.q}`;
     const metin = `${p.ad} (${[...new Set([p.ilce, p.il].filter(Boolean))].join(", ")}) çok güzel bir yer, Rota Cepte uygulamasında buldum:`;
     if (navigator.share) navigator.share({ title: p.ad, text: metin, url }).catch(() => {});
     else window.open("https://wa.me/?text=" + encodeURIComponent(metin + " " + url), "_blank");

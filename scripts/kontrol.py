@@ -4,7 +4,7 @@ import json, os, io, time, urllib.request, urllib.parse, urllib.error
 from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, ImageDraw, ImageFont
 
-UA = "RotaCepte/1.0 (https://github.com/me7rt/RotaCepte; kontrol betigi)"
+UA = "RotaCepte/1.0 (https://github.com/me7rt/Rota-Cepte; kontrol betigi)"
 K = "kontrol"
 liste = json.load(open(f"{K}/liste.json", encoding="utf-8"))
 
