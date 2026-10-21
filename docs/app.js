@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "4.7";
+  const SURUM = "4.8";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -182,6 +182,7 @@
     $("home").hidden = v !== "home";
     $("tema").hidden = v !== "tema";
     $("rota").hidden = v !== "rota";
+    $("rozet").hidden = v !== "rozet";
     $("city").hidden = v !== "city";
     $("back").hidden = v === "home";
     if (degisti || v === "city") window.scrollTo(0, 0);
@@ -211,6 +212,7 @@
       if (h[0] === "yakin") return await showNear(no);
       if (h[0] === "tema" && TEMA[h[1]]) return showTema(h[1]);
       if (h[0] === "rota") return await showRota(h[1], no);
+      if (h[0] === "rozetler") { view = { mode: "rozet" }; show("rozet"); $("eyebrow").textContent = "Gezgin rozetleri"; $("title").textContent = "Rozetlerin"; renderRozet(); return; }
       showHome();
     } catch (e) {
       if (no !== routeNo) return;
@@ -327,6 +329,8 @@
   function renderRozet() {
     const R = rozetler(), k = R.filter((r) => r.tamam).length;
     $("rozetSay").textContent = `${k} / ${R.length}`;
+    const kz = R.filter((r) => r.tamam).map((r) => r.e).slice(0, 5).join(" ");
+    $("rozetBtn").innerHTML = `<span class="rbtnust"><b>🏅 Rozetlerin: ${k} / ${R.length}</b><small${kz ? ' class="emo"' : ""}>${kz || "Henüz rozet yok. Gezdiğin yerleri işaretle, rozet kazan."}</small></span><span class="km">›</span>`;
     $("rozetList").innerHTML = R.sort((x, y) => (y.tamam - x.tamam) || (y.n / y.hedef - x.n / x.hedef)).map((r) =>
       `<li class="rozet${r.tamam ? " on" : ""}" title="${esc(r.acik)}"><i>${r.e}</i><b>${esc(r.ad)}</b><small>${r.tamam ? "Kazandın" : `${r.n}/${r.hedef}`}</small></li>`).join("");
   }
@@ -633,6 +637,7 @@
     $("tabBtnYer").textContent = `Gezilecek yerler (${d.yerler.length})`;
     havaGoster(IDX.ilBy.get(d.s) || d); yemekGoster(d);
     places = d.yerler; cat = "hepsi"; shown = 60; fitted = false;
+    ilAraSifirla();
     sortMode = me ? "yakin" : "oner";
     setTab(tab);
   }
@@ -653,6 +658,7 @@
     renderHero({ f: z.f, m: z.m, w: z.w, facts: [nufusBilgi(z), alanBilgi(z), ["Gezilecek yer", z.n]] });
     $("tabs").hidden = true;
     places = d.yerler.filter((y) => y.i === i); cat = "hepsi"; shown = 60; fitted = false;
+    ilAraSifirla();
     sortMode = me ? "yakin" : "oner";
     $("tabYer").hidden = false; $("tabIlce").hidden = true;
     ensureMap(); renderAll();
@@ -663,6 +669,7 @@
     $("eyebrow").textContent = "Konumuna göre"; $("title").textContent = "Yakınımdakiler";
     $("hero").hidden = true; $("tabs").hidden = true; $("tabYer").hidden = false; $("tabIlce").hidden = true;
     places = []; cat = "hepsi"; shown = 60; fitted = false; sortMode = "yakin";
+    ilAraSifirla();
     ensureMap();
     if (!me) {
       renderAll();
@@ -679,14 +686,17 @@
   }
 
   // ---------- liste ----------
+  let ilAra = "";
   function visible() {
     let v = places;
+    if (ilAra) v = v.filter((p) => sade(p.ad + " " + (p.ilce || "")).includes(ilAra));
     if (cat === "one") v = v.filter((p) => p.one);
     else if (cat !== "hepsi") v = v.filter((p) => p.k === cat);
     if (sortMode === "yakin" && me) v = v.slice().sort((a, b) => km(me, a) - km(me, b));
     else v = v.slice().sort((a, b) => (b.one || 0) - (a.one || 0) || b.sl - a.sl);
     return v;
   }
+  function ilAraSifirla() { ilAra = ""; $("ilAra").value = ""; $("ilAraSil").hidden = true; }
   function renderAll() { renderChips(); renderSort(); renderList(); drawPins(); }
   function renderChips() {
     const say = (k) => places.filter((p) => (k === "one" ? p.one : p.k === k)).length;
@@ -714,7 +724,7 @@
     if (!v.length) {
       $("list").innerHTML = view.mode === "ilce"
         ? '<li class="empty">Bu ilçe için henüz fotoğraflı gezi noktası yok. İlin diğer yerlerine göz atabilirsin.</li>'
-        : view.mode === "near" && !me ? $("list").innerHTML : '<li class="empty">Bu kategoride yer yok.</li>';
+        : view.mode === "near" && !me ? $("list").innerHTML : ilAra ? '<li class="empty">Bu isimde yer bulunamadı. Tüm Türkiye\'de aramak için ana sayfadaki arama kutusunu kullan.</li>' : '<li class="empty">Bu kategoride yer yok.</li>';
       $("moreBtn").hidden = true;
       return;
     }
@@ -833,6 +843,8 @@
     const y = e.target.closest("[data-yer]");
     if (y) { const [s, j] = y.dataset.yer.split("|"); bekleyenYer = { s, j: +j }; git(`#/il/${s}`); }
   });
+  $("ilAra").addEventListener("input", () => { ilAra = sade($("ilAra").value.trim()); $("ilAraSil").hidden = !ilAra; shown = 60; renderList(); drawPins(); });
+  $("ilAraSil").addEventListener("click", () => { ilAraSifirla(); renderList(); drawPins(); $("ilAra").focus(); });
   $("nearBtn").addEventListener("click", () => git("#/yakin"));
   $("locBtn").addEventListener("click", () => { if (watchId !== null) stopLocation(); else startLocation(); });
   $("temaLoc").addEventListener("click", () => startLocation());
