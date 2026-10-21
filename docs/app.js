@@ -230,7 +230,7 @@
       const iyi = d.yerler.filter((y) => y.f && y.q && y.one);
       const liste = iyi.length ? iyi : d.yerler.filter((y) => y.f && y.q);
       const p = liste[gun % liste.length]; if (!p) return;
-      const src = foto(p.f, 800);
+      const src = foto(p.f, 960);
       $("gunun").innerHTML = `<button class="gunun" data-go="#/il/${d.s}/yer/${p.q}">${src ? `<img src="${src}" alt="" onerror="this.remove()">` : ""}<span class="gtxt"><small>Günün keşfi</small><b>${esc(p.ad)}</b><span>${esc([...new Set([p.ilce, p.il].filter(Boolean))].join(", "))}</span></span></button>`;
     } catch (e) { gunYuk = false; }
   }
