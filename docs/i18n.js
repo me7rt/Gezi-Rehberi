@@ -99,7 +99,7 @@
     "Rakım": "Elevation", "UNESCO Dünya Mirası": "UNESCO World Heritage", "İpucu:": "Tip:", "Fotoğraf:": "Photo:",
     "Vikipedi (İngilizce)": "Wikipedia", "Vikipedi'de oku": "Read on Wikipedia", "Vikipedi'de (İngilizce) oku": "Read more on Wikipedia",
     "Gitmedin": "Not yet", "Başladın": "Started", "Tüm ilçeler": "All districts", "İlçe bilgisi": "District info",
-    "Hazır rota": "Ready-made route", "Bugün keşfet": "Today's discovery", "Yakınında keşfet": "Discover nearby"
+    "Hazır rota": "Ready-made route", "📸 Gezi karnemi paylaş": "📸 Share my travel card", "Bugün keşfet": "Today's discovery", "Yakınında keşfet": "Discover nearby"
   };
   window.DIL = dil;
   window.T = (s) => (dil === "en" && EN[s] != null ? EN[s] : s);
