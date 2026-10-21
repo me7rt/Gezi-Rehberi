@@ -1,7 +1,7 @@
 // Mağaza ekran görüntüleri (1080x1920). Kullanım: BASE=https://... node .github/ekran.mjs
 import { chromium } from "playwright";
 import fs from "fs";
-const BASE = process.env.BASE || "https://me7rt.github.io/RotaCepte/";
+const BASE = process.env.BASE || "https://me7rt.github.io/Rota-Cepte/";
 const OUT = "ekran"; fs.mkdirSync(OUT, { recursive: true });
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 360, height: 640 }, deviceScaleFactor: 3, locale: "tr-TR", isMobile: true, hasTouch: true });
