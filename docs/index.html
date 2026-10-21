@@ -17,50 +17,63 @@
 <meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=3.6">
+<link rel="stylesheet" href="style.css?v=3.7">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
-  padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(30px + env(safe-area-inset-bottom,0px));
-  background:radial-gradient(120% 80% at 50% 30%,#2a5fc0 0%,#173f8a 45%,#0b2250 100%);color:#fff;text-align:center;
-  font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:opacity .5s ease,visibility .5s,transform .5s ease;cursor:pointer}
-.splash.out{opacity:0;visibility:hidden;transform:scale(1.04)}
-.sp-yol{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.sp-yol path{fill:none;stroke:#fff;stroke-linecap:round}
-.sp-yol .y1{stroke-width:2;opacity:.14;stroke-dasharray:1400;stroke-dashoffset:1400;animation:spCiz 2.6s .1s ease-out forwards}
-.sp-yol .y2{stroke-width:1.2;opacity:.10;stroke-dasharray:1400;stroke-dashoffset:1400;animation:spCiz 3s .4s ease-out forwards}
-.sp-mid{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
-.sp-mid img{width:104px;height:104px;border-radius:24px;box-shadow:0 20px 50px rgba(0,10,40,.5),0 0 0 1px rgba(255,255,255,.12);animation:spPop .8s cubic-bezier(.2,.9,.3,1) both}
-.sp-app{font-size:42px;font-weight:800;letter-spacing:-1px;margin:22px 0 0;line-height:1;animation:spUp .7s .25s ease both}
-.sp-tag{font-size:15px;font-weight:500;opacity:.82;margin:10px 0 0;animation:spUp .7s .35s ease both}
-.sp-say{display:flex;gap:8px;margin-top:22px;animation:spUp .7s .5s ease both}
-.sp-say span{font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
-.sp-yuk{width:132px;height:3px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:34px;animation:spUp .7s .6s ease both}
-.sp-yuk i{display:block;height:100%;width:0;background:#fff;border-radius:3px;animation:spDol 2.9s .3s cubic-bezier(.4,0,.2,1) forwards}
-.sp-by{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;animation:spUp .7s .7s ease both}
+  padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(30px + env(safe-area-inset-bottom,0px));
+  background:radial-gradient(1.5px 1.5px at 12% 18%,rgba(255,255,255,.7),transparent),radial-gradient(1px 1px at 78% 12%,rgba(255,255,255,.6),transparent),
+  radial-gradient(1.5px 1.5px at 88% 34%,rgba(255,255,255,.5),transparent),radial-gradient(1px 1px at 30% 8%,rgba(255,255,255,.5),transparent),
+  radial-gradient(1px 1px at 60% 26%,rgba(255,255,255,.4),transparent),radial-gradient(1px 1px at 8% 44%,rgba(255,255,255,.4),transparent),
+  radial-gradient(120% 70% at 50% 40%,#1d4a9e 0%,#0f2c66 50%,#071634 100%);color:#fff;text-align:center;
+  font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:opacity .55s ease,visibility .55s,transform .55s ease;cursor:pointer}
+.splash.out{opacity:0;visibility:hidden;transform:scale(1.06)}
+.sp-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%}
+.sp-harita{width:min(92vw,420px);height:auto;overflow:visible}
+.sp-nok circle{fill:#9fc3ff;filter:drop-shadow(0 0 3px rgba(159,195,255,.8));opacity:0;transform-box:fill-box;transform-origin:center;animation:spNok .5s ease-out forwards}
+.sp-rota{fill:none;stroke:#f5b544;stroke-width:2.4;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;filter:drop-shadow(0 0 4px rgba(245,181,68,.7));animation:spCiz 1s 1.25s cubic-bezier(.5,0,.3,1) forwards}
+.sp-pin{opacity:0;animation:spDus .55s 2.15s cubic-bezier(.3,1.6,.5,1) forwards}
+.sp-dalga{fill:none;stroke:#f5b544;stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center;animation:spDalga 1.6s 2.5s ease-out infinite}
+.sp-app{font-size:46px;font-weight:800;letter-spacing:-1px;margin:18px 0 0;line-height:1.05;display:flex}
+.sp-app span{display:inline-block;opacity:0;animation:spHarf .5s cubic-bezier(.2,.9,.3,1.3) forwards}
+.sp-tag{font-size:15px;font-weight:500;opacity:0;margin:10px 0 0;animation:spUp .7s 2.9s ease forwards}
+.sp-tag b{color:#f5b544;font-weight:700}
+.sp-by{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:0;animation:spUp .7s 3.1s ease forwards}
 .sp-by small{font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;font-weight:600}
 .sp-by b{font-size:19px;font-weight:700;letter-spacing:.3px}
 .sp-by span{font-size:11px;opacity:.5;margin-top:4px}
-@keyframes spPop{from{opacity:0;transform:translateY(10px) scale(.88)}to{opacity:1;transform:none}}
-@keyframes spUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes spNok{0%{opacity:0;transform:scale(0)}60%{opacity:1;transform:scale(1.8)}100%{opacity:.85;transform:scale(1)}}
 @keyframes spCiz{to{stroke-dashoffset:0}}
-@keyframes spDol{to{width:100%}}
-@media (prefers-reduced-motion:reduce){.sp-mid img,.sp-app,.sp-tag,.sp-say,.sp-yuk,.sp-by,.sp-yol path,.sp-yuk i{animation:none;stroke-dashoffset:0;width:100%}}
+@keyframes spDus{from{opacity:0;transform:translateY(-40px)}to{opacity:1;transform:none}}
+@keyframes spDalga{0%{opacity:.9;transform:scale(.6)}100%{opacity:0;transform:scale(3.2)}}
+@keyframes spHarf{from{opacity:0;transform:translateY(22px) rotate(8deg)}to{opacity:1;transform:none}}
+@keyframes spUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.sp-yildiz{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(1.6px 1.6px at 20% 30%,#fff,transparent),radial-gradient(1.2px 1.2px at 70% 22%,#fff,transparent),radial-gradient(1.6px 1.6px at 85% 62%,#fff,transparent),radial-gradient(1.2px 1.2px at 15% 72%,#fff,transparent),radial-gradient(1.4px 1.4px at 45% 85%,#fff,transparent),radial-gradient(1.2px 1.2px at 92% 8%,#fff,transparent),radial-gradient(1.4px 1.4px at 5% 12%,#fff,transparent),radial-gradient(1.2px 1.2px at 55% 12%,#fff,transparent);animation:spPirilti 2.2s ease-in-out infinite alternate}
+.sp-isik{position:absolute;left:50%;top:42%;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(245,181,68,.28),rgba(245,181,68,0) 60%);opacity:0;animation:spIsik 1.4s 2.2s ease-out forwards}
+.sp-patla circle{fill:#ffd27a;opacity:0;animation:spPatla .9s 2.45s ease-out forwards}
+.sp-app span{background:linear-gradient(100deg,#fff 0%,#fff 40%,#ffd27a 50%,#fff 60%,#fff 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
+.sp-app{animation:spParla 1.6s 3s ease-in-out forwards}
+.sp-app span{animation-name:spHarf,spParlaH;animation-duration:.5s,1.4s;animation-timing-function:cubic-bezier(.2,.9,.3,1.3),ease-in-out;animation-fill-mode:forwards,forwards}
+@keyframes spPirilti{from{opacity:.35}to{opacity:1}}
+@keyframes spIsik{0%{opacity:0;transform:scale(.4)}60%{opacity:1}100%{opacity:.7;transform:scale(1)}}
+@keyframes spPatla{0%{opacity:1;transform:translate(0,-20px)}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
+@keyframes spParlaH{from{background-position:100% 0}to{background-position:0 0}}
+@keyframes spParla{0%{text-shadow:none}50%{filter:drop-shadow(0 0 14px rgba(255,210,122,.6))}100%{filter:drop-shadow(0 0 6px rgba(255,210,122,.25))}}
+@media (prefers-reduced-motion:reduce){.splash *{animation:none!important;opacity:1!important;stroke-dashoffset:0!important}}
 .kopya{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:#c2462e;color:#fff;font:600 13px/1.4 system-ui,sans-serif;text-align:center;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
 .kopya a{color:#fff}
 </style>
 </head>
 <body>
 <div class="splash" id="splash" aria-hidden="true">
-  <svg class="sp-yol" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
-    <path class="y1" d="M-40 760 C 80 700, 60 600, 180 560 S 360 470, 300 380 S 120 260, 220 170 S 420 90, 460 -20"/>
-    <path class="y2" d="M-60 620 C 40 590, 120 640, 200 600 S 300 520, 380 540 S 470 470, 480 430"/>
-  </svg>
+  <div class="sp-yildiz"></div><div class="sp-isik"></div>
   <div class="sp-mid">
-    <img src="icon-512.png" alt="">
-    <p class="sp-app">Yoldayız</p>
-    <p class="sp-tag">Türkiye'yi keşfetmenin en kolay yolu</p>
-    <div class="sp-say"><span>81 il</span><span>950+ ilçe</span><span>2.400+ yer</span></div>
-    <div class="sp-yuk"><i></i></div>
+    <svg class="sp-harita" viewBox="-12 -40 386 210" aria-hidden="true">
+      <g class="sp-nok"><circle cx="194" cy="126" r="3.8" style="animation-delay:0.74s"/><circle cx="246" cy="115" r="3.8" style="animation-delay:0.90s"/><circle cx="91" cy="90" r="3.8" style="animation-delay:0.43s"/><circle cx="341" cy="65" r="3.8" style="animation-delay:1.19s"/><circle cx="157" cy="98" r="3.8" style="animation-delay:0.63s"/><circle cx="197" cy="40" r="3.8" style="animation-delay:0.75s"/><circle cx="137" cy="59" r="3.8" style="animation-delay:0.57s"/><circle cx="99" cy="130" r="3.8" style="animation-delay:0.45s"/><circle cx="336" cy="28" r="3.8" style="animation-delay:1.17s"/><circle cx="317" cy="28" r="3.8" style="animation-delay:1.11s"/><circle cx="39" cy="116" r="3.8" style="animation-delay:0.27s"/><circle cx="36" cy="64" r="3.8" style="animation-delay:0.26s"/><circle cx="130" cy="15" r="3.8" style="animation-delay:0.55s"/><circle cx="308" cy="107" r="3.8" style="animation-delay:1.09s"/><circle cx="284" cy="51" r="3.8" style="animation-delay:1.01s"/><circle cx="83" cy="57" r="3.8" style="animation-delay:0.40s"/><circle cx="294" cy="82" r="3.8" style="animation-delay:1.04s"/><circle cx="328" cy="96" r="3.8" style="animation-delay:1.15s"/><circle cx="111" cy="40" r="3.8" style="animation-delay:0.49s"/><circle cx="82" cy="124" r="3.8" style="animation-delay:0.40s"/><circle cx="60" cy="53" r="3.8" style="animation-delay:0.33s"/><circle cx="8" cy="53" r="3.8" style="animation-delay:0.17s"/><circle cx="147" cy="38" r="3.8" style="animation-delay:0.60s"/><circle cx="179" cy="43" r="3.8" style="animation-delay:0.69s"/><circle cx="61" cy="113" r="3.8" style="animation-delay:0.34s"/><circle cx="285" cy="106" r="3.8" style="animation-delay:1.02s"/><circle cx="105" cy="33" r="3.8" style="animation-delay:0.47s"/><circle cx="10" cy="28" r="3.8" style="animation-delay:0.18s"/><circle cx="267" cy="92" r="3.8" style="animation-delay:0.96s"/><circle cx="267" cy="66" r="3.8" style="animation-delay:0.96s"/><circle cx="311" cy="56" r="3.8" style="animation-delay:1.10s"/><circle cx="101" cy="65" r="3.8" style="animation-delay:0.46s"/><circle cx="227" cy="133" r="3.8" style="animation-delay:0.84s"/><circle cx="252" cy="42" r="3.8" style="animation-delay:0.92s"/><circle cx="268" cy="47" r="3.8" style="animation-delay:0.97s"/><circle cx="361" cy="123" r="3.8" style="animation-delay:1.25s"/><circle cx="203" cy="156" r="3.8" style="animation-delay:0.77s"/><circle cx="360" cy="60" r="3.8" style="animation-delay:1.24s"/><circle cx="99" cy="110" r="3.8" style="animation-delay:0.45s"/><circle cx="60" cy="31" r="3.8" style="animation-delay:0.33s"/><circle cx="23" cy="98" r="3.8" style="animation-delay:0.22s"/><circle cx="219" cy="112" r="3.8" style="animation-delay:0.82s"/><circle cx="133" cy="25" r="3.8" style="animation-delay:0.55s"/><circle cx="142" cy="135" r="3.8" style="animation-delay:0.58s"/><circle cx="341" cy="45" r="3.8" style="animation-delay:1.19s"/><circle cx="154" cy="18" r="3.8" style="animation-delay:0.62s"/><circle cx="190" cy="90" r="3.8" style="animation-delay:0.73s"/><circle cx="154" cy="61" r="3.8" style="animation-delay:0.62s"/><circle cx="29" cy="13" r="3.8" style="animation-delay:0.24s"/><circle cx="163" cy="75" r="3.8" style="animation-delay:0.64s"/><circle cx="222" cy="140" r="3.8" style="animation-delay:0.83s"/><circle cx="79" cy="37" r="3.8" style="animation-delay:0.39s"/><circle cx="130" cy="113" r="3.8" style="animation-delay:0.54s"/><circle cx="72" cy="75" r="3.8" style="animation-delay:0.37s"/><circle cx="246" cy="100" r="3.8" style="animation-delay:0.90s"/><circle cx="42" cy="90" r="3.8" style="animation-delay:0.28s"/><circle cx="294" cy="127" r="3.8" style="animation-delay:1.04s"/><circle cx="156" cy="144" r="3.8" style="animation-delay:0.62s"/><circle cx="50" cy="134" r="3.8" style="animation-delay:0.30s"/><circle cx="317" cy="83" r="3.8" style="animation-delay:1.11s"/><circle cx="174" cy="89" r="3.8" style="animation-delay:0.68s"/><circle cx="174" cy="111" r="3.8" style="animation-delay:0.68s"/><circle cx="231" cy="36" r="3.8" style="animation-delay:0.85s"/><circle cx="204" cy="129" r="3.8" style="animation-delay:0.77s"/><circle cx="297" cy="33" r="3.8" style="animation-delay:1.05s"/><circle cx="89" cy="39" r="3.8" style="animation-delay:0.42s"/><circle cx="200" cy="26" r="3.8" style="animation-delay:0.76s"/><circle cx="325" cy="111" r="3.8" style="animation-delay:1.14s"/><circle cx="178" cy="15" r="3.8" style="animation-delay:0.69s"/><circle cx="220" cy="64" r="3.8" style="animation-delay:0.82s"/><circle cx="261" cy="129" r="3.8" style="animation-delay:0.94s"/><circle cx="329" cy="122" r="3.8" style="animation-delay:1.15s"/><circle cx="30" cy="32" r="3.8" style="animation-delay:0.24s"/><circle cx="211" cy="48" r="3.8" style="animation-delay:0.79s"/><circle cx="276" cy="37" r="3.8" style="animation-delay:0.99s"/><circle cx="269" cy="78" r="3.8" style="animation-delay:0.97s"/><circle cx="67" cy="96" r="3.8" style="animation-delay:0.35s"/><circle cx="347" cy="96" r="3.8" style="animation-delay:1.21s"/><circle cx="64" cy="40" r="3.8" style="animation-delay:0.34s"/><circle cx="185" cy="66" r="3.8" style="animation-delay:0.71s"/><circle cx="115" cy="23" r="3.8" style="animation-delay:0.50s"/></g>
+      <path class="sp-rota" d="M23 98 Q 9 65 60 31 Q 98 25 137 59 Q 167 63 174 89"/>
+      <g transform="translate(174 89)"><g class="sp-patla"><circle r="1.8" style="--dx:28.0px;--dy:-20.0px"/><circle r="1.8" style="--dx:24.2px;--dy:-6.0px"/><circle r="1.8" style="--dx:14.0px;--dy:4.2px"/><circle r="1.8" style="--dx:0.0px;--dy:8.0px"/><circle r="1.8" style="--dx:-14.0px;--dy:4.2px"/><circle r="1.8" style="--dx:-24.2px;--dy:-6.0px"/><circle r="1.8" style="--dx:-28.0px;--dy:-20.0px"/><circle r="1.8" style="--dx:-24.2px;--dy:-34.0px"/><circle r="1.8" style="--dx:-14.0px;--dy:-44.2px"/><circle r="1.8" style="--dx:-0.0px;--dy:-48.0px"/><circle r="1.8" style="--dx:14.0px;--dy:-44.2px"/><circle r="1.8" style="--dx:24.2px;--dy:-34.0px"/></g><g class="sp-pin"><circle class="sp-dalga" r="6"/><path d="M0 0 C -4 -7 -11 -12 -11 -20 A 11 11 0 0 1 11 -20 C 11 -12 4 -7 0 0 Z" fill="#f5b544"/><circle cy="-20" r="4.2" fill="#0b2250"/></g></g>
+    </svg>
+    <p class="sp-app"><span style="animation-delay:2.30s,3.05s">Y</span><span style="animation-delay:2.37s,3.05s">o</span><span style="animation-delay:2.44s,3.05s">l</span><span style="animation-delay:2.51s,3.05s">d</span><span style="animation-delay:2.58s,3.05s">a</span><span style="animation-delay:2.65s,3.05s">y</span><span style="animation-delay:2.72s,3.05s">ı</span><span style="animation-delay:2.79s,3.05s">z</span></p>
+    <p class="sp-tag"><b>81 il</b>, binlerce yer. Hadi yola çıkalım.</p>
   </div>
   <div class="sp-by">
     <small>Hazırlayan</small>
@@ -150,16 +163,16 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=3.6"></script>
+<script src="app.js?v=3.7"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
   var s = document.getElementById("splash"), bitti = false;
   function kapat() { if (bitti) return; bitti = true; s.classList.add("out"); setTimeout(function () { s.remove(); }, 500); }
-  function hazir() { setTimeout(kapat, Math.max(0, 3200 - performance.now())); }
+  function hazir() { setTimeout(kapat, Math.max(0, 4800 - performance.now())); }
   s.addEventListener("click", kapat);
   if (document.readyState === "complete") hazir(); else addEventListener("load", hazir);
-  setTimeout(kapat, 6000);
+  setTimeout(kapat, 7000);
   // İnternet yokken de açılsın
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
   // Uygulama başka bir sitede kopyalanıp yayınlanırsa orijinalini göster
