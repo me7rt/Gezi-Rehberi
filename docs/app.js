@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "4.3";
+  const SURUM = "4.4";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -773,6 +773,21 @@
   window.addEventListener("popstate", () => { if (!$("sheet").hidden) hideSheet(); });
   window.addEventListener("hashchange", route);
 
+  // ---------- Android geri tuşu (yalnızca uygulama içinde) ----------
+  const CapApp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+  if (CapApp && CapApp.addListener) {
+    let cikisZamani = 0;
+    CapApp.addListener("backButton", (e) => {
+      const modal = document.querySelector(".tanit");
+      if (modal) { modal.remove(); return; }
+      if (!$("sheet").hidden) { closeDetail(); return; }
+      const ev = !location.hash || location.hash === "#/" || location.hash === "#";
+      if (!ev) { if (e && e.canGoBack) history.back(); else git("#/"); return; }
+      if ($("search").value) { araTemizle(); return; }
+      if (Date.now() - cikisZamani < 2000) { CapApp.exitApp(); return; }
+      cikisZamani = Date.now(); toast("Çıkmak için tekrar geri bas");
+    });
+  }
   temaChips();
   route();
   setTimeout(tanitim, 5200);
