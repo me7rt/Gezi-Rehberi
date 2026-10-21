@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "3.9";
+  const SURUM = "4.0";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -105,7 +105,22 @@
   let open = null, sheetPushed = false, bekleyenYer = null, homeMe = null, sonSira = 0, routeNo = 0;
 
   // ---------- konum ----------
+  function stopLocation() {
+    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    watchId = null; me = null; homeMe = null;
+    try { localStorage.setItem("gezi-konum-kapali", "1"); } catch (e) {}
+    $("locBtn").classList.remove("on");
+    $("locText").textContent = "Konum kapalı";
+    $("nearSub").textContent = "Konumunu aç, sana en yakın gezilecek yerleri sıralayalım";
+    if (meMarker && layer) { layer.removeLayer(meMarker); meMarker = null; }
+    if (open) renderFacts(open);
+    if (view && view.mode === "tema") renderTema();
+    else if (!$("home").hidden) renderHome();
+    else if (!$("city").hidden && view.d) { if (sortMode === "yakin") sortMode = "oner"; renderSort(); renderList(); if (!$("tabIlce").hidden) renderIlceList(view.d); }
+    toast("Konum kapatıldı");
+  }
   function startLocation(cb) {
+    try { localStorage.removeItem("gezi-konum-kapali"); } catch (e) {}
     if (!navigator.geolocation) { toast("Bu cihaz konumu desteklemiyor."); return; }
     if (watchId !== null) { if (me && cb) cb(); return; }
     let first = true;
@@ -650,7 +665,10 @@
 
   // ---------- olaylar ----------
   let araZaman = null;
-  $("search").addEventListener("input", () => { clearTimeout(araZaman); araZaman = setTimeout(renderHome, 120); });
+  function araTemizle() { $("search").value = ""; $("araSil").hidden = true; renderHome(); }
+  $("search").addEventListener("input", () => { $("araSil").hidden = !$("search").value; clearTimeout(araZaman); araZaman = setTimeout(renderHome, 120); });
+  $("araSil").addEventListener("click", () => { araTemizle(); $("search").blur(); window.scrollTo(0, 0); });
+  $("results").addEventListener("click", (e) => { if (e.target.closest("[data-go],[data-yer]")) setTimeout(araTemizle, 0); });
   $("search").addEventListener("focus", () => { if (IDX) loadAra(); });
   document.addEventListener("click", (e) => {
     const b = e.target.closest("[data-go]");
@@ -659,7 +677,7 @@
     if (y) { const [s, j] = y.dataset.yer.split("|"); bekleyenYer = { s, j: +j }; git(`#/il/${s}`); }
   });
   $("nearBtn").addEventListener("click", () => git("#/yakin"));
-  $("locBtn").addEventListener("click", () => startLocation());
+  $("locBtn").addEventListener("click", () => { if (watchId !== null) stopLocation(); else startLocation(); });
   $("temaLoc").addEventListener("click", () => startLocation());
   $("back").addEventListener("click", () => {
     if (view.mode === "ilce") git(`#/il/${view.d.s}/ilceler`);
@@ -693,5 +711,6 @@
   route();
   setTimeout(tanitim, 5200);
   // Konum izni daha önce verildiyse sessizce başlat
-  if (navigator.permissions) navigator.permissions.query({ name: "geolocation" }).then((s) => { if (s.state === "granted") startLocation(); }).catch(() => {});
+  let kapali = false; try { kapali = !!localStorage.getItem("gezi-konum-kapali"); } catch (e) {}
+  if (!kapali && navigator.permissions) navigator.permissions.query({ name: "geolocation" }).then((s) => { if (s.state === "granted") startLocation(); }).catch(() => {});
 })();
