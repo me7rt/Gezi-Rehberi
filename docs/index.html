@@ -135,10 +135,10 @@
 (function () {
   var s = document.getElementById("splash"), bitti = false;
   function kapat() { if (bitti) return; bitti = true; s.classList.add("out"); setTimeout(function () { s.remove(); }, 500); }
-  function hazir() { setTimeout(kapat, Math.max(0, 2000 - performance.now())); }
+  function hazir() { setTimeout(kapat, Math.max(0, 3200 - performance.now())); }
   s.addEventListener("click", kapat);
   if (document.readyState === "complete") hazir(); else addEventListener("load", hazir);
-  setTimeout(kapat, 4500);
+  setTimeout(kapat, 6000);
   // İnternet yokken de açılsın
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
   // Uygulama başka bir sitede kopyalanıp yayınlanırsa orijinalini göster
