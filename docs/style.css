@@ -239,3 +239,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .yknbas{font-size:13px;margin:16px 0 8px;color:var(--muted,#667)}
 .ykns{display:flex;flex-wrap:wrap;gap:6px}
 .ykn{text-decoration:none;color:var(--fg);font-weight:700;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 12px}
+
+/* 5.2: dil düğmesi */
+.dilbtn{display:block;margin:18px auto 4px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:9px 18px;font:inherit;font-weight:700;cursor:pointer}
