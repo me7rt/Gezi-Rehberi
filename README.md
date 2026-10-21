@@ -1,4 +1,4 @@
-# Gezi Rehberi
+# Yoldayız
 
 Türkiye'nin 81 ili ve tüm ilçelerinde gezilecek yerler: harita, canlı konuma göre mesafe, her yer için fotoğraf ve bilgi, tek dokunuşla Google Maps'te yol tarifi.
 
