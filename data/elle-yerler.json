@@ -1,0 +1,10 @@
+{
+"balikesir": [
+  { "ad": "Sütüven Şelalesi", "k": "d", "ilce": "Edremit", "lat": 39.655, "lng": 26.985, "gq": "Sütüven Şelalesi, Edremit, Balıkesir",
+    "m": "Kaz Dağları'nın eteğinde, Zeytinli yakınında, çam ve çınar ağaçları arasından dökülen serin bir şelale. Kısa bir yürüyüşle ulaşılır; yazın sıcağından kaçmak için bölgenin en sevilen duraklarından biridir." },
+  { "ad": "Hasanboğuldu", "k": "d", "ilce": "Edremit", "lat": 39.63, "lng": 26.93, "gq": "Hasanboğuldu Tabiat Parkı, Edremit, Balıkesir",
+    "m": "Güre yakınındaki Kaz Dağları vadisinde, buz gibi suyuyla ünlü bir gölet ve şelale. Hasan ile Emine'nin efsanesiyle anılır; yürüyüş yolu, piknik alanları ve dere boyu manzarasıyla görülmeye değer." },
+  { "ad": "Kızılkeçili", "k": "d", "ilce": "Edremit", "lat": 39.64, "lng": 26.905, "gq": "Kızılkeçili, Edremit, Balıkesir",
+    "m": "Kaz Dağları'nın yamacında, Güre'nin hemen üstünde, eski taş evleri ve dar sokaklarıyla sakin bir dağ köyü. Körfez manzarası, temiz havası ve köy kahvaltısıyla bilinir." }
+]
+}
