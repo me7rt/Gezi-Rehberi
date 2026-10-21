@@ -397,7 +397,7 @@ const FOTO = new Map();
 async function fotoBilgi(adlar) {
   const yeni = [...new Set(adlar.filter((a) => a && !FOTO.has(a)))];
   for (const p of parca(yeni, 50)) {
-    const { bul } = await apiSayfalar("commons.wikimedia.org", { action: "query", titles: p.map((a) => "File:" + a).join("|"), prop: "imageinfo", iiprop: "url|size|mime|extmetadata", iiextmetadatafilter: "Artist|LicenseShortName" });
+    const { bul } = await apiSayfalar("commons.wikimedia.org", { action: "query", titles: p.map((a) => "File:" + a).join("|"), prop: "imageinfo", iiprop: "url|size|mime|extmetadata", iiextmetadatafilter: "Artist|LicenseShortName|DateTimeOriginal|DateTime" });
     for (const a of p) {
       const pg = bul("File:" + a); const ii = pg && pg.imageinfo && pg.imageinfo[0];
       if (!ii) { FOTO.set(a, null); continue; }
@@ -410,7 +410,8 @@ function fotoKaydi(a, ii) {
   const yazar = (em.Artist ? em.Artist.value : "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim().slice(0, 70);
   const lis = em.LicenseShortName ? em.LicenseShortName.value.replace(/<[^>]+>/g, "").trim() : "";
   const m = /\/wikipedia\/commons\/([^?#]+)/.exec(ii.url || "");
-  return { ad: a, w: ii.width, h: ii.height, mime: ii.mime, p: m ? m[1] : "", a: [yazar, lis].filter(Boolean).join(" · ") };
+  const tarih = /(?:19|20)\d\d/.exec(((em.DateTimeOriginal || em.DateTime || {}).value || "").replace(/<[^>]+>/g, " "));
+  return { ad: a, w: ii.width, h: ii.height, mime: ii.mime, p: m ? m[1] : "", a: [yazar, lis].filter(Boolean).join(" · "), y: tarih ? +tarih[0] : 0 };
 }
 function fotoUygun(a) {
   const f = FOTO.get(a);
@@ -438,7 +439,7 @@ function adPuan(dosya, ad) {
 }
 async function kategoriFoto(cat, ad) {
   if (!cat) return [];
-  const j = await api("commons.wikimedia.org", { action: "query", generator: "categorymembers", gcmtitle: "Category:" + cat, gcmtype: "file", gcmlimit: "60", prop: "imageinfo", iiprop: "url|size|mime|extmetadata", iiextmetadatafilter: "Artist|LicenseShortName" });
+  const j = await api("commons.wikimedia.org", { action: "query", generator: "categorymembers", gcmtitle: "Category:" + cat, gcmtype: "file", gcmlimit: "60", prop: "imageinfo", iiprop: "url|size|mime|extmetadata", iiextmetadatafilter: "Artist|LicenseShortName|DateTimeOriginal|DateTime" });
   const out = [];
   for (const pg of (j.query && j.query.pages) || []) {
     const a = pg.title.replace(/^File:/, ""); const ii = pg.imageinfo && pg.imageinfo[0];
@@ -502,6 +503,29 @@ for (const il of iller.values()) {
   }
 }
 
+// İl kapağı: en bilinen yerlerin güncel (2016 ve sonrası), yatay, büyük fotoğrafı
+const GUNCEL = 2016;
+const kapakUygun = (a) => { const f = a && FOTO.get(a); return !!f && fotoUygun(a) && f.w >= 1200 && f.w > f.h * 1.15 && f.y >= GUNCEL; };
+let kapakGuncel = 0, kapakKat = 0;
+for (const il of iller.values()) {
+  if (KAPAK[il.s]) continue;
+  const adaylar = il.yerler.filter((o) => o.one && o.foto).slice(0, 4);
+  for (const o of adaylar) {
+    if (kapakUygun(o.foto)) { il.kapakO = o; il.kapakFoto = o.foto; kapakGuncel++; break; }
+    if (!o.cat) continue;
+    const j = await api("commons.wikimedia.org", { action: "query", generator: "categorymembers", gcmtitle: "Category:" + o.cat, gcmtype: "file", gcmlimit: "80", prop: "imageinfo", iiprop: "url|size|mime|extmetadata", iiextmetadatafilter: "Artist|LicenseShortName|DateTimeOriginal|DateTime" }).catch(() => ({}));
+    const ok = [];
+    for (const pg of (j.query && j.query.pages) || []) {
+      const a = pg.title.replace(/^File:/, ""); const ii = pg.imageinfo && pg.imageinfo[0];
+      if (!ii) continue; if (!FOTO.has(a)) FOTO.set(a, fotoKaydi(a, ii));
+      if (kapakUygun(a) && FOTO.get(a).w >= 1600) ok.push(a);
+    }
+    ok.sort((x, y) => adPuan(y, o.ad) - adPuan(x, o.ad) || FOTO.get(y).y - FOTO.get(x).y);
+    if (ok.length) { il.kapakO = o; il.kapakFoto = ok[0]; kapakKat++; break; }
+  }
+}
+rapor("güncel il kapağı: yerin kendi fotoğrafı", kapakGuncel, "| kategoriden", kapakKat, "| eski kural", iller.size - kapakGuncel - kapakKat);
+
 // ---------- 8. Metinler ----------
 rapor("== Metinler");
 async function ozetler(host, basliklar) {
@@ -555,7 +579,8 @@ for (const il of ilSirali) {
   const dosya = { ad: il.ad, s: il.s, q: il.q, lat: il.koor ? il.koor[0] : 0, lng: il.koor ? il.koor[1] : 0, plaka: PLAKA[il.s] || il.plaka, f: fotoCikti(il.foto), m: trM.get(il.trA) || "", w: il.trA ? "tr:" + il.trA : "", nuf: il.nufus || 0, nufY: il.nufusYil || "", alan: il.alan ? Math.round(il.alan) : 0, ilceler: ilceCikti, yerler };
   // Kapak: şehir genel görünümü yerine ilin en bilinen yerinin büyük fotoğrafı
   const kapakYer = yerler.find((y) => y.f && y.ad === KAPAK[il.s]) || yerler.find((y) => y.one && y.f && y.f.w >= 1200) || yerler.find((y) => y.one && y.f);
-  if (kapakYer) { dosya.f = kapakYer.f; dosya.kapak = kapakYer.ad; }
+  if (il.kapakFoto && !KAPAK[il.s]) { dosya.f = fotoCikti(il.kapakFoto); dosya.kapak = temizAd(il.kapakO.ad); }
+  else if (kapakYer) { dosya.f = kapakYer.f; dosya.kapak = kapakYer.ad; }
   fs.writeFileSync(`${OUT}/il/${il.s}.json`, JSON.stringify(dosya));
   index.iller.push({ ad: il.ad, s: il.s, q: il.q, lat: dosya.lat, lng: dosya.lng, plaka: dosya.plaka, f: dosya.f, n: yerler.length, ilceler: ilceCikti.map((d) => [d.ad, d.lat, d.lng, d.n]) });
   yerler.forEach((y, j) => ara.push([y.ad, il.s, j, Math.round(y.lat * 1e3) / 1e3, Math.round(y.lng * 1e3) / 1e3, y.k, y.f ? 1 : 0]));
