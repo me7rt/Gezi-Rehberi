@@ -148,17 +148,18 @@ const LBL = 'SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en".
 // ---------- 1. İller ----------
 rapor("== İller");
 const iller = new Map();
-for (const b of await sparql(`SELECT ?il ?ilLabel ?coord ?img ?plaka ?trA ?cat ?bas ?basImg ?alan WHERE {
+for (const b of await sparql(`SELECT ?il ?ilLabel ?coord ?img ?plaka ?trA ?enA ?cat ?bas ?basImg ?alan WHERE {
   ?il wdt:P31 wd:Q48336 . FILTER NOT EXISTS { ?il wdt:P576 [] }
   OPTIONAL { ?il wdt:P625 ?coord } OPTIONAL { ?il wdt:P18 ?img } OPTIONAL { ?il wdt:P395 ?plaka }
   OPTIONAL { ?il wdt:P2046 ?alan } OPTIONAL { ?il wdt:P373 ?cat }
   OPTIONAL { ?il wdt:P36 ?bas . OPTIONAL { ?bas wdt:P18 ?basImg } }
   OPTIONAL { ?trA schema:about ?il ; schema:isPartOf <https://tr.wikipedia.org/> }
+  OPTIONAL { ?enA schema:about ?il ; schema:isPartOf <https://en.wikipedia.org/> }
   ${LBL} }`)) {
   const q = qid(val(b, "il"));
   const o = iller.get(q) || { q, ad: temizAd(val(b, "ilLabel")), imgs: [], basImgs: [], ilceler: [] };
   o.koor ||= nokta(val(b, "coord")); o.plaka ||= val(b, "plaka"); o.alan ||= +val(b, "alan") || 0; o.cat ||= val(b, "cat");
-  o.trA ||= makale(val(b, "trA")); o.bas ||= qid(val(b, "bas"));
+  o.trA ||= makale(val(b, "trA")); o.enA ||= makale(val(b, "enA")); o.bas ||= qid(val(b, "bas"));
   for (const [k, a] of [["img", o.imgs], ["basImg", o.basImgs]]) { const f = dosyaAdi(val(b, k)); if (f && !a.includes(f)) a.push(f); }
   iller.set(q, o);
 }
@@ -538,9 +539,9 @@ async function ozetler(host, basliklar) {
 }
 const trB = [], enB = [];
 for (const il of iller.values()) {
-  trB.push(il.trA);
+  trB.push(il.trA); enB.push(il.enA);
   for (const d of il.ilceler) trB.push(d.trA);
-  for (const o of il.yerler) { if (o.trA) trB.push(o.trA); else enB.push(o.enA); }
+  for (const o of il.yerler) { if (o.trA) trB.push(o.trA); enB.push(o.enA); }
 }
 const trM = await ozetler("tr.wikipedia.org", trB);
 const enM = await ozetler("en.wikipedia.org", enB);
@@ -550,6 +551,7 @@ rapor("Türkçe metin:", trM.size, "| İngilizce metin:", enM.size);
 const fotoCikti = (a) => { const f = a && FOTO.get(a); return f ? { p: f.p, w: f.w, a: f.a } : null; };
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT + "/il", { recursive: true });
+fs.mkdirSync(OUT + "/en", { recursive: true });
 fs.mkdirSync(KONTROL, { recursive: true });
 const index = { surum: SURUM, iller: [] };
 const ara = [];
@@ -582,6 +584,10 @@ for (const il of ilSirali) {
   if (il.kapakFoto && !KAPAK[il.s]) { dosya.f = fotoCikti(il.kapakFoto); dosya.kapak = temizAd(il.kapakO.ad); }
   else if (kapakYer) { dosya.f = kapakYer.f; dosya.kapak = kapakYer.ad; }
   fs.writeFileSync(`${OUT}/il/${il.s}.json`, JSON.stringify(dosya));
+  // İngilizce: İngilizce Vikipedi'deki ad ve özet (yoksa uygulama Türkçe adı ve kısa bir İngilizce cümle gösterir)
+  const en = { m: enM.get(il.enA) || "", w: il.enA ? "en:" + il.enA : "", y: {} };
+  for (const o of il.yerler) if (o.enA) en.y[o.q] = [o.enA.replace(/ \(.*\)$/, ""), enM.get(o.enA) || "", o.enA];
+  fs.writeFileSync(`${OUT}/en/${il.s}.json`, JSON.stringify(en));
   index.iller.push({ ad: il.ad, s: il.s, q: il.q, lat: dosya.lat, lng: dosya.lng, plaka: dosya.plaka, f: dosya.f, n: yerler.length, ilceler: ilceCikti.map((d) => [d.ad, d.lat, d.lng, d.n]) });
   yerler.forEach((y, j) => ara.push([y.ad, il.s, j, Math.round(y.lat * 1e3) / 1e3, Math.round(y.lng * 1e3) / 1e3, y.k, y.f ? 1 : 0]));
   // Kontrol listesi: il kapağı, ilçe kapakları, seçkin yerler ve her ilin en ünlü 8 yeri
