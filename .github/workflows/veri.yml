@@ -30,7 +30,8 @@ jobs:
         run: |
           git config user.name "Mert Turanlıoğlu"
           git config user.email "me7rtt@gmail.com"
-          git add docs/data
+          cp kontrol/rapor.txt data/son-rapor.txt
+          git add docs/data data/son-rapor.txt
           if git diff --cached --quiet; then echo "degisiklik yok"; exit 0; fi
           git commit -m "Veri guncellendi (otomatik)"
           for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && break; sleep 5; done

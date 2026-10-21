@@ -169,27 +169,28 @@ rapor("il sayısı", iller.size, "| eşleşmeyen seçkin il:", [...seckinAnahtar
 // ---------- 2. İlçeler ----------
 rapor("== İlçeler");
 const ilceler = new Map();
-for (const b of await sparql(`SELECT ?ilce ?ilceLabel ?il ?coord ?img ?trA ?cat ?alan WHERE {
+for (const b of await sparql(`SELECT ?ilce ?ilceLabel ?trL ?il ?coord ?img ?trA ?cat ?alan WHERE {
   ?ilce p:P31 ?s1 . ?s1 ps:P31 wd:Q1147395 . FILTER NOT EXISTS { ?s1 pq:P582 [] } FILTER NOT EXISTS { ?s1 wikibase:rank wikibase:DeprecatedRank }
   ?ilce p:P131 ?s2 . ?s2 ps:P131 ?il . FILTER NOT EXISTS { ?s2 pq:P582 [] } FILTER NOT EXISTS { ?s2 wikibase:rank wikibase:DeprecatedRank }
   ?il wdt:P31 wd:Q48336 .
   FILTER NOT EXISTS { ?ilce wdt:P576 [] }
   ?ilce wdt:P625 ?coord .
-  ?trA schema:about ?ilce ; schema:isPartOf <https://tr.wikipedia.org/> .
+  OPTIONAL { ?trA schema:about ?ilce ; schema:isPartOf <https://tr.wikipedia.org/> }
+  OPTIONAL { ?ilce rdfs:label ?trL . FILTER(LANG(?trL) = "tr") }
   OPTIONAL { ?ilce wdt:P18 ?img } OPTIONAL { ?ilce wdt:P2046 ?alan } OPTIONAL { ?ilce wdt:P373 ?cat }
   ${LBL} }`)) {
   const q = qid(val(b, "ilce")); const ilq = qid(val(b, "il"));
   if (!iller.has(ilq)) continue;
-  const o = ilceler.get(q) || { q, il: ilq, ad: temizAd(val(b, "ilceLabel")), imgs: [] };
+  const o = ilceler.get(q) || { q, il: ilq, ad: temizAd(val(b, "ilceLabel")).replace(/\s+[Dd]istrict$/, "").replace(/\s+(ilçesi|İlçesi|Merkez)$/u, ""), imgs: [], puan: (val(b, "trA") ? 2 : 0) + (val(b, "trL") ? 1 : 0) };
   o.koor ||= nokta(val(b, "coord")); o.alan ||= +val(b, "alan") || 0; o.cat ||= val(b, "cat"); o.trA ||= makale(val(b, "trA"));
   const f = dosyaAdi(val(b, "img")); if (f && !o.imgs.includes(f)) o.imgs.push(f);
   ilceler.set(q, o);
 }
 // Aynı ilde aynı adlı ikinci kayıtları ele
 const ilceAd = new Map();
-for (const o of [...ilceler.values()]) {
+for (const o of [...ilceler.values()].sort((a, b) => b.puan - a.puan)) {
   const k = o.il + "|" + nrm(o.ad);
-  if (ilceAd.has(k) || /^Q\d+$/.test(o.ad)) { ilceler.delete(o.q); continue; }
+  if (ilceAd.has(k) || /^Q\d+$/.test(o.ad) || /'(n[ıiuü]n|[ıiuü]n)$/u.test(o.ad)) { ilceler.delete(o.q); continue; }
   ilceAd.set(k, o.q);
 }
 for (const o of ilceler.values()) iller.get(o.il).ilceler.push(o);
@@ -359,7 +360,7 @@ for (const il of iller.values()) {
     if (!o.k) continue;
     if (!o.one) {
       if (!o.imgs.length) continue;
-      if (!o.trA && o.sl < 6) continue;
+      if (!o.trA && o.sl < 4) continue;
     }
     let ic = [...o.ilceler].find((q) => ilceler.has(q) && ilceler.get(q).il === il.q);
     if (!ic) {
