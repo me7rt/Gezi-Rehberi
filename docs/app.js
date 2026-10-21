@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "3.7";
+  const SURUM = "3.8";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -73,6 +73,7 @@
   }
   async function loadIndex() {
     IDX = await getJSON(`data/index.json?v=${SURUM}`, { cache: "no-cache" });
+    IDX.iller.forEach((il) => il.ilceler.forEach((z) => { z[0] = z[0].replace(/ \(.*\)$/, ""); }));
     IDX.ilBy = new Map(IDX.iller.map((i) => [i.s, i]));
     const s = IDX.surum || "";
     $("ver").textContent = `Sürüm ${SURUM} · Veri ${s.slice(6, 8)}.${s.slice(4, 6)}.${s.slice(0, 4)} · ${nf(IDX.iller.reduce((t, i) => t + i.n, 0))} yer, ${nf(IDX.iller.reduce((t, i) => t + i.ilceler.length, 0))} ilçe`;
@@ -80,6 +81,7 @@
   async function loadIl(s) {
     if (IL.has(s)) return IL.get(s);
     const d = await getJSON(`data/il/${s}.json?v=${IDX.surum}`);
+    d.ilceler.forEach((z) => { z.ad = z.ad.replace(/ \(.*\)$/, ""); });
     d.yerler.forEach((y, j) => { y.j = j; y.il = d.ad; y.ilS = d.s; y.ilce = y.i >= 0 && d.ilceler[y.i] ? d.ilceler[y.i].ad : ""; });
     IL.set(s, d);
     return d;
@@ -88,8 +90,9 @@
     if (ARA || araYukleniyor) return;
     araYukleniyor = true;
     try {
-      const a = await getJSON(`data/ara.json?v=${IDX.surum}`);
-      ARA = a.map(([ad, s, j]) => [sade(ad), ad, s, j]);
+      const a = await getJSON(`data/ara.json?v=${IDX.surum}-2`);
+      ARA = a.map(([ad, s, j, lat, lng, k, f]) => [sade(ad), ad, s, j, lat, lng, k, f]);
+      if (view && view.mode === "tema") renderTema();
       if (!$("home").hidden) renderHome();
     } catch { araYukleniyor = false; }
   }
@@ -139,6 +142,7 @@
       }
       if (open) renderFacts(open);
       if (!$("home").hidden && (!homeMe || km(homeMe, me) > 2)) { homeMe = me; renderHome(); }
+      if (hemen && view && view.mode === "tema") renderTema();
     }, hemen ? 0 : 400);
   }
   function updateKm() {
@@ -153,6 +157,7 @@
   function show(v) {
     const degisti = $(v).hidden;
     $("home").hidden = v !== "home";
+    $("tema").hidden = v !== "tema";
     $("city").hidden = v !== "city";
     $("back").hidden = v === "home";
     if (degisti || v === "city") window.scrollTo(0, 0);
@@ -180,6 +185,7 @@
         return;
       }
       if (h[0] === "yakin") return await showNear(no);
+      if (h[0] === "tema" && TEMA[h[1]]) return showTema(h[1]);
       showHome();
     } catch (e) {
       if (no !== routeNo) return;
@@ -308,6 +314,66 @@
     u.onend = u.onerror = () => { $("dDinle").textContent = "🔊 Dinle"; $("dDinle").classList.remove("on"); };
     speechSynthesis.cancel(); speechSynthesis.speak(u);
     $("dDinle").textContent = "⏹ Durdur"; $("dDinle").classList.add("on");
+  }
+  // ---------- keşfet: tema listeleri (Türkiye geneli) ----------
+  const TEMA = {
+    selale: { ad: "Şelaleler", e: "💧", k: ["selale"] },
+    magara: { ad: "Mağaralar", e: "🕳️", k: ["magara"] },
+    kanyon: { ad: "Kanyon ve vadiler", e: "🏞️", k: ["kanyon", "vadi"] },
+    gol: { ad: "Göller", e: "🌊", k: ["golu", "gol "], d: 1 },
+    ada: { ad: "Adalar ve koylar", e: "🏝️", k: ["adasi", "koyu", "plaj"] },
+    park: { ad: "Milli parklar", e: "🌲", k: ["milli park", "tabiat park"] },
+    dag: { ad: "Dağlar ve yaylalar", e: "⛰️", k: ["dagi", "yayla"], d: 1 },
+    kale: { ad: "Kaleler", e: "🏰", k: ["kale"] },
+    kopru: { ad: "Tarihi köprüler", e: "🌉", k: ["kopru"] },
+    saray: { ad: "Saraylar ve konaklar", e: "👑", k: ["saray", "konag", "kosk"] },
+    han: { ad: "Han ve kervansaraylar", e: "🐫", k: ["kervansaray", " hani", "bedesten"] },
+    muze: { ad: "Müzeler", e: "🏛️", k: ["muze"] }
+  };
+  function temaChips() {
+    $("temaChips").innerHTML = Object.entries(TEMA).map(([k, t]) =>
+      `<button class="tchip" data-go="#/tema/${k}"><i>${t.e}</i><span>${esc(t.ad)}</span></button>`).join("");
+  }
+  function showTema(k) {
+    view = { mode: "tema", k }; show("tema");
+    $("eyebrow").textContent = "Türkiye geneli"; $("title").textContent = TEMA[k].ad;
+    renderTema();
+  }
+  function renderTema() {
+    if (!view || view.mode !== "tema") return;
+    const t = TEMA[view.k];
+    $("temaLoc").hidden = !!me;
+    if (!ARA) { $("temaList").innerHTML = '<li class="empty">Yükleniyor…</li>'; loadAra(); return; }
+    let r = ARA.filter((x) => t.k.some((w) => (" " + x[0] + " ").includes(w)) && (!t.d || x[6] === "d"));
+    if (me) r = r.map((x) => [km(me, { lat: x[4], lng: x[5] }), x]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+    else r.sort((a, b) => b[7] - a[7] || a[1].localeCompare(b[1], "tr"));
+    $("temaSay").textContent = `${r.length} yer` + (me ? " · sana en yakından uzağa" : " · konumunu açarsan yakından uzağa sıralarız");
+    $("temaList").innerHTML = r.length ? r.map((x) => {
+      const c = CATS[x[6]] || CATS.t, il = (IDX.ilBy.get(x[2]) || {}).ad || "";
+      return `<li><button class="row res" data-yer="${x[2]}|${x[3]}"><span class="thumb" style="--c:${c.renk}">${icon(x[6] || "t", 20)}</span><span class="rt"><b>${esc(x[1])}</b><small>${esc(il)}</small></span><span class="km">${me ? fmt(km(me, { lat: x[4], lng: x[5] })) : "›"}</span></button></li>`;
+    }).join("") : '<li class="empty">Bu türde yer bulunamadı.</li>';
+  }
+  // ---------- ilk açılış rehberi ----------
+  function tanitim() {
+    try { if (localStorage.getItem("gezi-tanitim")) return; } catch (e) { return; }
+    const s = [
+      ["🗺️", "81 ili keşfet", "Her ilde ve ilçede gezilecek yerler, fotoğraflar ve kısa bilgiler seni bekliyor."],
+      ["📍", "Yakınındakileri bul", "Konumunu açarsan sana en yakın şelaleleri, kaleleri, müzeleri sıralarız."],
+      ["✅", "Gittiğin yerleri işaretle", "\"Buraya gittim\" de, 81 ilden kaçını gezdiğini gör. Beğendiklerini kalple kaydet."]
+    ];
+    let i = 0;
+    const d = document.createElement("div"); d.className = "tanit";
+    const ciz = () => {
+      d.innerHTML = `<div class="tkart"><div class="temo">${s[i][0]}</div><h2>${s[i][1]}</h2><p>${s[i][2]}</p>
+        <div class="tnok">${s.map((_, j) => `<i class="${j === i ? "on" : ""}"></i>`).join("")}</div>
+        <div class="tbtn"><button class="linkbtn" data-t="gec">Geç</button><button class="btn primary" data-t="ileri">${i < s.length - 1 ? "İleri" : "Başlayalım"}</button></div></div>`;
+    };
+    const bitir = () => { try { localStorage.setItem("gezi-tanitim", "1"); } catch (e) {} d.classList.add("out"); setTimeout(() => d.remove(), 300); };
+    d.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-t]"); if (!b) return;
+      if (b.dataset.t === "gec" || i === s.length - 1) bitir(); else { i++; ciz(); }
+    });
+    ciz(); document.body.appendChild(d);
   }
   // ---------- günün keşfi ----------
   let gunYuk = false;
@@ -563,8 +629,9 @@
     if (!txt) txt = `${p.ad}, ${p.ilce ? p.ilce + " / " : ""}${p.il} içinde görülmeye değer yerlerden biri.`;
     $("dText").textContent = txt;
     const q = `${p.lat},${p.lng}`;
-    $("dMap").href = `https://www.google.com/maps/search/?api=1&query=${q}`;
-    $("dDir").href = `https://www.google.com/maps/dir/?api=1&destination=${q}`;
+    const hedef = p.gq ? encodeURIComponent(p.gq) : q;
+    $("dMap").href = `https://www.google.com/maps/search/?api=1&query=${hedef}`;
+    $("dDir").href = `https://www.google.com/maps/dir/?api=1&destination=${hedef}`;
     $("dWiki").hidden = !p.w;
     $("dWiki").href = wikiUrl(p.w);
     $("dWiki").textContent = p.w && p.w.startsWith("en:") ? "Vikipedi'de (İngilizce) oku" : "Vikipedi'de devamını oku";
@@ -593,6 +660,7 @@
   });
   $("nearBtn").addEventListener("click", () => git("#/yakin"));
   $("locBtn").addEventListener("click", () => startLocation());
+  $("temaLoc").addEventListener("click", () => startLocation());
   $("back").addEventListener("click", () => {
     if (view.mode === "ilce") git(`#/il/${view.d.s}/ilceler`);
     else git("#/");
@@ -621,7 +689,9 @@
   window.addEventListener("popstate", () => { if (!$("sheet").hidden) hideSheet(); });
   window.addEventListener("hashchange", route);
 
+  temaChips();
   route();
+  setTimeout(tanitim, 5200);
   // Konum izni daha önce verildiyse sessizce başlat
   if (navigator.permissions) navigator.permissions.query({ name: "geolocation" }).then((s) => { if (s.state === "granted") startLocation(); }).catch(() => {});
 })();

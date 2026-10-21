@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=3.7">
+<link rel="stylesheet" href="style.css?v=3.8">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
   padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(30px + env(safe-area-inset-bottom,0px));
@@ -98,6 +98,7 @@
       <b>Yakınımdaki yerler</b>
       <small id="nearSub">Konumunu aç, sana en yakın gezilecek yerleri sıralayalım</small>
     </button>
+    <section class="kesfet"><h2 class="sec">Keşfet</h2><div class="tchips" id="temaChips"></div></section>
     <div id="gunun"></div>
     <section id="gezSec" class="gez" hidden><button class="gezbtn" id="gezBtn"><span class="gezust"><b id="gezSay"></b><small id="gezAlt"></small></span><span class="bar"><i id="gezBar"></i></span></button><ul class="list" id="gezList" hidden></ul></section>
     <section id="favSec" hidden><h2 class="sec">Gideceğim yerler</h2><ul class="list" id="favList"></ul></section>
@@ -106,6 +107,12 @@
   </div>
   <p class="credit" id="ver"></p>
   <p class="credit">Hazırlayan: <b>Mert Turanlıoğlu</b><br>© 2026 Mert Turanlıoğlu · Tüm hakları saklıdır · <a href="gizlilik.html">Gizlilik</a></p>
+</main>
+
+<main id="tema" class="view" hidden>
+  <button class="loc tkonum" id="temaLoc">📍 Yakından uzağa sırala</button>
+  <p class="tsay" id="temaSay"></p>
+  <ul class="list" id="temaList"></ul>
 </main>
 
 <main id="city" class="view" hidden>
@@ -163,7 +170,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=3.7"></script>
+<script src="app.js?v=3.8"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
