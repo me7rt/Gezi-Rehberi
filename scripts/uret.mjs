@@ -359,8 +359,9 @@ for (const il of iller.values()) {
     o.k ||= kategori(o.siniflar);
     if (!o.k) continue;
     if (!o.one) {
-      if (!o.imgs.length) continue;
-      if (!o.trA && o.sl < 4) continue;
+      // Ünlü olması şart değil: Türkçe maddesi olan her yer aday (fotoğrafı yoksa Commons kategorisinden aranır)
+      if (!o.imgs.length && !(o.trA && o.cat)) continue;
+      if (!o.trA && o.sl < 3) continue;
     }
     let ic = [...o.ilceler].find((q) => ilceler.has(q) && ilceler.get(q).il === il.q);
     if (!ic) {
@@ -378,7 +379,7 @@ for (const il of iller.values()) {
   for (const o of liste) {
     if (o.one) { kalan.push(o); continue; }
     const key = o.ilce || "-"; const n = say.get(key) || 0;
-    if (n >= (o.ilce ? 26 : 32)) continue;
+    if (n >= (o.ilce ? 40 : 45)) continue;
     say.set(key, n + 1); kalan.push(o);
   }
   il.adaylar = kalan;
@@ -455,11 +456,15 @@ const KULLANILAN = new Set();
 const tumYer = [];
 for (const il of iller.values()) for (const o of il.adaylar) tumYer.push(o);
 tumYer.sort((a, b) => (b.one || 0) - (a.one || 0) || (a.seckinSira ?? 0) - (b.seckinSira ?? 0) || b.sl - a.sl);
-let yedekKat = 0, yedekYakin = 0, fotosuzSeckin = 0;
+let yedekKat = 0, yedekYakin = 0, fotosuzSeckin = 0, yedekHak = 2500;
 for (const o of tumYer) {
   const adaylar = [...o.imgs, o.trSayfaFoto].filter(Boolean);
   let sec = adaylar.find((a) => fotoUygun(a) && !KULLANILAN.has(a));
   if (sec) o.fotoKaynak = o.imgs.includes(sec) ? "wikidata" : "vikipedi";
+  if (!sec && !o.one && o.cat && yedekHak > 0) {
+    yedekHak--;
+    for (const a of await kategoriFoto(o.cat, o.ad)) if (!KULLANILAN.has(a)) { sec = a; o.fotoKaynak = "kategori"; yedekKat++; break; }
+  }
   if (!sec && o.one) {
     for (const a of await kategoriFoto(o.cat, o.ad)) if (!KULLANILAN.has(a)) { sec = a; o.fotoKaynak = "kategori"; yedekKat++; break; }
     if (!sec) for (const a of await yakinFoto(o.koor[0], o.koor[1], o.ad)) if (!KULLANILAN.has(a)) { sec = a; o.fotoKaynak = "yakın"; yedekYakin++; break; }
@@ -467,18 +472,18 @@ for (const o of tumYer) {
   }
   if (sec) { o.foto = sec; KULLANILAN.add(sec); }
 }
-rapor("seçkin yedek foto: kategori", yedekKat, "| yakın", yedekYakin, "| hiç bulunamayan", fotosuzSeckin);
+rapor("yedek foto: kategori", yedekKat, "| yakın", yedekYakin, "| hiç bulunamayan", fotosuzSeckin);
 
 // İl ve ilçe kapak fotoğrafları
 for (const il of iller.values()) {
   il.yerler = il.adaylar.filter((o) => o.foto);
-  // Son sınır: ilçe başına 20, ilçesiz 25, il başına 320
+  // Son sınır: ilçe başına 30, ilçesiz 35, il başına 400
   const say = new Map(); const son = [];
   for (const o of il.yerler) {
-    if (!o.one) { const key = o.ilce || "-"; const n = say.get(key) || 0; if (n >= (o.ilce ? 20 : 25)) continue; say.set(key, n + 1); }
+    if (!o.one) { const key = o.ilce || "-"; const n = say.get(key) || 0; if (n >= (o.ilce ? 30 : 35)) continue; say.set(key, n + 1); }
     son.push(o);
   }
-  il.yerler = son.slice(0, 320);
+  il.yerler = son.slice(0, 400);
   const ilkYer = il.yerler.find((o) => o.one) || il.yerler[0];
   il.foto = [...il.imgs, ...il.basImgs].find(fotoUygun);
   il.fotoKaynak = il.foto ? "wikidata" : "";
