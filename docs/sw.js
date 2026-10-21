@@ -1,4 +1,4 @@
-/* Gezi Rehberi · © 2026 Mert Turanlıoğlu · Çevrimdışı açılış (önce internet, yoksa kayıtlı kopya) */
+/* Yoldayız · © 2026 Mert Turanlıoğlu · Çevrimdışı açılış (önce internet, yoksa kayıtlı kopya) */
 const C = "gezi-3.3";
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(

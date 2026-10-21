@@ -1,9 +1,9 @@
-/* Gezi Rehberi · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz.
+/* Yoldayız · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz.
    Gezi Rehberi 3: 81 il, tüm ilçeler, canlı konum.
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "3.3";
+  const SURUM = "3.4";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -193,7 +193,7 @@
   // ---------- ana sayfa ----------
   function showHome() {
     view = { mode: "home" }; show("home");
-    $("eyebrow").textContent = "Gezi Rehberi"; $("title").textContent = "Nereye gidiyorsun?";
+    $("eyebrow").textContent = "Yoldayız"; $("title").textContent = "Nereye gidiyorsun?";
     renderHome();
   }
   // ---------- gideceğim yerler (favoriler) ----------
@@ -237,7 +237,7 @@
   // ---------- paylaş ----------
   function paylas(p) {
     const url = `https://me7rt.github.io/Gezi-Rehberi/#/il/${p.ilS}/yer/${p.q}`;
-    const metin = `${p.ad} (${[...new Set([p.ilce, p.il].filter(Boolean))].join(", ")}) çok güzel bir yer, Gezi Rehberi'nde buldum:`;
+    const metin = `${p.ad} (${[...new Set([p.ilce, p.il].filter(Boolean))].join(", ")}) çok güzel bir yer, Yoldayız uygulamasında buldum:`;
     if (navigator.share) navigator.share({ title: p.ad, text: metin, url }).catch(() => {});
     else window.open("https://wa.me/?text=" + encodeURIComponent(metin + " " + url), "_blank");
   }

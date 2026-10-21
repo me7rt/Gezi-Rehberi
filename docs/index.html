@@ -1,23 +1,23 @@
 <!doctype html>
-<!-- Gezi Rehberi · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz. -->
+<!-- Yoldayız · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz. -->
 <html lang="tr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4fa3">
-<title>Gezi Rehberi</title>
+<title>Yoldayız · Türkiye Gezi Rehberi</title>
 <meta name="author" content="Mert Turanlıoğlu">
 <meta name="copyright" content="© 2026 Mert Turanlıoğlu. Tüm hakları saklıdır.">
-<meta name="description" content="Gezi Rehberi: Türkiye'nin 81 ilinde gezilecek yerler. Hazırlayan: Mert Turanlıoğlu.">
+<meta name="description" content="Yoldayız: Türkiye'nin 81 ilinde gezilecek yerler. Hazırlayan: Mert Turanlıoğlu.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Gezi Rehberi">
+<meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=3.3">
+<link rel="stylesheet" href="style.css?v=3.4">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
   padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(34px + env(safe-area-inset-bottom,0px));
@@ -43,7 +43,7 @@
 <div class="splash" id="splash" aria-hidden="true">
   <div class="sp-mid">
     <img src="icon-512.png" alt="">
-    <p class="sp-app">Gezi Rehberi</p>
+    <p class="sp-app">Yoldayız</p>
     <p class="sp-tag">Türkiye'nin 81 ilinde gezilecek yerler</p>
   </div>
   <div class="sp-by">
@@ -55,7 +55,7 @@
 <header class="top">
   <button class="back" id="back" hidden aria-label="Geri">‹</button>
   <div class="titles">
-    <div class="eyebrow" id="eyebrow">Gezi Rehberi</div>
+    <div class="eyebrow" id="eyebrow">Yoldayız</div>
     <h1 id="title">Nereye gidiyorsun?</h1>
   </div>
   <button class="loc" id="locBtn" aria-label="Konumumu kullan"><i></i><span id="locText">Konum kapalı</span></button>
@@ -129,7 +129,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=3.3"></script>
+<script src="app.js?v=3.4"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
@@ -145,7 +145,7 @@
   var h = location.hostname, izinli = ["me7rt.github.io", "localhost", "127.0.0.1", ""];
   if (izinli.indexOf(h) < 0) {
     var b = document.createElement("div"); b.className = "kopya";
-    b.innerHTML = 'Bu uygulama <b>Mert Turanlıoğlu</b>\'na aittir. Orijinali: <a href="https://me7rt.github.io/Gezi-Rehberi/">me7rt.github.io/Gezi-Rehberi</a>';
+    b.innerHTML = 'Bu uygulama <b>Mert Turanlıoğlu</b>\'na aittir (Yoldayız). Orijinali: <a href="https://me7rt.github.io/Gezi-Rehberi/">me7rt.github.io/Gezi-Rehberi</a>';
     document.body.appendChild(b);
   }
 })();
