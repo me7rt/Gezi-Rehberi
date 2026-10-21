@@ -6,6 +6,37 @@ ilçe sayısı 958 | koordinatsız: yok
 Türkiye geneli aday yer: 6149
 ili bulunamayan yer: 239
 == Seçkin yerler
+  RED Kastamonu / Ilgarini Mağarası: Vikipedi'de yok
+  RED Kastamonu / Horma Kanyonu: Vikipedi'de yok
+  RED Tokat / Sulu Sokak: Vikipedi'de yok
+  RED Kayseri / Gevher Nesibe Şifahiyesi: Vikipedi'de yok
+  RED Kayseri / Talas: anlam ayrımı sayfası
+  RED Rize / Zil Kalesi: Vikipedi'de yok
+  RED Kırıkkale / Hasandede: Vikipedi'de yok
+  RED İstanbul / Sultan Ahmed Camii: Vikipedi'de yok
+  RED İstanbul / Balat: anlam ayrımı sayfası
+  RED Tunceli / Ovacık: anlam ayrımı sayfası
+  RED Şırnak / Cizre: şehir sayfası (Cizre)
+  RED Bursa / Ulu Cami (Bursa): Vikipedi'de yok
+  RED Bursa / Osman Gazi Türbesi: Vikipedi'de yok
+  RED Adıyaman / Arsameia: Vikipedi'de yok
+  RED Antalya / Kaleiçi: anlam ayrımı sayfası
+  RED Antalya / Olimpos: anlam ayrımı sayfası
+  RED Artvin / Şavşat Karagöl: Vikipedi'de yok
+  RED Artvin / Borçka Karagöl: Vikipedi'de yok
+  RED Batman / Malabadi Köprüsü: başka ilde (Diyarbakır)
+  RED Van / Çavuştepe: Vikipedi'de yok
+  RED Edirne / Eski Cami (Edirne): Vikipedi'de yok
+  RED Edirne / Sultan II. Bayezid Külliyesi: Vikipedi'de yok
+  RED Malatya / Eski Malatya: Vikipedi'de yok
+  RED Malatya / Levent Vadisi: Vikipedi'de yok
+  RED Malatya / Nemrut Dağı: başka ilde (Adıyaman)
+  RED Konya / Alâeddin Camii: anlam ayrımı sayfası
+  RED Bolu / Gölcük Tabiat Parkı: koordinat yok
+  RED Denizli / Tripolis: anlam ayrımı sayfası
+  RED Aksaray / Sultanhanı Kervansarayı: Vikipedi'de yok
+  RED Muş / Muş Lalesi: Vikipedi'de yok
+  RED Muş / Haspet Kalesi: Vikipedi'de yok
   RED Kırklareli / İğneada Longozu: Vikipedi'de yok
   RED Kırklareli / Vize Ayasofya Camii: Vikipedi'de yok
   RED Mersin / Cennet ve Cehennem Obrukları: Vikipedi'de yok
@@ -22,44 +53,6 @@ ili bulunamayan yer: 239
   RED Zonguldak / Filyos: anlam ayrımı sayfası
   RED Zonguldak / Ereğli (Zonguldak): Vikipedi'de yok
   RED Zonguldak / Cehennemağzı Mağaraları: Vikipedi'de yok
-  RED Çankırı / Çankırı Tuz Mağarası: Vikipedi'de yok
-  RED Çankırı / Çankırı Kalesi: Vikipedi'de yok
-  RED Çorum / Şapinuva: şehir sayfası (Şapinuva)
-  RED Osmaniye / Zorkun Yaylası: koordinat yok
-  RED İzmir / Saat Kulesi (İzmir): Vikipedi'de yok
-  RED İzmir / Asansör (İzmir): Vikipedi'de yok
-  RED İzmir / Agora (İzmir): Vikipedi'de yok
-  RED İzmir / Bergama Akropolü: Vikipedi'de yok
-  RED Erzurum / Erzurum Kalesi: Vikipedi'de yok
-  RED Artvin / Şavşat Karagöl: Vikipedi'de yok
-  RED Artvin / Borçka Karagöl: Vikipedi'de yok
-  RED Bursa / Ulu Cami (Bursa): Vikipedi'de yok
-  RED Bursa / Osman Gazi Türbesi: Vikipedi'de yok
-  RED Adıyaman / Arsameia: Vikipedi'de yok
-  RED Antalya / Kaleiçi: anlam ayrımı sayfası
-  RED Antalya / Olimpos: anlam ayrımı sayfası
-  RED Bolu / Gölcük Tabiat Parkı: koordinat yok
-  RED Batman / Malabadi Köprüsü: başka ilde (Diyarbakır)
-  RED Van / Çavuştepe: Vikipedi'de yok
-  RED Konya / Alâeddin Camii: anlam ayrımı sayfası
-  RED Mardin / Deyrulzafaran Manastırı: Vikipedi'de yok
-  RED Mardin / Zinciriye Medresesi: anlam ayrımı sayfası
-  RED Mardin / Midyat: il/ilçe/şehir sayfasına düşüyor (Midyat)
-  RED Muş / Muş Lalesi: Vikipedi'de yok
-  RED Muş / Haspet Kalesi: Vikipedi'de yok
-  RED Malatya / Eski Malatya: Vikipedi'de yok
-  RED Malatya / Levent Vadisi: Vikipedi'de yok
-  RED Malatya / Nemrut Dağı: başka ilde (Adıyaman)
-  RED Iğdır / Ağrı Dağı: başka ilde (Ağrı)
-  RED Kütahya / Kütahya Çini Müzesi: Vikipedi'de yok
-  RED Kütahya / Germiyan Sokağı: Vikipedi'de yok
-  RED Kilis / Kilis Kalesi: Vikipedi'de yok
-  RED Kilis / Ravanda Kalesi: Vikipedi'de yok
-  RED Tekirdağ / Rakoczi Müzesi: Vikipedi'de yok
-  RED Tekirdağ / Şarköy: il/ilçe/şehir sayfasına düşüyor (Şarköy)
-  RED Tekirdağ / Namık Kemal Evi: Vikipedi'de yok
-  RED Manisa / Manisa Muradiye Camii: Vikipedi'de yok
-  RED Manisa / Niobe Kayası: Vikipedi'de yok
   RED Bingöl / Yüzen Adalar: Vikipedi'de yok
   RED Bingöl / Bingöl Kalesi: Vikipedi'de yok
   RED Bingöl / Kral Kızı Kalesi: Vikipedi'de yok
@@ -83,44 +76,6 @@ ili bulunamayan yer: 239
   RED Balıkesir / Kaz Dağları Millî Parkı: Vikipedi'de yok
   RED Çanakkale / Gelibolu Yarımadası Tarihî Alanı: Vikipedi'de yok
   RED Çanakkale / Gökçeada: il/ilçe/şehir sayfasına düşüyor (Gökçeada)
-  RED Denizli / Tripolis: anlam ayrımı sayfası
-  RED Aksaray / Sultanhanı Kervansarayı: Vikipedi'de yok
-  RED Edirne / Eski Cami (Edirne): Vikipedi'de yok
-  RED Edirne / Sultan II. Bayezid Külliyesi: Vikipedi'de yok
-  RED Bitlis / Ahlat Selçuklu Meydan Mezarlığı: Vikipedi'de yok
-  RED Bitlis / Nemrut Krater Gölü: Vikipedi'de yok
-  RED Hatay / Harbiye Şelalesi: Vikipedi'de yok
-  RED Hatay / Musa Ağacı: Vikipedi'de yok
-  RED Hatay / Uzun Çarşı (Antakya): Vikipedi'de yok
-  RED Kocaeli / Kartepe: şehir sayfası (Kartepe)
-  RED Kocaeli / Kerpe: il merkezine çok uzak
-  RED Kocaeli / Kocaeli Müzesi: Vikipedi'de yok
-  RED Kocaeli / Kandıra: il/ilçe/şehir sayfasına düşüyor (Kandıra)
-  RED Hakkari / Cilo Dağları: Vikipedi'de yok
-  RED Hakkari / Meydan Medresesi: Vikipedi'de yok
-  RED Hakkari / Zap Suyu: il merkezine çok uzak
-  RED Muğla / Ölüdeniz: anlam ayrımı sayfası
-  RED Muğla / Dalyan: anlam ayrımı sayfası
-  RED Muğla / Akyaka: başka ilde (Kars)
-  RED Muğla / Datça: il/ilçe/şehir sayfasına düşüyor (Datça)
-  RED Tunceli / Ovacık: anlam ayrımı sayfası
-  RED Şırnak / Cizre: şehir sayfası (Cizre)
-  RED Trabzon / Trabzon Ayasofya Camii: Vikipedi'de yok
-  RED Trabzon / Atatürk Köşkü (Trabzon): Vikipedi'de yok
-  RED Trabzon / Boztepe (Trabzon): Vikipedi'de yok
-  RED Nevşehir / Uçhisar: şehir sayfası (Uçhisar, Nevşehir)
-  RED Nevşehir / Paşabağ: Vikipedi'de yok
-  RED Nevşehir / Avanos: şehir sayfası (Avanos)
-  RED Nevşehir / Ihlara Vadisi: başka ilde (Aksaray)
-  RED Nevşehir / Ürgüp: şehir sayfası (Ürgüp)
-  RED Düzce / Güzeldere Şelalesi: Vikipedi'de yok
-  RED Düzce / Samandere Şelalesi: Vikipedi'de yok
-  RED Giresun / Kümbet Yaylası: koordinat yok
-  RED Giresun / Bektaş Yaylası: koordinat yok
-  RED Gümüşhane / Santa Harabeleri: koordinat yok
-  RED Gümüşhane / Zigana Dağları: Vikipedi'de yok
-  RED Siirt / Veysel Karani Türbesi: Vikipedi'de yok
-  RED Siirt / İbrahim Hakkı Erzurumi Türbesi: Vikipedi'de yok
   RED Kahramanmaraş / Başkonuş Yaylası: Vikipedi'de yok
   RED Karaman / Binbir Kilise: Vikipedi'de yok
   RED Karaman / Hatuniye Medresesi: anlam ayrımı sayfası
@@ -141,26 +96,72 @@ ili bulunamayan yer: 239
   RED Ordu / Boztepe: başka ilde (Kırşehir)
   RED Ordu / Çambaşı Yaylası: Vikipedi'de yok
   RED Ordu / Paşaoğlu Konağı: Vikipedi'de yok
-  RED Kastamonu / Ilgarini Mağarası: Vikipedi'de yok
-  RED Kastamonu / Horma Kanyonu: Vikipedi'de yok
-  RED Tokat / Sulu Sokak: Vikipedi'de yok
-  RED Kayseri / Gevher Nesibe Şifahiyesi: Vikipedi'de yok
-  RED Kayseri / Talas: anlam ayrımı sayfası
-  RED Rize / Zil Kalesi: Vikipedi'de yok
-  RED Kırıkkale / Hasandede: Vikipedi'de yok
-  RED İstanbul / Sultan Ahmed Camii: Vikipedi'de yok
-  RED İstanbul / Balat: anlam ayrımı sayfası
+  RED Bitlis / Ahlat Selçuklu Meydan Mezarlığı: Vikipedi'de yok
+  RED Bitlis / Nemrut Krater Gölü: Vikipedi'de yok
+  RED Hatay / Harbiye Şelalesi: Vikipedi'de yok
+  RED Hatay / Musa Ağacı: Vikipedi'de yok
+  RED Hatay / Uzun Çarşı (Antakya): Vikipedi'de yok
+  RED Kocaeli / Kartepe: şehir sayfası (Kartepe)
+  RED Kocaeli / Kerpe: il merkezine çok uzak
+  RED Kocaeli / Kocaeli Müzesi: Vikipedi'de yok
+  RED Kocaeli / Kandıra: il/ilçe/şehir sayfasına düşüyor (Kandıra)
+  RED Hakkari / Cilo Dağları: Vikipedi'de yok
+  RED Hakkari / Meydan Medresesi: Vikipedi'de yok
+  RED Hakkari / Zap Suyu: il merkezine çok uzak
+  RED Muğla / Ölüdeniz: anlam ayrımı sayfası
+  RED Muğla / Dalyan: anlam ayrımı sayfası
+  RED Muğla / Akyaka: başka ilde (Kars)
+  RED Muğla / Datça: il/ilçe/şehir sayfasına düşüyor (Datça)
+  RED Iğdır / Ağrı Dağı: başka ilde (Ağrı)
+  RED Kütahya / Kütahya Çini Müzesi: Vikipedi'de yok
+  RED Kütahya / Germiyan Sokağı: Vikipedi'de yok
+  RED Kilis / Kilis Kalesi: Vikipedi'de yok
+  RED Kilis / Ravanda Kalesi: Vikipedi'de yok
+  RED Tekirdağ / Rakoczi Müzesi: Vikipedi'de yok
+  RED Tekirdağ / Şarköy: il/ilçe/şehir sayfasına düşüyor (Şarköy)
+  RED Tekirdağ / Namık Kemal Evi: Vikipedi'de yok
+  RED Manisa / Manisa Muradiye Camii: Vikipedi'de yok
+  RED Manisa / Niobe Kayası: Vikipedi'de yok
+  RED Mardin / Deyrulzafaran Manastırı: Vikipedi'de yok
+  RED Mardin / Zinciriye Medresesi: anlam ayrımı sayfası
+  RED Mardin / Midyat: il/ilçe/şehir sayfasına düşüyor (Midyat)
+  RED Çankırı / Çankırı Tuz Mağarası: Vikipedi'de yok
+  RED Çankırı / Çankırı Kalesi: Vikipedi'de yok
+  RED Çorum / Şapinuva: şehir sayfası (Şapinuva)
+  RED Osmaniye / Zorkun Yaylası: koordinat yok
+  RED İzmir / Saat Kulesi (İzmir): Vikipedi'de yok
+  RED İzmir / Asansör (İzmir): Vikipedi'de yok
+  RED İzmir / Agora (İzmir): Vikipedi'de yok
+  RED İzmir / Bergama Akropolü: Vikipedi'de yok
+  RED Erzurum / Erzurum Kalesi: Vikipedi'de yok
+  RED Trabzon / Trabzon Ayasofya Camii: Vikipedi'de yok
+  RED Trabzon / Atatürk Köşkü (Trabzon): Vikipedi'de yok
+  RED Trabzon / Boztepe (Trabzon): Vikipedi'de yok
+  RED Nevşehir / Uçhisar: şehir sayfası (Uçhisar, Nevşehir)
+  RED Nevşehir / Paşabağ: Vikipedi'de yok
+  RED Nevşehir / Avanos: şehir sayfası (Avanos)
+  RED Nevşehir / Ihlara Vadisi: başka ilde (Aksaray)
+  RED Nevşehir / Ürgüp: şehir sayfası (Ürgüp)
+  RED Düzce / Güzeldere Şelalesi: Vikipedi'de yok
+  RED Düzce / Samandere Şelalesi: Vikipedi'de yok
+  RED Giresun / Kümbet Yaylası: koordinat yok
+  RED Giresun / Bektaş Yaylası: koordinat yok
+  RED Gümüşhane / Santa Harabeleri: koordinat yok
+  RED Gümüşhane / Zigana Dağları: Vikipedi'de yok
+  RED Siirt / Veysel Karani Türbesi: Vikipedi'de yok
+  RED Siirt / İbrahim Hakkı Erzurumi Türbesi: Vikipedi'de yok
 seçkin kabul: 289 / 433
 == Fotoğraflar
-fotoğraf bilgisi alınan dosya: 3104 | uygun: 2843
+fotoğraf bilgisi alınan dosya: 3105 | uygun: 2844
+  FOTOSUZ seçkin: MKE Silahsan Özel Müzesi (Q28136374)
+  FOTOSUZ seçkin: Kapulukaya Barajı ve Hidroelektrik Santrali (Q2885173)
   FOTOSUZ seçkin: Macaheli (Q259183)
   FOTOSUZ seçkin: Kızılkeçili (Q6587543)
   FOTOSUZ seçkin: Aydıntepe Yeraltı Şehri (Q28219863)
   FOTOSUZ seçkin: Sudüşen Şelalesi (Q97320238)
   FOTOSUZ seçkin: Elazığ Arkeoloji Ve Etnografya Müzesi (Q28221154)
-  FOTOSUZ seçkin: MKE Silahsan Özel Müzesi (Q28136374)
-  FOTOSUZ seçkin: Kapulukaya Barajı ve Hidroelektrik Santrali (Q2885173)
 yedek foto: kategori 213 | yakın 2 | hiç bulunamayan 7
+güncel il kapağı: yerin kendi fotoğrafı 10 | kategoriden 51 | eski kural 20
 == Metinler
 Türkçe metin: 2705 | İngilizce metin: 71
 Adana: 52 yer (6 seçkin), 15 ilçe, fotosuz ilçe 2, ilçesiz yer 1
@@ -184,7 +185,7 @@ Bitlis: 10 yer (3 seçkin), 7 ilçe, fotosuz ilçe 3, ilçesiz yer 0
 Bolu: 14 yer (4 seçkin), 9 ilçe, fotosuz ilçe 3, ilçesiz yer 0
 Burdur: 13 yer (4 seçkin), 11 ilçe, fotosuz ilçe 5, ilçesiz yer 0
 Bursa: 77 yer (6 seçkin), 17 ilçe, fotosuz ilçe 3, ilçesiz yer 1
-Çanakkale: 53 yer (4 seçkin), 12 ilçe, fotosuz ilçe 2, ilçesiz yer 1
+Çanakkale: 53 yer (4 seçkin), 12 ilçe, fotosuz ilçe 2, ilçesiz yer 2
 Çankırı: 6 yer (2 seçkin), 11 ilçe, fotosuz ilçe 8, ilçesiz yer 2
 Çorum: 16 yer (4 seçkin), 14 ilçe, fotosuz ilçe 7, ilçesiz yer 0
 Denizli: 21 yer (4 seçkin), 20 ilçe, fotosuz ilçe 6, ilçesiz yer 0
@@ -244,4 +245,4 @@ Van: 23 yer (5 seçkin), 13 ilçe, fotosuz ilçe 4, ilçesiz yer 2
 Yalova: 8 yer (2 seçkin), 6 ilçe, fotosuz ilçe 2, ilçesiz yer 1
 Yozgat: 9 yer (4 seçkin), 14 ilçe, fotosuz ilçe 11, ilçesiz yer 0
 Zonguldak: 5 yer (1 seçkin), 8 ilçe, fotosuz ilçe 6, ilçesiz yer 0
-TOPLAM: 81 il, 958 ilçe, 2443 yer, kontrol edilecek 1533 fotoğraf, sürüm 202610211734
+TOPLAM: 81 il, 958 ilçe, 2443 yer, kontrol edilecek 1533 fotoğraf, sürüm 202610211908
