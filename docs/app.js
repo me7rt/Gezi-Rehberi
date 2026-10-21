@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.2";
+  const SURUM = "5.3";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -92,8 +92,10 @@
     if (DIL === "en") {
       const en = await getJSON(`data/en/${s}.json?v=${IDX.surum}`).catch(() => null);
       if (en) {
-        d.me = en.m; d.we = en.w;
-        d.yerler.forEach((y) => { const e = en.y && en.y[y.q]; if (e) { y.ae = e[0]; y.me = e[1]; y.we = "en:" + e[2]; } });
+        // Vikipedi girişlerindeki parantezleri (okunuş, Türkçe adı) at: "Cappadocia (; Turkish: Kapadokya) is..." -> "Cappadocia is..."
+        const sade = (t) => (t || "").replace(/\s*\([^()]*\)/g, "").replace(/\s+([,.])/g, "$1");
+        d.me = sade(en.m); d.we = en.w;
+        d.yerler.forEach((y) => { const e = en.y && en.y[y.q]; if (e) { y.ae = e[0]; y.me = sade(e[1]); y.we = "en:" + e[2]; } });
       }
     }
     IL.set(s, d);
