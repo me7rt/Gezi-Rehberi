@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=4.1">
+<link rel="stylesheet" href="style.css?v=4.2">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
   padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(30px + env(safe-area-inset-bottom,0px));
@@ -170,7 +170,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=4.1"></script>
+<script src="app.js?v=4.2"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
@@ -180,6 +180,14 @@
   s.addEventListener("click", kapat);
   if (document.readyState === "complete") hazir(); else addEventListener("load", hazir);
   setTimeout(kapat, 7000);
+  // Arka plandan 10 saniyeden uzun süre sonra dönülürse baştan (açılış ekranı + ana sayfa) başla
+  var gizlendi = 0;
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) { gizlendi = Date.now(); return; }
+    if (gizlendi && Date.now() - gizlendi > 10000) {
+      if (location.hash) location.replace(location.pathname + location.search); else location.reload();
+    }
+  });
   // İnternet yokken de açılsın
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
   // Uygulama başka bir sitede kopyalanıp yayınlanırsa orijinalini göster
