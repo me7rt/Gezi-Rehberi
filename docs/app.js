@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.0";
+  const SURUM = "5.1";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -408,16 +408,41 @@
   // ---------- dinle (sesli okuma) ----------
   const sesVar = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
   function dinleDurdur() { if (sesVar) speechSynthesis.cancel(); $("dDinle").textContent = "🔊 Dinle"; $("dDinle").classList.remove("on"); }
+  // Telefondaki en doğal Türkçe sesi seç (geliştirilmiş / doğal / Google sesleri öne, robotik olanlar sona)
+  function enIyiSes() {
+    const v = speechSynthesis.getVoices().filter((x) => /^tr/i.test(x.lang));
+    const puan = (x) => { const n = x.name.toLowerCase(); let p = 0;
+      if (/premium|enhanced|geliştirilmiş|neural|natural|doğal|wavenet|online/.test(n)) p += 5;
+      if (/google/.test(n)) p += 3;
+      if (!x.localService) p += 1;
+      if (/compact|espeak|robot/.test(n)) p -= 5;
+      return p; };
+    return v.sort((x, y) => puan(y) - puan(x))[0] || null;
+  }
+  // Kısaltmaları açık oku, parantezleri atla: kulağa daha doğal gelsin
+  function okunur(t) {
+    return t.replace(/^\(İngilizce kaynaktan\) /, "").replace(/\s*\([^)]*\)/g, "")
+      .replace(/(^|\s)MÖ(?=[\s.,])/g, "$1milattan önce").replace(/\bMS\b/g, "milattan sonra")
+      .replace(/(\d)\s*km\b/g, "$1 kilometre").replace(/(\d)\s*m\b/g, "$1 metre")
+      .replace(/\byy\.?/g, "yüzyıl").replace(/\bvb\.?/g, "ve benzeri").replace(/\s{2,}/g, " ").trim();
+  }
   function dinle() {
     if (!sesVar || !open) return;
     if (speechSynthesis.speaking) return dinleDurdur();
-    const u = new SpeechSynthesisUtterance(open.ad + ". " + $("dText").textContent.replace(/^\(İngilizce kaynaktan\) /, ""));
-    u.lang = "tr-TR"; u.rate = 0.95;
-    const tr = speechSynthesis.getVoices().find((v) => /^tr/i.test(v.lang)); if (tr) u.voice = tr;
-    u.onend = u.onerror = () => { $("dDinle").textContent = "🔊 Dinle"; $("dDinle").classList.remove("on"); };
-    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    const ses = enIyiSes();
+    // Cümle cümle oku: doğal duraklar olur, uzun metinde ses kesilmez
+    const cumleler = (open.ad + ". " + okunur($("dText").textContent)).split(/(?<=[.!?])\s+(?=[A-ZÇĞİÖŞÜ])/).filter((c) => c.trim());
+    speechSynthesis.cancel();
+    cumleler.forEach((c, i) => {
+      const u = new SpeechSynthesisUtterance(c.trim());
+      u.lang = "tr-TR"; u.rate = 1; u.pitch = 1; if (ses) u.voice = ses;
+      if (i === cumleler.length - 1) u.onend = () => { $("dDinle").textContent = "🔊 Dinle"; $("dDinle").classList.remove("on"); };
+      u.onerror = (e) => { if (e.error !== "interrupted" && e.error !== "canceled") dinleDurdur(); };
+      speechSynthesis.speak(u);
+    });
     $("dDinle").textContent = "⏹ Durdur"; $("dDinle").classList.add("on");
   }
+  if (sesVar) speechSynthesis.getVoices();
   // ---------- keşfet: tema listeleri (Türkiye geneli) ----------
   const TEMA = {
     selale: { ad: "Şelaleler", e: "💧", k: ["selale"] },
