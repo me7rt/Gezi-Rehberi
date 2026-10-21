@@ -402,7 +402,7 @@ function fotoKaydi(a, ii) {
   const em = ii.extmetadata || {};
   const yazar = (em.Artist ? em.Artist.value : "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim().slice(0, 70);
   const lis = em.LicenseShortName ? em.LicenseShortName.value.replace(/<[^>]+>/g, "").trim() : "";
-  const m = /\/wikipedia\/commons\/(.+)$/.exec(ii.url || "");
+  const m = /\/wikipedia\/commons\/([^?#]+)/.exec(ii.url || "");
   return { ad: a, w: ii.width, h: ii.height, mime: ii.mime, p: m ? m[1] : "", a: [yazar, lis].filter(Boolean).join(" · ") };
 }
 function fotoUygun(a) {

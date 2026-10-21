@@ -2,7 +2,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "3.0";
+  const SURUM = "3.1";
 
   const SVG = {
     t: '<path d="M4 20h16M6 20v-7M18 20v-7M5 13h14M7 13a5 5 0 0 1 10 0M12 4v4"/>',
@@ -43,8 +43,9 @@
   const COM = "https://upload.wikimedia.org/wikipedia/commons/";
   function foto(f, W) {
     if (!f || !f.p) return "";
-    if (f.w <= W) return COM + f.p;
-    return `${COM}thumb/${f.p}/${W}px-${f.p.split("/").pop()}`;
+    const p = f.p.split("?")[0];
+    if (f.w <= W) return COM + p;
+    return `${COM}thumb/${p}/${W}px-${p.split("/").pop()}`;
   }
   function wikiUrl(w) {
     if (!w) return "";
