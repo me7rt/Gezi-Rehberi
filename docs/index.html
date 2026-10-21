@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="Gezi Rehberi">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=3.2">
+<link rel="stylesheet" href="style.css?v=3.3">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
   padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(34px + env(safe-area-inset-bottom,0px));
@@ -69,6 +69,8 @@
       <b>Yakınımdaki yerler</b>
       <small id="nearSub">Konumunu aç, sana en yakın gezilecek yerleri sıralayalım</small>
     </button>
+    <div id="gunun"></div>
+    <section id="favSec" hidden><h2 class="sec">Gideceğim yerler</h2><ul class="list" id="favList"></ul></section>
     <h2 class="sec">81 il</h2>
     <ul class="ils" id="ilGrid"><li class="empty">Yükleniyor…</li></ul>
   </div>
@@ -107,6 +109,7 @@
       <span class="ph-icon" id="dIcon"></span>
       <span class="ph-img" id="dImg"></span>
       <span class="tag" id="dTag"></span>
+      <button class="fav" id="dFav" aria-label="Gideceğim yerlere ekle">♡</button>
       <button class="close" id="dClose" aria-label="Kapat">×</button>
     </div>
     <small class="pcredit" id="dCredit"></small>
@@ -118,6 +121,7 @@
       <div class="btns">
         <a class="btn" id="dMap" target="_blank" rel="noopener">Haritada aç</a>
         <a class="btn primary" id="dDir" target="_blank" rel="noopener">Yol tarifi</a>
+        <button class="btn share" id="dShare">Arkadaşına gönder</button>
       </div>
       <a class="more" id="dWiki" target="_blank" rel="noopener">Vikipedi'de devamını oku</a>
     </div>
@@ -125,7 +129,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=3.2"></script>
+<script src="app.js?v=3.3"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
@@ -135,6 +139,8 @@
   s.addEventListener("click", kapat);
   if (document.readyState === "complete") hazir(); else addEventListener("load", hazir);
   setTimeout(kapat, 4500);
+  // İnternet yokken de açılsın
+  if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
   // Uygulama başka bir sitede kopyalanıp yayınlanırsa orijinalini göster
   var h = location.hostname, izinli = ["me7rt.github.io", "localhost", "127.0.0.1", ""];
   if (izinli.indexOf(h) < 0) {

@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "3.2";
+  const SURUM = "3.3";
 
   const SVG = {
     t: '<path d="M4 20h16M6 20v-7M18 20v-7M5 13h14M7 13a5 5 0 0 1 10 0M12 4v4"/>',
@@ -173,6 +173,7 @@
         if (no !== routeNo) return;
         if (h[2] === "ilce" && d.ilceler[+h[3]]) showIlce(d, +h[3]);
         else showIl(d, h[2] === "ilceler" ? "ilce" : "yer");
+        if (h[2] === "yer") { const p = d.yerler.find((y) => y.q === h[3]); history.replaceState(null, "", "#/il/" + d.s); if (p) openDetail(p); }
         if (bekleyenYer && bekleyenYer.s === d.s) { const p = d.yerler[bekleyenYer.j]; bekleyenYer = null; if (p) openDetail(p); }
         return;
       }
@@ -193,10 +194,57 @@
     $("eyebrow").textContent = "Gezi Rehberi"; $("title").textContent = "Nereye gidiyorsun?";
     renderHome();
   }
+  // ---------- gideceğim yerler (favoriler) ----------
+  const FAV = "gezi-fav";
+  function favs() { try { return JSON.parse(localStorage.getItem(FAV)) || []; } catch (e) { return []; } }
+  function favYaz(a) { try { localStorage.setItem(FAV, JSON.stringify(a)); } catch (e) {} }
+  const ayni = (x, p) => x.q === p.q && x.s === p.ilS;
+  const favMi = (p) => favs().some((x) => ayni(x, p));
+  function favDegis(p) {
+    let a = favs();
+    if (favMi(p)) a = a.filter((x) => !ayni(x, p));
+    else a.unshift({ q: p.q, s: p.ilS, ad: p.ad, il: [...new Set([p.ilce, p.il].filter(Boolean))].join(", "), k: p.k, f: p.f });
+    favYaz(a); favBtn(p);
+  }
+  function favBtn(p) {
+    const on = favMi(p), b = $("dFav");
+    b.classList.toggle("on", on); b.textContent = on ? "♥" : "♡";
+    b.setAttribute("aria-label", on ? "Listemden çıkar" : "Gideceğim yerlere ekle");
+  }
+  function renderFav() {
+    const a = favs();
+    $("favSec").hidden = !a.length;
+    $("favList").innerHTML = a.map((x) =>
+      `<li><button class="row" data-go="#/il/${x.s}/yer/${x.q}">${thumb(x.f, x.k)}<span class="rt"><b>${esc(x.ad)}</b><small>${esc(x.il)}</small></span><span class="km">›</span></button></li>`).join("");
+  }
+  // ---------- günün keşfi ----------
+  let gunYuk = false;
+  async function gununKesfi() {
+    if (gunYuk) return; gunYuk = true;
+    try {
+      const gun = Math.floor((Date.now() + 108e5) / 864e5);
+      const il = IDX.iller[(gun * 7) % IDX.iller.length];
+      const d = await loadIl(il.s);
+      const iyi = d.yerler.filter((y) => y.f && y.q && y.one);
+      const liste = iyi.length ? iyi : d.yerler.filter((y) => y.f && y.q);
+      const p = liste[gun % liste.length]; if (!p) return;
+      const src = foto(p.f, 800);
+      $("gunun").innerHTML = `<button class="gunun" data-go="#/il/${d.s}/yer/${p.q}">${src ? `<img src="${src}" alt="" onerror="this.remove()">` : ""}<span class="gtxt"><small>Günün keşfi</small><b>${esc(p.ad)}</b><span>${esc([...new Set([p.ilce, p.il].filter(Boolean))].join(", "))}</span></span></button>`;
+    } catch (e) { gunYuk = false; }
+  }
+  // ---------- paylaş ----------
+  function paylas(p) {
+    const url = `https://me7rt.github.io/Gezi-Rehberi/#/il/${p.ilS}/yer/${p.q}`;
+    const metin = `${p.ad} (${[...new Set([p.ilce, p.il].filter(Boolean))].join(", ")}) çok güzel bir yer, Gezi Rehberi'nde buldum:`;
+    if (navigator.share) navigator.share({ title: p.ad, text: metin, url }).catch(() => {});
+    else window.open("https://wa.me/?text=" + encodeURIComponent(metin + " " + url), "_blank");
+  }
+
   function renderHome() {
     if (!IDX) return;
     const q = $("search").value.trim();
     if (q.length >= 2) return renderSearch(q);
+    renderFav(); gununKesfi();
     $("results").hidden = true; $("homeMain").hidden = false;
     const iller = IDX.iller.slice();
     if (me) iller.sort((a, b) => km(me, a) - km(me, b));
@@ -324,7 +372,7 @@
       : me ? "En yakından uzağa" : "Mesafe için konumu aç";
   }
   function altYazi(p) {
-    if (view.mode === "near") return [p.ilce, p.il].filter(Boolean).join(", ");
+    if (view.mode === "near") return [...new Set([p.ilce, p.il].filter(Boolean))].join(", ");
     if (view.mode === "il") return [p.ilce, CATS[p.k].ad].filter(Boolean).join(" · ");
     return CATS[p.k].ad;
   }
@@ -390,7 +438,7 @@
   // ---------- detay ----------
   function renderFacts(p) {
     const parts = [me ? `<span>Uzaklık <strong>${fmt(km(me, p))}</strong></span>` : `<span>Mesafe için konumu aç</span>`];
-    parts.push(`<span>${esc([p.ilce, p.il].filter(Boolean).join(", "))}</span>`);
+    parts.push(`<span>${esc([...new Set([p.ilce, p.il].filter(Boolean))].join(", "))}</span>`);
     if (p.yil) parts.push(`<span>${p.k === "d" ? "Kuruluş" : "Yapım"} <strong>${esc(p.yil)}</strong></span>`);
     if (p.rak) parts.push(`<span>Rakım <strong>${nf(p.rak)} m</strong></span>`);
     if (p.un) parts.push(`<span class="badge">UNESCO Dünya Mirası</span>`);
@@ -407,6 +455,7 @@
     $("dImg").innerHTML = src ? `<img src="${src}" alt="${esc(p.ad)}" onerror="this.remove()">` : "";
     $("dCredit").textContent = p.f && p.f.a ? "Fotoğraf: " + p.f.a + " · Wikimedia Commons" : "";
     renderFacts(p);
+    favBtn(p); $("dFav").hidden = $("dShare").hidden = !p.q;
     $("dTip").hidden = !p.ip; $("dTip").innerHTML = p.ip ? "<b>İpucu:</b> " + esc(p.ip) : "";
     let txt = p.m ? (p.en ? "(İngilizce kaynaktan) " : "") + p.m : "";
     if (!txt && p.ac) txt = `${p.ad}: ${p.ac}.`;
@@ -462,6 +511,8 @@
   $("heroMore").addEventListener("click", () => { $("heroText").classList.remove("clamp"); $("heroMore").hidden = true; });
   $("dClose").addEventListener("click", closeDetail);
   $("sheet").addEventListener("click", (e) => { if (e.target === $("sheet")) closeDetail(); });
+  $("dFav").addEventListener("click", () => { if (open) favDegis(open); });
+  $("dShare").addEventListener("click", () => { if (open) paylas(open); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDetail(); });
   window.addEventListener("popstate", () => { if (!$("sheet").hidden) hideSheet(); });
   window.addEventListener("hashchange", route);
