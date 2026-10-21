@@ -112,3 +112,28 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .gtxt b{font-size:19px;line-height:1.2}
 .gtxt span{font-size:13px;opacity:.9}
 #favSec{display:flex;flex-direction:column;gap:8px}
+/* 3.5: gittim, hava, yemek, dinle */
+.btn.gittim{font:inherit;font-weight:700;cursor:pointer}
+.btn.gittim.on{background:var(--green);border-color:var(--green);color:#fff}
+#dDinle{font:inherit;font-weight:700;cursor:pointer}
+#dDinle.on{border-color:var(--cobalt);color:var(--cobalt)}
+.gez{display:flex;flex-direction:column;gap:8px}
+.gezbtn{display:flex;flex-direction:column;gap:8px;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:16px;padding:14px 16px;cursor:pointer;font:inherit}
+.gezust{display:flex;flex-direction:column;gap:2px}
+.gezust b{font-size:17px}
+.gezust small{color:var(--muted);font-size:13px}
+.bar{display:block;height:8px;border-radius:999px;background:var(--bg);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);border-radius:999px}
+.hava{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 12px}
+.hava>small{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.hgun{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;text-align:center}
+.hgun span{display:flex;flex-direction:column;align-items:center;gap:1px}
+.hgun em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}
+.hgun i{font-style:normal;font-size:24px;line-height:1.2}
+.hgun b{font-size:15px}
+.hgun b small{color:var(--muted);font-weight:600}
+.hgun>span>small{font-size:11px;color:var(--muted)}
+.yemek h3{font-size:16px;margin:4px 0 6px}
+.ychips{display:flex;flex-direction:column;gap:6px}
+.ychip{display:flex;justify-content:space-between;align-items:center;gap:8px;text-decoration:none;color:var(--fg);font-weight:700;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.ychip small{color:var(--cobalt);font-weight:600;font-size:12px;white-space:nowrap}

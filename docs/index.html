@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=3.4">
+<link rel="stylesheet" href="style.css?v=3.5">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
   padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(34px + env(safe-area-inset-bottom,0px));
@@ -70,6 +70,7 @@
       <small id="nearSub">Konumunu aç, sana en yakın gezilecek yerleri sıralayalım</small>
     </button>
     <div id="gunun"></div>
+    <section id="gezSec" class="gez" hidden><button class="gezbtn" id="gezBtn"><span class="gezust"><b id="gezSay"></b><small id="gezAlt"></small></span><span class="bar"><i id="gezBar"></i></span></button><ul class="list" id="gezList" hidden></ul></section>
     <section id="favSec" hidden><h2 class="sec">Gideceğim yerler</h2><ul class="list" id="favList"></ul></section>
     <h2 class="sec">81 il</h2>
     <ul class="ils" id="ilGrid"><li class="empty">Yükleniyor…</li></ul>
@@ -85,6 +86,8 @@
     <div class="facts" id="heroFacts"></div>
     <p class="text clamp" id="heroText"></p>
     <div class="herolinks"><button class="linkbtn" id="heroMore" hidden>Devamını oku</button><a class="linkbtn" id="heroWiki" target="_blank" rel="noopener" hidden>Vikipedi</a></div>
+    <div class="hava" id="hava" hidden></div>
+    <section class="yemek" id="yemek" hidden></section>
   </section>
   <div class="tabs" id="tabs" role="tablist">
     <button role="tab" data-tab="yer" id="tabBtnYer">Gezilecek yerler</button>
@@ -121,6 +124,8 @@
       <div class="btns">
         <a class="btn" id="dMap" target="_blank" rel="noopener">Haritada aç</a>
         <a class="btn primary" id="dDir" target="_blank" rel="noopener">Yol tarifi</a>
+        <button class="btn gittim" id="dGit">Buraya gittim</button>
+        <button class="btn" id="dDinle">🔊 Dinle</button>
         <button class="btn share" id="dShare">Arkadaşına gönder</button>
       </div>
       <a class="more" id="dWiki" target="_blank" rel="noopener">Vikipedi'de devamını oku</a>
@@ -129,7 +134,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=3.4"></script>
+<script src="app.js?v=3.5"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {

@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "3.4";
+  const SURUM = "3.5";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -219,6 +219,96 @@
     $("favList").innerHTML = a.map((x) =>
       `<li><button class="row" data-go="#/il/${x.s}/yer/${x.q}">${thumb(x.f, x.k)}<span class="rt"><b>${esc(x.ad)}</b><small>${esc(x.il)}</small></span><span class="km">›</span></button></li>`).join("");
   }
+  // ---------- gittiğim yerler ----------
+  const GIT = "gezi-gittim";
+  function gittiklerim() { try { return JSON.parse(localStorage.getItem(GIT)) || []; } catch (e) { return []; } }
+  const gittimMi = (p) => gittiklerim().some((x) => ayni(x, p));
+  function gitDegis(p) {
+    let a = gittiklerim();
+    const vardi = gittimMi(p);
+    if (vardi) a = a.filter((x) => !ayni(x, p));
+    else a.unshift({ q: p.q, s: p.ilS, ad: p.ad, il: [...new Set([p.ilce, p.il].filter(Boolean))].join(", "), k: p.k, f: p.f });
+    try { localStorage.setItem(GIT, JSON.stringify(a)); } catch (e) {}
+    gitBtn(p);
+    if (!vardi) {
+      const iller = new Set(a.map((x) => x.s)).size;
+      toast(`Harika! Gezdiğin il: ${iller}/81 · Gittiğin yer: ${a.length}`);
+    }
+  }
+  function gitBtn(p) {
+    const on = gittimMi(p), b = $("dGit");
+    b.classList.toggle("on", on); b.textContent = on ? "✓ Gittim" : "Buraya gittim";
+  }
+  function renderGez() {
+    const a = gittiklerim();
+    $("gezSec").hidden = !a.length;
+    if (!a.length) return;
+    const iller = new Set(a.map((x) => x.s)).size;
+    $("gezSay").textContent = `Gezdiğin iller: ${iller} / 81`;
+    $("gezAlt").textContent = `${a.length} yere gittin · listeyi gör`;
+    $("gezBar").style.width = Math.max(3, Math.round((iller / 81) * 100)) + "%";
+    $("gezList").innerHTML = a.map((x) =>
+      `<li><button class="row" data-go="#/il/${x.s}/yer/${x.q}">${thumb(x.f, x.k)}<span class="rt"><b>${esc(x.ad)}</b><small>${esc(x.il)}</small></span><span class="km">✓</span></button></li>`).join("");
+  }
+  // ---------- hava durumu ----------
+  const HAVA = { 0: ["☀️", "Açık"], 1: ["🌤️", "Az bulutlu"], 2: ["⛅", "Parçalı bulutlu"], 3: ["☁️", "Kapalı"], 45: ["🌫️", "Sisli"], 48: ["🌫️", "Sisli"],
+    51: ["🌦️", "Çisenti"], 53: ["🌦️", "Çisenti"], 55: ["🌦️", "Çisenti"], 56: ["🌧️", "Dondurucu çisenti"], 57: ["🌧️", "Dondurucu çisenti"],
+    61: ["🌧️", "Hafif yağmur"], 63: ["🌧️", "Yağmurlu"], 65: ["🌧️", "Kuvvetli yağmur"], 66: ["🌧️", "Dondurucu yağmur"], 67: ["🌧️", "Dondurucu yağmur"],
+    71: ["🌨️", "Hafif kar"], 73: ["🌨️", "Karlı"], 75: ["❄️", "Yoğun kar"], 77: ["🌨️", "Kar"], 80: ["🌦️", "Sağanak"], 81: ["🌧️", "Sağanak"], 82: ["⛈️", "Kuvvetli sağanak"],
+    85: ["🌨️", "Kar sağanağı"], 86: ["❄️", "Kar sağanağı"], 95: ["⛈️", "Gök gürültülü"], 96: ["⛈️", "Dolu"], 99: ["⛈️", "Dolu"] };
+  const havaOnbellek = new Map();
+  async function havaGoster(il) {
+    const kutu = $("hava"); kutu.hidden = true; kutu.innerHTML = "";
+    if (!il || il.lat == null) return;
+    const s = il.s;
+    try {
+      let d = havaOnbellek.get(s);
+      if (!d) {
+        const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${il.lat}&longitude=${il.lng}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Europe%2FIstanbul&forecast_days=3`);
+        if (!r.ok) return;
+        d = (await r.json()).daily; havaOnbellek.set(s, d);
+      }
+      if (!view || !view.d || view.d.s !== s) return;
+      const gunler = ["Bugün", "Yarın"];
+      kutu.innerHTML = `<small>${esc(il.ad)} hava durumu</small><div class="hgun">` + d.time.map((t, i) => {
+        const [ik, ad] = HAVA[d.weathercode[i]] || ["🌡️", ""];
+        const g = gunler[i] || new Date(t + "T12:00").toLocaleDateString("tr-TR", { weekday: "long" });
+        return `<span><em>${g}</em><i>${ik}</i><b>${Math.round(d.temperature_2m_max[i])}° <small>${Math.round(d.temperature_2m_min[i])}°</small></b><small>${ad}</small></span>`;
+      }).join("") + "</div>";
+      kutu.hidden = false;
+    } catch (e) {}
+  }
+  // ---------- meşhur yemekler ----------
+  function ekDe(ad) {
+    const k = ad.toLocaleLowerCase("tr"), sesli = k.match(/[aıoueiöü]/g) || ["a"];
+    const ince = "eiöü".includes(sesli[sesli.length - 1]), sert = "fstkçşhp".includes(k[k.length - 1]);
+    return "'" + (sert ? "t" : "d") + (ince ? "e" : "a");
+  }
+  let YEMEK = null;
+  async function yemekGoster(d) {
+    const kutu = $("yemek"); kutu.hidden = true;
+    try {
+      if (!YEMEK) YEMEK = await getJSON(`yemek.json?v=${SURUM}`);
+      const liste = YEMEK[d.s]; if (!liste || !liste.length) return;
+      if (!view || !view.d || view.d.s !== d.s) return;
+      kutu.innerHTML = `<h3>${esc(d.ad)}${ekDe(d.ad)} ne yenir?</h3><div class="ychips">` + liste.map((y) =>
+        `<a class="ychip" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(y + " " + d.ad)}">🍽️ ${esc(y)} <small>En iyi yerleri bul ›</small></a>`).join("") + "</div>";
+      kutu.hidden = false;
+    } catch (e) {}
+  }
+  // ---------- dinle (sesli okuma) ----------
+  const sesVar = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+  function dinleDurdur() { if (sesVar) speechSynthesis.cancel(); $("dDinle").textContent = "🔊 Dinle"; $("dDinle").classList.remove("on"); }
+  function dinle() {
+    if (!sesVar || !open) return;
+    if (speechSynthesis.speaking) return dinleDurdur();
+    const u = new SpeechSynthesisUtterance(open.ad + ". " + $("dText").textContent.replace(/^\(İngilizce kaynaktan\) /, ""));
+    u.lang = "tr-TR"; u.rate = 0.95;
+    const tr = speechSynthesis.getVoices().find((v) => /^tr/i.test(v.lang)); if (tr) u.voice = tr;
+    u.onend = u.onerror = () => { $("dDinle").textContent = "🔊 Dinle"; $("dDinle").classList.remove("on"); };
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    $("dDinle").textContent = "⏹ Durdur"; $("dDinle").classList.add("on");
+  }
   // ---------- günün keşfi ----------
   let gunYuk = false;
   async function gununKesfi() {
@@ -246,7 +336,7 @@
     if (!IDX) return;
     const q = $("search").value.trim();
     if (q.length >= 2) return renderSearch(q);
-    renderFav(); gununKesfi();
+    renderFav(); renderGez(); gununKesfi();
     $("results").hidden = true; $("homeMain").hidden = false;
     const iller = IDX.iller.slice();
     if (me) iller.sort((a, b) => km(me, a) - km(me, b));
@@ -277,7 +367,7 @@
 
   // ---------- il / ilçe / yakın ekranları ----------
   function renderHero(h) {
-    $("hero").hidden = false;
+    $("hero").hidden = false; $("hava").hidden = $("yemek").hidden = true;
     const src = foto(h.f, 960);
     $("heroImg").style.setProperty("--c", BOLGE_RENK);
     $("heroImg").innerHTML = icon("y", 40) + (src ? `<img src="${src}" alt="" onerror="this.remove()">` : "");
@@ -303,6 +393,7 @@
     $("tabs").hidden = false;
     $("tabBtnIlce").textContent = `İlçeler (${d.ilceler.length})`;
     $("tabBtnYer").textContent = `Gezilecek yerler (${d.yerler.length})`;
+    havaGoster(IDX.ilBy.get(d.s) || d); yemekGoster(d);
     places = d.yerler; cat = "hepsi"; shown = 60; fitted = false;
     sortMode = me ? "yakin" : "oner";
     setTab(tab);
@@ -464,7 +555,8 @@
     $("dImg").innerHTML = src ? `<img src="${src}" alt="${esc(p.ad)}" onerror="this.remove()">` : "";
     $("dCredit").textContent = p.f && p.f.a ? "Fotoğraf: " + p.f.a + " · Wikimedia Commons" : "";
     renderFacts(p);
-    favBtn(p); $("dFav").hidden = $("dShare").hidden = !p.q;
+    favBtn(p); gitBtn(p); $("dFav").hidden = $("dShare").hidden = $("dGit").hidden = !p.q;
+    dinleDurdur(); $("dDinle").hidden = !sesVar;
     $("dTip").hidden = !p.ip; $("dTip").innerHTML = p.ip ? "<b>İpucu:</b> " + esc(p.ip) : "";
     let txt = p.m ? (p.en ? "(İngilizce kaynaktan) " : "") + p.m : "";
     if (!txt && p.ac) txt = `${p.ad}: ${p.ac}.`;
@@ -481,7 +573,7 @@
     $("sheet").hidden = false;
     $("dClose").focus({ preventScroll: true });
   }
-  function hideSheet() { $("sheet").hidden = true; open = null; sheetPushed = false; }
+  function hideSheet() { dinleDurdur(); $("sheet").hidden = true; open = null; sheetPushed = false; }
   function closeDetail() {
     if ($("sheet").hidden) return;
     const geri = sheetPushed;
@@ -522,6 +614,9 @@
   $("sheet").addEventListener("click", (e) => { if (e.target === $("sheet")) closeDetail(); });
   $("dFav").addEventListener("click", () => { if (open) favDegis(open); });
   $("dShare").addEventListener("click", () => { if (open) paylas(open); });
+  $("dGit").addEventListener("click", () => { if (open) gitDegis(open); });
+  $("dDinle").addEventListener("click", dinle);
+  $("gezBtn").addEventListener("click", () => { $("gezList").hidden = !$("gezList").hidden; });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDetail(); });
   window.addEventListener("popstate", () => { if (!$("sheet").hidden) hideSheet(); });
   window.addEventListener("hashchange", route);
