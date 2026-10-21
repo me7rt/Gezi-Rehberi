@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "4.4";
+  const SURUM = "4.5";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -253,14 +253,16 @@
   const gittimMi = (p) => gittiklerim().some((x) => ayni(x, p));
   function gitDegis(p) {
     let a = gittiklerim();
-    const vardi = gittimMi(p);
+    const vardi = gittimMi(p), onceki = new Set(rozetler().filter((r) => r.tamam).map((r) => r.ad));
     if (vardi) a = a.filter((x) => !ayni(x, p));
     else a.unshift({ q: p.q, s: p.ilS, ad: p.ad, il: [...new Set([p.ilce, p.il].filter(Boolean))].join(", "), k: p.k, f: p.f });
     try { localStorage.setItem(GIT, JSON.stringify(a)); } catch (e) {}
     gitBtn(p);
     if (!vardi) {
       const iller = new Set(a.map((x) => x.s)).size;
-      toast(`Harika! Gezdiğin il: ${iller}/81 · Gittiğin yer: ${a.length}`);
+      const yeni = rozetler().find((r) => r.tamam && !onceki.has(r.ad));
+      if (yeni) rozetKutla(yeni);
+      else toast(`Harika! Gezdiğin il: ${iller}/81 · Gittiğin yer: ${a.length}`);
     }
   }
   function gitBtn(p) {
@@ -269,7 +271,7 @@
   }
   function renderGez() {
     const a = gittiklerim();
-    $("gezSec").hidden = false; renderHarita();
+    $("gezSec").hidden = false; renderHarita(); renderRozet();
     $("gezBtn").hidden = !a.length;
     if (!a.length) { $("gezList").hidden = true; return; }
     const iller = new Set(a.map((x) => x.s)).size;
@@ -278,6 +280,52 @@
     $("gezBar").style.width = Math.max(3, Math.round((iller / 81) * 100)) + "%";
     $("gezList").innerHTML = a.map((x) =>
       `<li><button class="row" data-go="#/il/${x.s}/yer/${x.q}">${thumb(x.f, x.k)}<span class="rt"><b>${esc(x.ad)}</b><small>${esc(x.il)}</small></span><span class="km">✓</span></button></li>`).join("");
+  }
+  // ---------- rozetler ----------
+  const BOLGE = {
+    "Marmara": "istanbul edirne kirklareli tekirdag canakkale kocaeli yalova sakarya bilecik bursa balikesir",
+    "Ege": "izmir manisa aydin denizli mugla afyonkarahisar kutahya usak",
+    "Akdeniz": "antalya isparta burdur mersin adana hatay osmaniye kahramanmaras",
+    "İç Anadolu": "ankara konya kayseri eskisehir sivas kirikkale aksaray karaman kirsehir nigde nevsehir yozgat cankiri",
+    "Karadeniz": "zonguldak bartin karabuk duzce bolu kastamonu sinop samsun ordu giresun trabzon rize artvin gumushane bayburt corum amasya tokat",
+    "Doğu Anadolu": "erzurum erzincan kars agri igdir ardahan van mus bitlis bingol tunceli elazig malatya hakkari",
+    "Güneydoğu": "gaziantep sanliurfa diyarbakir mardin batman siirt sirnak adiyaman kilis"
+  };
+  const temaSay = (a, anahtar, kat) => a.filter((x) => (!kat || x.k === kat) && anahtar.some((w) => (" " + sade(x.ad) + " ").includes(w))).length;
+  function rozetler() {
+    const a = gittiklerim(), il = new Set(a.map((x) => x.s));
+    const R = [
+      ["👣", "İlk adım", "İlk yerine gittin", a.length, 1],
+      ["🎒", "Gezgin", "10 yere git", a.length, 10],
+      ["🧭", "Kâşif", "25 yere git", a.length, 25],
+      ["🌟", "Efsane gezgin", "50 yere git", a.length, 50],
+      ["🗺️", "Yola düştün", "5 ile git", il.size, 5],
+      ["🚗", "Uzun yolcu", "20 ile git", il.size, 20],
+      ["🇹🇷", "Türkiye'yi gezdim", "81 ilin hepsine git", il.size, 81],
+      ["💧", "Şelale avcısı", "3 şelaleye git", temaSay(a, ["selale"]), 3],
+      ["🕳️", "Mağara kâşifi", "3 mağaraya git", temaSay(a, ["magara"]), 3],
+      ["🏰", "Kale fatihi", "5 kaleye git", temaSay(a, ["kale"]), 5],
+      ["🌊", "Göl sevdalısı", "3 göle git", temaSay(a, ["golu", "gol "], "d"), 3],
+      ["🌲", "Doğa dostu", "3 milli park ya da tabiat parkına git", temaSay(a, ["milli park", "tabiat park"]), 3],
+      ["🏛️", "Müze kurdu", "5 müzeye git", a.filter((x) => x.k === "m" || sade(x.ad).includes("muze")).length, 5]
+    ];
+    for (const [b, iller] of Object.entries(BOLGE)) {
+      const l = iller.split(" ");
+      R.push(["🏅", b + " fatihi", `${b} bölgesinin ${l.length} ilinin hepsine git`, l.filter((s) => il.has(s)).length, l.length]);
+    }
+    return R.map(([e, ad, acik, n, hedef]) => ({ e, ad, acik, n: Math.min(n, hedef), hedef, tamam: n >= hedef }));
+  }
+  function rozetKutla(r) {
+    const d = document.createElement("div"); d.className = "tanit";
+    d.innerHTML = `<div class="tkart rkutla"><div class="temo">${r.e}</div><small>Yeni rozet!</small><h2>${esc(r.ad)}</h2><p>${esc(r.acik)}</p><div class="tbtn" style="justify-content:center"><button class="btn primary">Süper!</button></div></div>`;
+    d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("button")) { d.classList.add("out"); setTimeout(() => d.remove(), 300); } });
+    document.body.appendChild(d);
+  }
+  function renderRozet() {
+    const R = rozetler(), k = R.filter((r) => r.tamam).length;
+    $("rozetSay").textContent = `${k} / ${R.length}`;
+    $("rozetList").innerHTML = R.sort((x, y) => (y.tamam - x.tamam) || (y.n / y.hedef - x.n / x.hedef)).map((r) =>
+      `<li class="rozet${r.tamam ? " on" : ""}" title="${esc(r.acik)}"><i>${r.e}</i><b>${esc(r.ad)}</b><small>${r.tamam ? "Kazandın" : `${r.n}/${r.hedef}`}</small></li>`).join("");
   }
   // ---------- hava durumu ----------
   const HAVA = { 0: ["☀️", "Açık"], 1: ["🌤️", "Az bulutlu"], 2: ["⛅", "Parçalı bulutlu"], 3: ["☁️", "Kapalı"], 45: ["🌫️", "Sisli"], 48: ["🌫️", "Sisli"],
