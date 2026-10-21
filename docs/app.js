@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.4";
+  const SURUM = "5.5";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -313,7 +313,7 @@
   function renderGez() {
     const a = gittiklerim();
     $("gezSec").hidden = false; renderHarita(); renderRozet();
-    $("gezBtn").hidden = !a.length;
+    $("gezBtn").hidden = $("karneBtn").hidden = !a.length;
     if (!a.length) { $("gezList").hidden = true; return; }
     const iller = new Set(a.map((x) => x.s)).size;
     $("gezSay").textContent = TL(`Gezdiğin iller: ${iller} / 81`, `Provinces visited: ${iller} / 81`);
@@ -599,7 +599,7 @@
     } catch (e) { kesifYuk = false; }
   }
   // ---------- gezi haritası: ilçelerini gezdikçe il boyanır ----------
-  let HARITA = null, haritaSoz = null;
+  let HARITA = null, haritaSoz = null, HARITA_ORAN = new Map(), HARITA_KUTU = [80, 0, 1050, 585];
   async function renderHarita() {
     const kutu = $("gezHarita"); if (!kutu || !IDX) return;
     try {
@@ -615,7 +615,7 @@
         for (const x of liste) { const y = d && d.yerler.find((t) => t.q === x.q); if (y && y.i >= 0) gidilen.add(y.i); }
         oran.set(s, Math.max(0.12, Math.min(1, gidilen.size / toplam)));
       }
-      let tam = 0;
+      let tam = 0; HARITA_ORAN = oran;
       const yollar = Object.entries(HARITA).map(([s, d]) => {
         const il = IDX.ilBy.get(s); if (!il) return "";
         const o = oran.get(il.s) || 0; if (o >= 1) tam++;
@@ -625,8 +625,72 @@
       kutu.innerHTML = `<svg viewBox="80 0 1050 585" class="trh" role="img" aria-label="${T("Gezi haritan")}">${yollar}</svg>
         <div class="hleg"><span><i style="background:var(--hbos)"></i>${T("Gitmedin")}</span><span><i style="background:color-mix(in srgb,#2fb36a 45%,var(--hbos))"></i>${T("Başladın")}</span><span><i style="background:#1f9d55"></i>${T("Tüm ilçeler")}</span></div>
         <p class="hnot">${a.length ? TL(`${ilBy.size} ile gittin${tam ? `, ${tam} ilin tüm ilçelerini gezdin 🏆` : ""}. Bir ilin ilçelerini gezdikçe rengi koyulaşır.`, `You've been to ${ilBy.size} provinces${tam ? `, all districts of ${tam} 🏆` : ""}. A province gets darker as you visit its districts.`) : TL(`Bir yere "Buraya gittim" dediğinde o il haritada yeşile boyanmaya başlar. İlçelerini gezdikçe rengi koyulaşır.`, `Tap "I've been here" on a place and its province turns green on the map. It gets darker as you visit its districts.`)}</p>`;
-      try { const sv = kutu.querySelector("svg"), b = sv.getBBox(); if (b.width) sv.setAttribute("viewBox", `${b.x - 4} ${b.y - 4} ${b.width + 8} ${b.height + 8}`); } catch (e) {}
+      try { const sv = kutu.querySelector("svg"), b = sv.getBBox(); if (b.width) { sv.setAttribute("viewBox", `${b.x - 4} ${b.y - 4} ${b.width + 8} ${b.height + 8}`); HARITA_KUTU = [b.x, b.y, b.width, b.height]; } } catch (e) {}
     } catch (e) {}
+  }
+  // ---------- gezi karnem: paylaşılabilir görsel ----------
+  async function karne() {
+    const a = gittiklerim(); if (!a.length) return;
+    await renderHarita();
+    const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d"), F = (w, px) => `${w} ${px}px Figtree, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+    const bg = g.createLinearGradient(0, 0, W * 0.4, H); bg.addColorStop(0, "#1d4a9e"); bg.addColorStop(0.55, "#0f2c66"); bg.addColorStop(1, "#071634");
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    const isik = g.createRadialGradient(W * 0.85, 120, 0, W * 0.85, 120, 700); isik.addColorStop(0, "rgba(245,181,68,.35)"); isik.addColorStop(1, "rgba(245,181,68,0)");
+    g.fillStyle = isik; g.fillRect(0, 0, W, H);
+    g.textAlign = "center"; g.fillStyle = "#fff";
+    try { const ik = new Image(); ik.src = "icon-192.png"; await ik.decode(); g.save(); g.beginPath(); g.roundRect(W / 2 - 150, 92, 64, 64, 16); g.clip(); g.drawImage(ik, W / 2 - 150, 92, 64, 64); g.restore(); } catch (e) {}
+    g.font = F(800, 46); g.textAlign = "left"; g.fillText("Rota Cepte", W / 2 - 70, 140); g.textAlign = "center";
+    g.font = F(800, 96); g.fillText(TL("Gezi Karnem", "My Travel Card"), W / 2, 300);
+    const iller = new Set(a.map((x) => x.s)).size;
+    g.textAlign = "left"; g.font = F(800, 230); const wN = g.measureText(String(iller)).width;
+    g.font = F(700, 90); const w2 = g.measureText("/ 81").width, x0 = (W - wN - 24 - w2) / 2;
+    g.font = F(800, 230); g.fillStyle = "#f5b544"; g.fillText(String(iller), x0, 540);
+    g.font = F(700, 90); g.fillStyle = "rgba(255,255,255,.75)"; g.fillText("/ 81", x0 + wN + 24, 540); g.textAlign = "center";
+    g.font = F(600, 44); g.fillStyle = "#fff"; g.fillText(TL("ili gezdim", "provinces visited"), W / 2, 620);
+    // harita
+    const [bx, by, bw, bh] = HARITA_KUTU, olc = 980 / bw, ox = (W - bw * olc) / 2, oy = 700;
+    g.save(); g.translate(ox, oy); g.scale(olc, olc); g.translate(-bx, -by);
+    for (const [s, d] of Object.entries(HARITA || {})) {
+      const o = HARITA_ORAN.get(s) || 0, p = new Path2D(d);
+      g.fillStyle = o >= 1 ? "#2fd17a" : o > 0 ? `rgba(47,209,122,${0.75 + o * 0.25})` : "rgba(255,255,255,.14)";
+      g.fill(p); g.strokeStyle = "rgba(7,22,52,.9)"; g.lineWidth = 1.2 / olc * 1.6; g.stroke(p);
+    }
+    g.restore();
+    // sayılar
+    const R = rozetler(), rk = R.filter((x) => x.tamam);
+    const kutu = (x, sayi, yazi) => {
+      g.fillStyle = "rgba(255,255,255,.1)"; g.beginPath(); g.roundRect(x - 230, 1300, 460, 220, 36); g.fill();
+      g.fillStyle = "#fff"; g.font = F(800, 96); g.fillText(sayi, x, 1420); g.font = F(600, 38); g.fillStyle = "rgba(255,255,255,.8)"; g.fillText(yazi, x, 1478);
+    };
+    kutu(W / 2 - 255, String(a.length), TL("yer gördüm", "places seen"));
+    kutu(W / 2 + 255, `${rk.length}/${R.length}`, TL("rozet", "badges"));
+    if (rk.length) { g.font = F(400, 64); g.fillStyle = "#fff"; g.fillText(rk.slice(0, 8).map((x) => x.e).join(" "), W / 2, 1640); }
+    g.fillStyle = "#f5b544"; g.font = F(800, 50); g.fillText(T("Yol senin, rotan cepte!"), W / 2, 1770);
+    g.fillStyle = "rgba(255,255,255,.75)"; g.font = F(600, 36); g.fillText(TL("Sen de gez: me7rt.github.io/Rota-Cepte", "Explore too: me7rt.github.io/Rota-Cepte"), W / 2, 1835);
+    const url = c.toDataURL("image/png");
+    // önizleme + paylaş
+    const d = document.createElement("div"); d.className = "tanit";
+    d.innerHTML = `<div class="tkart karnek"><img src="${url}" alt=""><div class="tbtn"><button class="linkbtn" data-k="kapat">${T("Kapat")}</button><button class="btn primary" data-k="paylas">📤 ${TL("Paylaş", "Share")}</button></div></div>`;
+    const kapat = () => { d.classList.add("out"); setTimeout(() => d.remove(), 300); };
+    d.addEventListener("click", async (e) => {
+      if (e.target === d || e.target.closest("[data-k=kapat]")) return kapat();
+      if (!e.target.closest("[data-k=paylas]")) return;
+      const metin = TL(`Türkiye'nin ${iller} ilini gezdim! Sen kaç ili gezdin? Rota Cepte ile bak: https://me7rt.github.io/Rota-Cepte/`, `I've visited ${iller} of Türkiye's 81 provinces! How many have you? https://me7rt.github.io/Rota-Cepte/`);
+      const P = window.Capacitor && window.Capacitor.Plugins;
+      try {
+        if (P && P.Share && P.Filesystem) {
+          const yaz = await P.Filesystem.writeFile({ path: "gezi-karnem.png", data: url.split(",")[1], directory: "CACHE" });
+          await P.Share.share({ title: "Rota Cepte", text: metin, files: [yaz.uri] });
+          return;
+        }
+        const blob = await (await fetch(url)).blob(), dosya = new File([blob], "gezi-karnem.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [dosya] })) { await navigator.share({ files: [dosya], text: metin }); return; }
+        const l = document.createElement("a"); l.href = url; l.download = "gezi-karnem.png"; document.body.appendChild(l); l.click(); l.remove();
+        toast(TL("Görsel indirildi. Galeriden paylaşabilirsin.", "Image saved. You can share it from your gallery."));
+      } catch (err) { if (err && err.name !== "AbortError") toast(TL("Paylaşılamadı. Görsele basılı tutup kaydedebilirsin.", "Couldn't share. Long-press the image to save it.")); }
+    });
+    document.body.appendChild(d);
   }
   // ---------- paylaş ----------
   function paylas(p) {
@@ -946,6 +1010,7 @@
   document.querySelectorAll(".onerbtn").forEach((b) => b.addEventListener("click", yerOner));
   $("dDinle").addEventListener("click", dinle);
   $("gezBtn").addEventListener("click", () => { $("gezList").hidden = !$("gezList").hidden; });
+  $("karneBtn").addEventListener("click", karne);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDetail(); });
   window.addEventListener("popstate", () => { if (!$("sheet").hidden) hideSheet(); });
   window.addEventListener("hashchange", route);
