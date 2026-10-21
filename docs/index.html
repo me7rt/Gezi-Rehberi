@@ -1,10 +1,14 @@
 <!doctype html>
+<!-- Gezi Rehberi · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz. -->
 <html lang="tr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4fa3">
 <title>Gezi Rehberi</title>
+<meta name="author" content="Mert Turanlıoğlu">
+<meta name="copyright" content="© 2026 Mert Turanlıoğlu. Tüm hakları saklıdır.">
+<meta name="description" content="Gezi Rehberi: Türkiye'nin 81 ilinde gezilecek yerler. Hazırlayan: Mert Turanlıoğlu.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -13,9 +17,41 @@
 <meta name="apple-mobile-web-app-title" content="Gezi Rehberi">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=3.1">
+<link rel="stylesheet" href="style.css?v=3.2">
+<style>
+.splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(34px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(165deg,#2f6ad0,#1f4fa3 55%,#163a7c);color:#fff;text-align:center;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:opacity .45s ease,visibility .45s;cursor:pointer}
+.splash.out{opacity:0;visibility:hidden}
+.sp-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.sp-mid img{width:116px;height:116px;border-radius:27px;box-shadow:0 18px 40px rgba(5,20,50,.45);animation:spPop .7s cubic-bezier(.2,1.4,.4,1) both}
+.sp-app{font-size:34px;font-weight:800;letter-spacing:-.5px;margin:6px 0 0;animation:spUp .6s .2s ease both}
+.sp-tag{font-size:15px;opacity:.85;margin:0;animation:spUp .6s .3s ease both}
+.sp-by{display:flex;flex-direction:column;gap:2px;animation:spUp .6s .45s ease both}
+.sp-by small{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.75}
+.sp-by b{font-size:26px;font-weight:700;letter-spacing:.2px}
+.sp-by span{font-size:11px;opacity:.6;margin-top:6px}
+@keyframes spPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+@keyframes spUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sp-mid img,.sp-app,.sp-tag,.sp-by{animation:none}}
+.kopya{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:#c2462e;color:#fff;font:600 13px/1.4 system-ui,sans-serif;text-align:center;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
+.kopya a{color:#fff}
+</style>
 </head>
 <body>
+<div class="splash" id="splash" aria-hidden="true">
+  <div class="sp-mid">
+    <img src="icon-512.png" alt="">
+    <p class="sp-app">Gezi Rehberi</p>
+    <p class="sp-tag">Türkiye'nin 81 ilinde gezilecek yerler</p>
+  </div>
+  <div class="sp-by">
+    <small>Hazırlayan</small>
+    <b>Mert Turanlıoğlu</b>
+    <span>© 2026 · Tüm hakları saklıdır</span>
+  </div>
+</div>
 <header class="top">
   <button class="back" id="back" hidden aria-label="Geri">‹</button>
   <div class="titles">
@@ -37,7 +73,7 @@
     <ul class="ils" id="ilGrid"><li class="empty">Yükleniyor…</li></ul>
   </div>
   <p class="credit" id="ver"></p>
-  <p class="credit">Hazırlayan: <b>Mert Turanlıoğlu</b></p>
+  <p class="credit">Hazırlayan: <b>Mert Turanlıoğlu</b><br>© 2026 Mert Turanlıoğlu · Tüm hakları saklıdır</p>
 </main>
 
 <main id="city" class="view" hidden>
@@ -89,6 +125,24 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=3.1"></script>
+<script src="app.js?v=3.2"></script>
+<script>
+/* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
+(function () {
+  var s = document.getElementById("splash"), bitti = false;
+  function kapat() { if (bitti) return; bitti = true; s.classList.add("out"); setTimeout(function () { s.remove(); }, 500); }
+  function hazir() { setTimeout(kapat, Math.max(0, 2000 - performance.now())); }
+  s.addEventListener("click", kapat);
+  if (document.readyState === "complete") hazir(); else addEventListener("load", hazir);
+  setTimeout(kapat, 4500);
+  // Uygulama başka bir sitede kopyalanıp yayınlanırsa orijinalini göster
+  var h = location.hostname, izinli = ["me7rt.github.io", "localhost", "127.0.0.1", ""];
+  if (izinli.indexOf(h) < 0) {
+    var b = document.createElement("div"); b.className = "kopya";
+    b.innerHTML = 'Bu uygulama <b>Mert Turanlıoğlu</b>\'na aittir. Orijinali: <a href="https://me7rt.github.io/Gezi-Rehberi/">me7rt.github.io/Gezi-Rehberi</a>';
+    document.body.appendChild(b);
+  }
+})();
+</script>
 </body>
 </html>

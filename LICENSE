@@ -1,0 +1,37 @@
+Telif Hakkı © 2026 Mert Turanlıoğlu. Tüm hakları saklıdır.
+
+"Gezi Rehberi" uygulamasının kaynak kodu, tasarımı, ikonu, açılış ekranı ve
+seçilmiş içerikleri (data/ klasöründeki elle hazırlanmış listeler ve ipuçları)
+Mert Turanlıoğlu'na aittir ve 5846 sayılı Fikir ve Sanat Eserleri Kanunu ile
+korunmaktadır.
+
+Mert Turanlıoğlu'nun yazılı izni olmadan bu yazılımın tamamı veya bir kısmı:
+  - kopyalanamaz, değiştirilemez, çoğaltılamaz,
+  - başka bir ad veya kişi adına yayınlanamaz,
+  - uygulama mağazalarına (Google Play, App Store vb.) yüklenemez,
+  - ticari amaçla kullanılamaz.
+
+Bu deponun GitHub'da herkese açık olması, GitHub kullanım koşullarının izin
+verdiği görüntüleme ve GitHub içinde çatallama (fork) dışında hiçbir kullanım
+hakkı vermez.
+
+Üçüncü taraf içerikler kendi lisanslarına tabidir ve bu bildirimin kapsamı
+dışındadır:
+  - Vikipedi metinleri: CC BY-SA 4.0
+  - Wikimedia Commons fotoğrafları: her fotoğrafın kendi yazarı ve lisansı
+    (uygulamada fotoğrafın altında gösterilir)
+  - Wikidata verileri: CC0
+  - Harita: © OpenStreetMap katkıcıları (ODbL)
+  - Leaflet (docs/vendor): BSD 2-Clause lisansı
+
+İzin ve iletişim için: GitHub üzerinden @me7rt
+
+---
+
+Copyright © 2026 Mert Turanlıoğlu. All rights reserved.
+
+The source code, design, icon and splash screen of the "Gezi Rehberi" app are
+the property of Mert Turanlıoğlu. No part of this software may be copied,
+modified, redistributed, published under another name, uploaded to any app
+store, or used commercially without his prior written permission. Third-party
+content listed above remains under its own license.
