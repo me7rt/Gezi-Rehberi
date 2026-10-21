@@ -1,5 +1,5 @@
 /* Yoldayız · © 2026 Mert Turanlıoğlu · Çevrimdışı açılış (önce internet, yoksa kayıtlı kopya) */
-const C = "gezi-3.9";
+const C = "gezi-4.0";
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(
   caches.keys().then((k) => Promise.all(k.filter((x) => x !== C).map((x) => caches.delete(x)))).then(() => self.clients.claim())));

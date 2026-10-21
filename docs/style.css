@@ -170,3 +170,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .heroimg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.35));pointer-events:none}
 .heroimg img{filter:saturate(1.12) contrast(1.04)}
 @keyframes ilGel{from{opacity:0}to{opacity:1}}
+/* 4.0: arama temizle */
+.arakutu{position:relative}
+.arakutu #search{padding-right:46px}
+#search::-webkit-search-cancel-button{display:none}
+.arasil{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:0;background:var(--line);color:var(--fg);font-size:22px;line-height:1;cursor:pointer}

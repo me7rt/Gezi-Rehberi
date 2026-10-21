@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=3.9">
+<link rel="stylesheet" href="style.css?v=4.0">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
   padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(30px + env(safe-area-inset-bottom,0px));
@@ -91,7 +91,7 @@
 </header>
 
 <main id="home" class="view">
-  <input id="search" type="search" placeholder="İl, ilçe ya da yer ara… (ör. Uşak)" autocomplete="off" enterkeyhint="search">
+  <div class="arakutu"><input id="search" type="search" placeholder="İl, ilçe ya da yer ara… (ör. Uşak)" autocomplete="off" enterkeyhint="search"><button class="arasil" id="araSil" aria-label="Aramayı temizle" hidden>×</button></div>
   <ul class="list" id="results" hidden></ul>
   <div id="homeMain">
     <button class="near" id="nearBtn">
@@ -170,7 +170,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=3.9"></script>
+<script src="app.js?v=4.0"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
