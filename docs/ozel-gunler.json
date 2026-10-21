@@ -1,0 +1,17 @@
+{
+  "not": "Sabit günler AA-GG. Dini bayram tarihleri her yıl değişir: Diyanet takviminden kontrol edip 'degisken' listesine ekle (bas/bit dahil).",
+  "sabit": {
+    "01-01": { "e": "🎉", "tr": "Mutlu yıllar! Yeni yılda yeni rotalar seni bekliyor.", "en": "Happy New Year! New routes are waiting for you." },
+    "03-18": { "e": "🇹🇷", "tr": "18 Mart Çanakkale Zaferi'nin yıl dönümünde şehitlerimizi rahmetle anıyoruz.", "en": "Remembering the fallen on the anniversary of the Çanakkale Victory." },
+    "04-23": { "e": "🎈", "tr": "23 Nisan Ulusal Egemenlik ve Çocuk Bayramı kutlu olsun!", "en": "Happy National Sovereignty and Children's Day!" },
+    "05-19": { "e": "🇹🇷", "tr": "19 Mayıs Atatürk'ü Anma, Gençlik ve Spor Bayramı kutlu olsun!", "en": "Happy Commemoration of Atatürk, Youth and Sports Day!" },
+    "07-15": { "e": "🇹🇷", "tr": "15 Temmuz Demokrasi ve Milli Birlik Günü. Şehitlerimizi rahmetle anıyoruz.", "en": "July 15 Democracy and National Unity Day." },
+    "08-30": { "e": "🇹🇷", "tr": "30 Ağustos Zafer Bayramı kutlu olsun!", "en": "Happy Victory Day!" },
+    "10-29": { "e": "🇹🇷", "tr": "Cumhuriyet Bayramımız kutlu olsun! Nice yıllara Türkiye.", "en": "Happy Republic Day, Türkiye!" },
+    "11-10": { "e": "🖤", "tr": "Cumhuriyetimizin kurucusu Gazi Mustafa Kemal Atatürk'ü saygı, sevgi ve özlemle anıyoruz.", "en": "Remembering Mustafa Kemal Atatürk, founder of the Republic, with respect and longing.", "yas": 1 }
+  },
+  "degisken": [
+    { "bas": "2027-03-09", "bit": "2027-03-12", "e": "🌙", "tr": "Ramazan Bayramınız mübarek olsun!", "en": "Happy Eid al-Fitr!", "bayram": 1 },
+    { "bas": "2027-05-15", "bit": "2027-05-19", "e": "🐑", "tr": "Kurban Bayramınız mübarek olsun!", "en": "Happy Eid al-Adha!", "bayram": 1 }
+  ]
+}
