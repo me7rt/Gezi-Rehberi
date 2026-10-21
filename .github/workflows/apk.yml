@@ -9,9 +9,9 @@ on:
     paths: ["docs/**", "assets/**", "capacitor.config.json", "package.json", ".github/workflows/apk.yml"]
 permissions:
   contents: write
-concurrency: { group: apk, cancel-in-progress: true }
 jobs:
   apk:
+    concurrency: { group: apk, cancel-in-progress: true }
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
