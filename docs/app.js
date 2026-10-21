@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "4.5";
+  const SURUM = "4.6";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -98,6 +98,7 @@
     araSoz = getJSON(`data/ara.json?v=${IDX.surum}-2`).then((a) => {
       ARA = a.map(([ad, s, j, lat, lng, k, f]) => [sade(ad), ad, s, j, lat, lng, k, f]);
       if (view && view.mode === "tema") renderTema();
+      if (view && view.mode === "rota") renderRota();
       if (!$("home").hidden && $("search").value.trim().length >= 2) renderHome();
     }).catch(() => { araSoz = null; });
     return araSoz;
@@ -180,6 +181,7 @@
     const degisti = $(v).hidden;
     $("home").hidden = v !== "home";
     $("tema").hidden = v !== "tema";
+    $("rota").hidden = v !== "rota";
     $("city").hidden = v !== "city";
     $("back").hidden = v === "home";
     if (degisti || v === "city") window.scrollTo(0, 0);
@@ -208,6 +210,7 @@
       }
       if (h[0] === "yakin") return await showNear(no);
       if (h[0] === "tema" && TEMA[h[1]]) return showTema(h[1]);
+      if (h[0] === "rota") return await showRota(h[1], no);
       showHome();
     } catch (e) {
       if (no !== routeNo) return;
@@ -423,6 +426,47 @@
       const c = CATS[x[6]] || CATS.t, il = (IDX.ilBy.get(x[2]) || {}).ad || "";
       return `<li><button class="row res" data-yer="${x[2]}|${x[3]}"><span class="thumb" style="--c:${c.renk}">${icon(x[6] || "t", 20)}</span><span class="rt"><b>${esc(x[1])}</b><small>${esc(il)}</small></span><span class="km">${me ? fmt(km(me, { lat: x[4], lng: x[5] })) : "›"}</span></button></li>`;
     }).join("") : '<li class="empty">Bu türde yer bulunamadı.</li>';
+  }
+  // ---------- hazır gezi rotaları ----------
+  let ROTA = null;
+  function loadRota() {
+    if (!ROTA) ROTA = getJSON(`rotalar.json?v=${SURUM}`).catch(() => { ROTA = null; return []; });
+    return ROTA;
+  }
+  async function rotaKartlar() {
+    const r = await loadRota();
+    $("rotaSec").hidden = !r.length;
+    $("rotaKart").innerHTML = r.map((x) =>
+      `<button class="rkart" data-go="#/rota/${x.k}"><i>${x.e}</i><b>${esc(x.ad)}</b><small>${esc(x.sure)} · ${x.d.length} durak</small></button>`).join("");
+  }
+  async function showRota(k, no) {
+    const r = (await loadRota()).find((x) => x.k === k);
+    if (no !== routeNo) return;
+    if (!r) return showHome();
+    view = { mode: "rota", r }; show("rota");
+    $("eyebrow").textContent = "Hazır rota · " + r.sure; $("title").textContent = r.ad;
+    renderRota();
+  }
+  function renderRota() {
+    if (!view || view.mode !== "rota") return;
+    const r = view.r;
+    $("rotaNot").textContent = r.not;
+    if (!ARA) { $("rotaList").innerHTML = '<li class="empty">Yükleniyor…</li>'; $("rotaAc").hidden = true; loadAra(); return; }
+    const g = gittiklerim();
+    const ds = r.d.map(([s, ad]) => ARA.find((x) => x[2] === s && x[1] === ad)).filter(Boolean);
+    let top = 0;
+    ds.forEach((x, i) => { if (i) top += km({ lat: ds[i - 1][4], lng: ds[i - 1][5] }, { lat: x[4], lng: x[5] }); });
+    const gid = ds.filter((x) => g.some((y) => y.s === x[2] && y.ad === x[1])).length;
+    $("rotaSay").textContent = `${ds.length} durak · duraklar arası yaklaşık ${fmt(top * 1.3)} yol` + (gid ? ` · ${gid}/${ds.length} gittin` : "");
+    $("rotaList").innerHTML = ds.map((x, i) => {
+      const il = (IDX.ilBy.get(x[2]) || {}).ad || "", ok = g.some((y) => y.s === x[2] && y.ad === x[1]);
+      const ara = i ? `<span class="rara">↓ ~${fmt(km({ lat: ds[i - 1][4], lng: ds[i - 1][5] }, { lat: x[4], lng: x[5] }) * 1.3)}</span>` : "";
+      return `<li>${ara}<button class="row res" data-yer="${x[2]}|${x[3]}"><span class="rno${ok ? " on" : ""}">${ok ? "✓" : i + 1}</span><span class="rt"><b>${esc(x[1])}</b><small>${esc(il)}</small></span><span class="km">${me ? fmt(km(me, { lat: x[4], lng: x[5] })) : "›"}</span></button></li>`;
+    }).join("");
+    const nk = (x) => x[4] + "," + x[5];
+    const son = ds[ds.length - 1], ara = ds.slice(0, -1).map(nk).join("|");
+    $("rotaAc").href = `https://www.google.com/maps/dir/?api=1&destination=${nk(son)}${ara ? "&waypoints=" + encodeURIComponent(ara) : ""}&travelmode=driving`;
+    $("rotaAc").hidden = !ds.length;
   }
   // ---------- yer öner (e-posta taslağı açar) ----------
   const ILETISIM = "me7rtt@gmail.com";
@@ -837,6 +881,7 @@
     });
   }
   temaChips();
+  rotaKartlar();
   route();
   setTimeout(tanitim, 5200);
   // Konum izni daha önce verildiyse sessizce başlat
