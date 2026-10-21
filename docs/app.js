@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "3.8";
+  const SURUM = "3.9";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -437,7 +437,7 @@
     const src = foto(h.f, 960);
     $("heroImg").style.setProperty("--c", BOLGE_RENK);
     $("heroImg").innerHTML = icon("y", 40) + (src ? `<img src="${src}" alt="" onerror="this.remove()">` : "");
-    $("heroCredit").textContent = h.f && h.f.a ? "Fotoğraf: " + h.f.a + " · Wikimedia Commons" : "";
+    $("heroCredit").textContent = h.f && h.f.a ? (h.kapak ? h.kapak + " · " : "") + "Fotoğraf: " + h.f.a + " · Wikimedia Commons" : "";
     $("heroFacts").innerHTML = h.facts.filter(Boolean).map(([k, v]) => `<span>${esc(k)} <strong>${esc(v)}</strong></span>`).join("");
     $("heroText").textContent = h.m || "";
     $("heroText").classList.add("clamp");
@@ -455,7 +455,7 @@
     show("city");
     $("eyebrow").textContent = d.plaka ? `${d.plaka} · İl` : "İl";
     $("title").textContent = d.ad;
-    renderHero({ f: d.f, m: d.m, w: d.w, facts: [nufusBilgi(d), alanBilgi(d), ["İlçe", d.ilceler.length], ["Gezilecek yer", d.yerler.length]] });
+    renderHero({ f: d.f, kapak: d.kapak, m: d.m, w: d.w, facts: [nufusBilgi(d), alanBilgi(d), ["İlçe", d.ilceler.length], ["Gezilecek yer", d.yerler.length]] });
     $("tabs").hidden = false;
     $("tabBtnIlce").textContent = `İlçeler (${d.ilceler.length})`;
     $("tabBtnYer").textContent = `Gezilecek yerler (${d.yerler.length})`;

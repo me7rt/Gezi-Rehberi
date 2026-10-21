@@ -17,6 +17,8 @@ const CIKAR = new Set(DUZ.cikar || []);
 const SECKIN = okuJSON("data/yerler-ham.json", {});
 // Vikipedi'de maddesi olmayan popüler yerler (elle eklenir)
 const ELLE = okuJSON("data/elle-yerler.json", {});
+// İl kapak fotoğrafı için elle seçim: { "il-slug": "Yer adı" }
+const KAPAK = okuJSON("data/il-kapak.json", {});
 const IPUCU = okuJSON("data/ipuclari.json", {});
 
 // ---------- Sınıflar ----------
@@ -549,6 +551,9 @@ for (const il of ilSirali) {
   });
   const ilceCikti = ilceSira.map((d) => ({ ad: d.ad, q: d.q, lat: d.koor[0], lng: d.koor[1], f: fotoCikti(d.foto), m: trM.get(d.trA) || "", w: d.trA ? "tr:" + d.trA : "", nuf: d.nufus || 0, nufY: d.nufusYil || "", alan: d.alan ? Math.round(d.alan) : 0, n: yerler.filter((y) => y.i === ilceNo.get(d.q)).length }));
   const dosya = { ad: il.ad, s: il.s, q: il.q, lat: il.koor ? il.koor[0] : 0, lng: il.koor ? il.koor[1] : 0, plaka: il.plaka, f: fotoCikti(il.foto), m: trM.get(il.trA) || "", w: il.trA ? "tr:" + il.trA : "", nuf: il.nufus || 0, nufY: il.nufusYil || "", alan: il.alan ? Math.round(il.alan) : 0, ilceler: ilceCikti, yerler };
+  // Kapak: şehir genel görünümü yerine ilin en bilinen yerinin büyük fotoğrafı
+  const kapakYer = yerler.find((y) => y.f && y.ad === KAPAK[il.s]) || yerler.find((y) => y.one && y.f && y.f.w >= 1200) || yerler.find((y) => y.one && y.f);
+  if (kapakYer) { dosya.f = kapakYer.f; dosya.kapak = kapakYer.ad; }
   fs.writeFileSync(`${OUT}/il/${il.s}.json`, JSON.stringify(dosya));
   index.iller.push({ ad: il.ad, s: il.s, q: il.q, lat: dosya.lat, lng: dosya.lng, plaka: il.plaka, f: dosya.f, n: yerler.length, ilceler: ilceCikti.map((d) => [d.ad, d.lat, d.lng, d.n]) });
   yerler.forEach((y, j) => ara.push([y.ad, il.s, j, Math.round(y.lat * 1e3) / 1e3, Math.round(y.lng * 1e3) / 1e3, y.k, y.f ? 1 : 0]));
