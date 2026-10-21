@@ -1,0 +1,27 @@
+name: Ekran goruntuleri
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  ekran:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Playwright kur
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: Cek
+        run: node .github/ekran.mjs
+      - name: ekran-goruntuleri dalina koy
+        run: |
+          cd ekran
+          git init -q -b ekran-goruntuleri
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add . && git commit -qm "Ekran goruntuleri"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ekran-goruntuleri
