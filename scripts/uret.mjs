@@ -2,7 +2,7 @@
 // GitHub Actions'ta çalışır. Çıktı: docs/data/ (uygulama okur) ve kontrol/ (fotoğraf kontrolü için).
 import fs from "node:fs";
 
-const UA = "Yoldayiz/1.0 (https://github.com/me7rt/Yoldayiz; veri hazirlama betigi)";
+const UA = "RotaCepte/1.0 (https://github.com/me7rt/RotaCepte; veri hazirlama betigi)";
 const OUT = "docs/data";
 const KONTROL = "kontrol";
 const SURUM = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "");

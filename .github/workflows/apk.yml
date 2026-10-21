@@ -46,24 +46,24 @@ jobs:
             ./gradlew assembleRelease bundleRelease --no-daemon
             BT=$ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)
             $BT/zipalign -f 4 app/build/outputs/apk/release/app-release-unsigned.apk ../hizali.apk
-            $BT/apksigner sign --ks ../ks.jks --ks-key-alias upload --ks-pass env:KP --key-pass env:KP --out ../Yoldayiz.apk ../hizali.apk
-            cp app/build/outputs/bundle/release/app-release.aab ../Yoldayiz.aab
-            jarsigner -keystore ../ks.jks -storepass "$KP" -keypass "$KP" ../Yoldayiz.aab upload
+            $BT/apksigner sign --ks ../ks.jks --ks-key-alias upload --ks-pass env:KP --key-pass env:KP --out ../RotaCepte.apk ../hizali.apk
+            cp app/build/outputs/bundle/release/app-release.aab ../RotaCepte.aab
+            jarsigner -keystore ../ks.jks -storepass "$KP" -keypass "$KP" ../RotaCepte.aab upload
             rm -f ../ks.jks ../hizali.apk
           else
             ./gradlew assembleDebug --no-daemon
-            cp app/build/outputs/apk/debug/app-debug.apk ../Yoldayiz.apk
+            cp app/build/outputs/apk/debug/app-debug.apk ../RotaCepte.apk
           fi
-          ls -la ../Yoldayiz.*
+          ls -la ../RotaCepte.*
       - name: Play paketini sakla
         uses: actions/upload-artifact@v4
         with:
           name: play-paketi
-          path: Yoldayiz.aab
+          path: RotaCepte.aab
           if-no-files-found: ignore
       - name: Indirme linkine yukle
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete apk-son --yes --cleanup-tag || true
-          gh release create apk-son Yoldayiz.apk --title "Yoldayız (deneme sürümü)" --notes "Arkadaşlarla denemek için Android APK. Kurmak için telefonda 'bilinmeyen kaynaklardan yükleme' izni gerekir. Otomatik üretildi: $(date -u +%Y-%m-%d)" --latest
+          gh release create apk-son RotaCepte.apk --title "Rota Cepte (deneme sürümü)" --notes "Arkadaşlarla denemek için Android APK. Kurmak için telefonda 'bilinmeyen kaynaklardan yükleme' izni gerekir. Otomatik üretildi: $(date -u +%Y-%m-%d)" --latest
