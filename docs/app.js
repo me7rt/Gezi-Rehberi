@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "3.6";
+  const SURUM = "3.7";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
