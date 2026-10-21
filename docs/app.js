@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "4.2";
+  const SURUM = "4.3";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -44,6 +44,11 @@
 
   // ---------- fotoğraf ve bağlantılar ----------
   const COM = "https://upload.wikimedia.org/wikipedia/commons/";
+  // Küçük resim yüklenmezse orijinal dosyayı dene, o da olmazsa kaldır
+  window.fotoHata = (img) => {
+    if (!img.dataset.y && img.src.includes("/thumb/")) { img.dataset.y = 1; img.src = img.src.replace("/thumb/", "/").replace(/\/[^/]+$/, ""); }
+    else img.remove();
+  };
   function foto(f, W) {
     if (!f || !f.p) return "";
     const p = f.p.split("?")[0];
@@ -59,7 +64,7 @@
   function thumb(f, k, W, cls) {
     const src = foto(f, W || 250);
     const renk = CATS[k] ? CATS[k].renk : BOLGE_RENK;
-    return `<span class="${cls || "thumb"}" style="--c:${renk}">${icon(k, cls === "cover" ? 34 : 22)}${src ? `<img src="${src}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}</span>`;
+    return `<span class="${cls || "thumb"}" style="--c:${renk}">${icon(k, cls === "cover" ? 34 : 22)}${src ? `<img src="${src}" alt="" loading="lazy" decoding="async" onerror="fotoHata(this)">` : ""}</span>`;
   }
 
   // ---------- veri ----------
@@ -371,6 +376,28 @@
       return `<li><button class="row res" data-yer="${x[2]}|${x[3]}"><span class="thumb" style="--c:${c.renk}">${icon(x[6] || "t", 20)}</span><span class="rt"><b>${esc(x[1])}</b><small>${esc(il)}</small></span><span class="km">${me ? fmt(km(me, { lat: x[4], lng: x[5] })) : "›"}</span></button></li>`;
     }).join("") : '<li class="empty">Bu türde yer bulunamadı.</li>';
   }
+  // ---------- yer öner (e-posta taslağı açar) ----------
+  const ILETISIM = "me7rtt@gmail.com";
+  function yerOner() {
+    const il = view && view.d ? view.d.ad : "";
+    const d = document.createElement("div"); d.className = "tanit";
+    d.innerHTML = `<form class="tkart oner"><div class="temo">📍</div><h2>Yer öner</h2><p>Uygulamada olmayan, gidip görülmeye değer bir yer mi biliyorsun? Yaz, inceleyip ekleyelim.</p>
+      <label>Yerin adı<input name="ad" required maxlength="80" placeholder="ör. Sütüven Şelalesi"></label>
+      <label>İl / ilçe<input name="il" maxlength="80" value="${esc(il)}" placeholder="ör. Balıkesir, Edremit"></label>
+      <label>Neden gidilmeli? (isteğe bağlı)<textarea name="not" rows="3" maxlength="500" placeholder="Kısa bir not, yol tarifi ipucu…"></textarea></label>
+      <div class="tbtn"><button type="button" class="linkbtn" data-k="iptal">Vazgeç</button><button class="btn primary">Gönder</button></div></form>`;
+    const kapat = () => { d.classList.add("out"); setTimeout(() => d.remove(), 300); };
+    d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("[data-k=iptal]")) kapat(); });
+    d.querySelector("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const govde = `Yer: ${f.get("ad")}\nİl/ilçe: ${f.get("il")}\nNot: ${f.get("not")}\n\n(Yoldayız uygulamasından gönderildi)`;
+      location.href = `mailto:${ILETISIM}?subject=${encodeURIComponent("Yer önerisi: " + f.get("ad"))}&body=${encodeURIComponent(govde)}`;
+      kapat(); toast("Teşekkürler! E-posta uygulaman açılıyor.");
+    });
+    document.body.appendChild(d);
+    setTimeout(() => d.querySelector("input").focus(), 50);
+  }
   // ---------- ilk açılış rehberi ----------
   function tanitim() {
     try { if (localStorage.getItem("gezi-tanitim")) return; } catch (e) { return; }
@@ -489,7 +516,7 @@
     $("hero").hidden = false; $("hava").hidden = $("yemek").hidden = true;
     const src = foto(h.f, 960);
     $("heroImg").style.setProperty("--c", BOLGE_RENK);
-    $("heroImg").innerHTML = icon("y", 40) + (src ? `<img src="${src}" alt="" onerror="this.remove()">` : "");
+    $("heroImg").innerHTML = icon("y", 40) + (src ? `<img src="${src}" alt="" onerror="fotoHata(this)">` : "");
     $("heroCredit").textContent = h.f && h.f.a ? (h.kapak ? h.kapak + " · " : "") + "Fotoğraf: " + h.f.a + " · Wikimedia Commons" : "";
     $("heroFacts").innerHTML = h.facts.filter(Boolean).map(([k, v]) => `<span>${esc(k)} <strong>${esc(v)}</strong></span>`).join("");
     $("heroText").textContent = h.m || "";
@@ -671,7 +698,7 @@
     $("dPhoto").style.setProperty("--c", c.renk);
     $("dIcon").innerHTML = icon(p.k, 54);
     const src = foto(p.f, 960);
-    $("dImg").innerHTML = src ? `<img src="${src}" alt="${esc(p.ad)}" onerror="this.remove()">` : "";
+    $("dImg").innerHTML = src ? `<img src="${src}" alt="${esc(p.ad)}" onerror="fotoHata(this)">` : "";
     $("dCredit").textContent = p.f && p.f.a ? "Fotoğraf: " + p.f.a + " · Wikimedia Commons" : "";
     renderFacts(p);
     favBtn(p); gitBtn(p); $("dFav").hidden = $("dShare").hidden = $("dGit").hidden = !p.q;
@@ -739,6 +766,7 @@
   $("dFav").addEventListener("click", () => { if (open) favDegis(open); });
   $("dShare").addEventListener("click", () => { if (open) paylas(open); });
   $("dGit").addEventListener("click", () => { if (open) gitDegis(open); });
+  document.querySelectorAll(".onerbtn").forEach((b) => b.addEventListener("click", yerOner));
   $("dDinle").addEventListener("click", dinle);
   $("gezBtn").addEventListener("click", () => { $("gezList").hidden = !$("gezList").hidden; });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDetail(); });

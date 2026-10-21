@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=4.2">
+<link rel="stylesheet" href="style.css?v=4.3">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
   padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(30px + env(safe-area-inset-bottom,0px));
@@ -105,6 +105,7 @@
     <h2 class="sec">81 il</h2>
     <ul class="ils" id="ilGrid"><li class="empty">Yükleniyor…</li></ul>
   </div>
+  <button class="onerbtn">📍 Burada olmayan bir yer mi biliyorsun? <b>Öner</b></button>
   <p class="credit" id="ver"></p>
   <p class="credit">Hazırlayan: <b>Mert Turanlıoğlu</b><br>© 2026 Mert Turanlıoğlu · Tüm hakları saklıdır · <a href="gizlilik.html">Gizlilik</a></p>
 </main>
@@ -139,6 +140,7 @@
   <div id="tabIlce" hidden>
     <ul class="list" id="ilceList"></ul>
   </div>
+  <button class="onerbtn">📍 Bu ilde eksik bir yer mi var? <b>Öner</b></button>
   <p class="credit">Bilgiler: Vikipedi (CC BY-SA). Fotoğraflar: Wikimedia Commons, yazar ve lisansı fotoğrafın altında. Harita: © OpenStreetMap katkıcıları.</p>
 </main>
 
@@ -170,13 +172,13 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=4.2"></script>
+<script src="app.js?v=4.3"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
   var s = document.getElementById("splash"), bitti = false;
   function kapat() { if (bitti) return; bitti = true; s.classList.add("out"); setTimeout(function () { s.remove(); }, 500); }
-  function hazir() { setTimeout(kapat, Math.max(0, 4800 - performance.now())); }
+  function hazir() { setTimeout(kapat, Math.max(0, 5000 - performance.now())); }
   s.addEventListener("click", kapat);
   if (document.readyState === "complete") hazir(); else addEventListener("load", hazir);
   setTimeout(kapat, 7000);
