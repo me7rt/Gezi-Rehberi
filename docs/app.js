@@ -1,9 +1,9 @@
-/* Yoldayız · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz.
-   Yoldayız: 81 il, tüm ilçeler, canlı konum.
+/* Rota Cepte · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz.
+   Rota Cepte: 81 il, tüm ilçeler, canlı konum.
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "4.8";
+  const SURUM = "4.9";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -226,7 +226,7 @@
   // ---------- ana sayfa ----------
   function showHome() {
     view = { mode: "home" }; show("home");
-    $("eyebrow").textContent = "Yoldayız"; $("title").textContent = "Nereye gidiyorsun?";
+    $("eyebrow").textContent = "Rota Cepte"; $("title").textContent = "Nereye gidiyorsun?";
     renderHome();
   }
   // ---------- gideceğim yerler (favoriler) ----------
@@ -487,7 +487,7 @@
     d.querySelector("form").addEventListener("submit", (e) => {
       e.preventDefault();
       const f = new FormData(e.target);
-      const govde = `Yer: ${f.get("ad")}\nİl/ilçe: ${f.get("il")}\nNot: ${f.get("not")}\n\n(Yoldayız uygulamasından gönderildi)`;
+      const govde = `Yer: ${f.get("ad")}\nİl/ilçe: ${f.get("il")}\nNot: ${f.get("not")}\n\n(Rota Cepte uygulamasından gönderildi)`;
       location.href = `mailto:${ILETISIM}?subject=${encodeURIComponent("Yer önerisi: " + f.get("ad"))}&body=${encodeURIComponent(govde)}`;
       kapat(); toast("Teşekkürler! E-posta uygulaman açılıyor.");
     });
@@ -568,8 +568,8 @@
   }
   // ---------- paylaş ----------
   function paylas(p) {
-    const url = `https://me7rt.github.io/Yoldayiz/#/il/${p.ilS}/yer/${p.q}`;
-    const metin = `${p.ad} (${[...new Set([p.ilce, p.il].filter(Boolean))].join(", ")}) çok güzel bir yer, Yoldayız uygulamasında buldum:`;
+    const url = `https://me7rt.github.io/RotaCepte/#/il/${p.ilS}/yer/${p.q}`;
+    const metin = `${p.ad} (${[...new Set([p.ilce, p.il].filter(Boolean))].join(", ")}) çok güzel bir yer, Rota Cepte uygulamasında buldum:`;
     if (navigator.share) navigator.share({ title: p.ad, text: metin, url }).catch(() => {});
     else window.open("https://wa.me/?text=" + encodeURIComponent(metin + " " + url), "_blank");
   }

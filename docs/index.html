@@ -1,25 +1,24 @@
 <!doctype html>
-<!-- Yoldayız · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz. -->
+<!-- Rota Cepte · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz. -->
 <html lang="tr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4fa3">
-<title>Yoldayız · Türkiye Gezi Rehberi</title>
+<title>Rota Cepte · Türkiye Gezi Rehberi</title>
 <meta name="author" content="Mert Turanlıoğlu">
 <meta name="copyright" content="© 2026 Mert Turanlıoğlu. Tüm hakları saklıdır.">
-<meta name="description" content="Yoldayız: Türkiye'nin 81 ilinde gezilecek yerler. Hazırlayan: Mert Turanlıoğlu.">
+<meta name="description" content="Rota Cepte: Türkiye'nin 81 ilinde gezilecek yerler. Hazırlayan: Mert Turanlıoğlu.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Yoldayız">
-<meta name="application-name" content="Yoldayız">
-<meta name="apple-mobile-web-app-title" content="Yoldayız">
+<meta name="apple-mobile-web-app-title" content="Rota Cepte">
+<meta name="application-name" content="Rota Cepte">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=4.8">
+<link rel="stylesheet" href="style.css?v=4.9">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
   padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(30px + env(safe-area-inset-bottom,0px));
@@ -74,7 +73,7 @@
       <path class="sp-rota" d="M23 98 Q 9 65 60 31 Q 98 25 137 59 Q 167 63 174 89"/>
       <g transform="translate(174 89)"><g class="sp-patla"><circle r="1.8" style="--dx:28.0px;--dy:-20.0px"/><circle r="1.8" style="--dx:24.2px;--dy:-6.0px"/><circle r="1.8" style="--dx:14.0px;--dy:4.2px"/><circle r="1.8" style="--dx:0.0px;--dy:8.0px"/><circle r="1.8" style="--dx:-14.0px;--dy:4.2px"/><circle r="1.8" style="--dx:-24.2px;--dy:-6.0px"/><circle r="1.8" style="--dx:-28.0px;--dy:-20.0px"/><circle r="1.8" style="--dx:-24.2px;--dy:-34.0px"/><circle r="1.8" style="--dx:-14.0px;--dy:-44.2px"/><circle r="1.8" style="--dx:-0.0px;--dy:-48.0px"/><circle r="1.8" style="--dx:14.0px;--dy:-44.2px"/><circle r="1.8" style="--dx:24.2px;--dy:-34.0px"/></g><g class="sp-pin"><circle class="sp-dalga" r="6"/><path d="M0 0 C -4 -7 -11 -12 -11 -20 A 11 11 0 0 1 11 -20 C 11 -12 4 -7 0 0 Z" fill="#f5b544"/><circle cy="-20" r="4.2" fill="#0b2250"/></g></g>
     </svg>
-    <p class="sp-app"><span style="animation-delay:2.30s,3.05s">Y</span><span style="animation-delay:2.37s,3.05s">o</span><span style="animation-delay:2.44s,3.05s">l</span><span style="animation-delay:2.51s,3.05s">d</span><span style="animation-delay:2.58s,3.05s">a</span><span style="animation-delay:2.65s,3.05s">y</span><span style="animation-delay:2.72s,3.05s">ı</span><span style="animation-delay:2.79s,3.05s">z</span></p>
+    <p class="sp-app"><span style="animation-delay:2.30s,3.10s">R</span><span style="animation-delay:2.37s,3.10s">o</span><span style="animation-delay:2.44s,3.10s">t</span><span style="animation-delay:2.51s,3.10s">a</span><span style="animation-delay:2.58s,3.10s">&nbsp;</span><span style="animation-delay:2.65s,3.10s">C</span><span style="animation-delay:2.72s,3.10s">e</span><span style="animation-delay:2.79s,3.10s">p</span><span style="animation-delay:2.86s,3.10s">t</span><span style="animation-delay:2.93s,3.10s">e</span></p>
     <p class="sp-tag"><b>81 il</b>, binlerce yer. Hadi yola çıkalım.</p>
   </div>
   <div class="sp-by">
@@ -86,7 +85,7 @@
 <header class="top">
   <button class="back" id="back" hidden aria-label="Geri">‹</button>
   <div class="titles">
-    <div class="eyebrow" id="eyebrow">Yoldayız</div>
+    <div class="eyebrow" id="eyebrow">Rota Cepte</div>
     <h1 id="title">Nereye gidiyorsun?</h1>
   </div>
   <button class="loc" id="locBtn" aria-label="Konumumu kullan"><i></i><span id="locText">Konum kapalı</span></button>
@@ -189,7 +188,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=4.8"></script>
+<script src="app.js?v=4.9"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
@@ -213,7 +212,7 @@
   var h = location.hostname, izinli = ["me7rt.github.io", "localhost", "127.0.0.1", ""];
   if (izinli.indexOf(h) < 0) {
     var b = document.createElement("div"); b.className = "kopya";
-    b.innerHTML = 'Bu uygulama <b>Mert Turanlıoğlu</b>\'na aittir (Yoldayız). Orijinali: <a href="https://me7rt.github.io/Yoldayiz/">me7rt.github.io/Yoldayiz</a>';
+    b.innerHTML = 'Bu uygulama <b>Mert Turanlıoğlu</b>\'na aittir (Rota Cepte). Orijinali: <a href="https://me7rt.github.io/RotaCepte/">me7rt.github.io/RotaCepte</a>';
     document.body.appendChild(b);
   }
 })();
