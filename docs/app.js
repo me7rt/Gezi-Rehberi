@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "4.9";
+  const SURUM = "5.0";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -99,6 +99,7 @@
       ARA = a.map(([ad, s, j, lat, lng, k, f]) => [sade(ad), ad, s, j, lat, lng, k, f]);
       if (view && view.mode === "tema") renderTema();
       if (view && view.mode === "rota") renderRota();
+      if (!$("home").hidden) renderFav();
       if (!$("home").hidden && $("search").value.trim().length >= 2) renderHome();
     }).catch(() => { araSoz = null; });
     return araSoz;
@@ -238,8 +239,8 @@
   function favDegis(p) {
     let a = favs();
     if (favMi(p)) a = a.filter((x) => !ayni(x, p));
-    else a.unshift({ q: p.q, s: p.ilS, ad: p.ad, il: [...new Set([p.ilce, p.il].filter(Boolean))].join(", "), k: p.k, f: p.f });
-    favYaz(a); favBtn(p);
+    else a.unshift({ q: p.q, s: p.ilS, ad: p.ad, il: [...new Set([p.ilce, p.il].filter(Boolean))].join(", "), k: p.k, f: p.f, lat: p.lat, lng: p.lng });
+    favYaz(a); favBtn(p); renderFav();
   }
   function favBtn(p) {
     const on = favMi(p), b = $("dFav");
@@ -249,8 +250,32 @@
   function renderFav() {
     const a = favs();
     $("favSec").hidden = !a.length;
-    $("favList").innerHTML = a.map((x) =>
-      `<li><button class="row" data-go="#/il/${x.s}/yer/${x.q}">${thumb(x.f, x.k)}<span class="rt"><b>${esc(x.ad)}</b><small>${esc(x.il)}</small></span><span class="km">›</span></button></li>`).join("");
+    const kon = (x) => {
+      if (x.lat != null) return x;
+      const r = ARA && ARA.find((y) => y[2] === x.s && y[1] === x.ad);
+      return r ? { ...x, lat: r[4], lng: r[5] } : null;
+    };
+    if (a.some((x) => x.lat == null) && !ARA && IDX) loadAra();
+    const nok = a.map(kon).filter(Boolean);
+    $("favList").innerHTML = a.map((x) => {
+      const n = kon(x);
+      return `<li><button class="row" data-go="#/il/${x.s}/yer/${x.q}">${thumb(x.f, x.k)}<span class="rt"><b>${esc(x.ad)}</b><small>${esc(x.il)}</small></span><span class="km">${me && n ? fmt(km(me, n)) : "›"}</span></button></li>`;
+    }).join("");
+    // Kendi rotan: en yakından başlayıp hep bir sonraki en yakın yere giden sıra (en fazla 10 durak)
+    const b = $("favRota");
+    if (nok.length < 2) { b.hidden = true; return; }
+    let kalan = nok.slice(), sira = [], cur = me || null, top = 0;
+    while (kalan.length && sira.length < 10) {
+      let bi = 0;
+      if (cur) kalan.forEach((x, i) => { if (km(cur, x) < km(cur, kalan[bi])) bi = i; });
+      const x = kalan.splice(bi, 1)[0];
+      if (cur && (sira.length || me)) top += km(cur, x);
+      sira.push(x); cur = x;
+    }
+    const nk = (x) => x.lat + "," + x.lng, son = sira[sira.length - 1], ara = sira.slice(0, -1).map(nk).join("|");
+    b.href = `https://www.google.com/maps/dir/?api=1&destination=${nk(son)}${ara ? "&waypoints=" + encodeURIComponent(ara) : ""}&travelmode=driving`;
+    b.innerHTML = `🧭 Listemden rota yap <small>${sira.length} durak · ~${fmt(top * 1.3)} · en yakından başlar</small>`;
+    b.hidden = false;
   }
   // ---------- gittiğim yerler ----------
   const GIT = "gezi-gittim";
@@ -260,7 +285,7 @@
     let a = gittiklerim();
     const vardi = gittimMi(p), onceki = new Set(rozetler().filter((r) => r.tamam).map((r) => r.ad));
     if (vardi) a = a.filter((x) => !ayni(x, p));
-    else a.unshift({ q: p.q, s: p.ilS, ad: p.ad, il: [...new Set([p.ilce, p.il].filter(Boolean))].join(", "), k: p.k, f: p.f });
+    else a.unshift({ q: p.q, s: p.ilS, ad: p.ad, il: [...new Set([p.ilce, p.il].filter(Boolean))].join(", "), k: p.k, f: p.f, t: Date.now() });
     try { localStorage.setItem(GIT, JSON.stringify(a)); } catch (e) {}
     gitBtn(p);
     if (!vardi) {
@@ -284,7 +309,7 @@
     $("gezAlt").textContent = `${a.length} yere gittin · listeyi gör`;
     $("gezBar").style.width = Math.max(3, Math.round((iller / 81) * 100)) + "%";
     $("gezList").innerHTML = a.map((x) =>
-      `<li><button class="row" data-go="#/il/${x.s}/yer/${x.q}">${thumb(x.f, x.k)}<span class="rt"><b>${esc(x.ad)}</b><small>${esc(x.il)}</small></span><span class="km">✓</span></button></li>`).join("");
+      `<li><button class="row" data-go="#/il/${x.s}/yer/${x.q}">${thumb(x.f, x.k)}<span class="rt"><b>${esc(x.ad)}</b><small>${esc(x.il)}${x.t ? " · " + new Date(x.t).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }) : ""}</small></span><span class="km">✓</span></button></li>`).join("");
   }
   // ---------- rozetler ----------
   const BOLGE = {
@@ -814,6 +839,8 @@
     const hedef = p.gq ? encodeURIComponent(p.gq) : q;
     $("dMap").href = `https://www.google.com/maps/search/?api=1&query=${hedef}`;
     $("dDir").href = `https://www.google.com/maps/dir/?api=1&destination=${hedef}`;
+    $("dYakin").innerHTML = [["🍽️", "Yemek", "restoran"], ["☕", "Kafe", "kafe"], ["🏨", "Konaklama", "otel"], ["⛽", "Benzin", "benzin istasyonu"], ["🅿️", "Otopark", "otopark"]].map(([e, ad, ara]) =>
+      `<a class="ykn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent(ara)}/@${p.lat},${p.lng},15z">${e} ${ad}</a>`).join("");
     $("dWiki").hidden = !p.w;
     $("dWiki").href = wikiUrl(p.w);
     $("dWiki").textContent = p.w && p.w.startsWith("en:") ? "Vikipedi'de (İngilizce) oku" : "Vikipedi'de devamını oku";

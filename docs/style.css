@@ -232,3 +232,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .rbtnust{display:flex;flex-direction:column;gap:4px}
 .rbtnust small{color:var(--muted);font-size:13px}
 .rbtnust small.emo{font-size:20px;color:inherit}
+
+/* 5.0: listemden rota + yakınında bul */
+.favrota{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:10px;text-align:center}
+.favrota small{font-weight:500;font-size:12px;opacity:.85}
+.yknbas{font-size:13px;margin:16px 0 8px;color:var(--muted,#667)}
+.ykns{display:flex;flex-wrap:wrap;gap:6px}
+.ykn{text-decoration:none;color:var(--fg);font-weight:700;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 12px}
