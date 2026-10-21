@@ -17,34 +17,50 @@
 <meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=3.5">
+<link rel="stylesheet" href="style.css?v=3.6">
 <style>
-.splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
-  padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(34px + env(safe-area-inset-bottom,0px));
-  background:linear-gradient(165deg,#2f6ad0,#1f4fa3 55%,#163a7c);color:#fff;text-align:center;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:opacity .45s ease,visibility .45s;cursor:pointer}
-.splash.out{opacity:0;visibility:hidden}
-.sp-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
-.sp-mid img{width:116px;height:116px;border-radius:27px;box-shadow:0 18px 40px rgba(5,20,50,.45);animation:spPop .7s cubic-bezier(.2,1.4,.4,1) both}
-.sp-app{font-size:34px;font-weight:800;letter-spacing:-.5px;margin:6px 0 0;animation:spUp .6s .2s ease both}
-.sp-tag{font-size:15px;opacity:.85;margin:0;animation:spUp .6s .3s ease both}
-.sp-by{display:flex;flex-direction:column;gap:2px;animation:spUp .6s .45s ease both}
-.sp-by small{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.75}
-.sp-by b{font-size:26px;font-weight:700;letter-spacing:.2px}
-.sp-by span{font-size:11px;opacity:.6;margin-top:6px}
-@keyframes spPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
-@keyframes spUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.sp-mid img,.sp-app,.sp-tag,.sp-by{animation:none}}
+.splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
+  padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(30px + env(safe-area-inset-bottom,0px));
+  background:radial-gradient(120% 80% at 50% 30%,#2a5fc0 0%,#173f8a 45%,#0b2250 100%);color:#fff;text-align:center;
+  font-family:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:opacity .5s ease,visibility .5s,transform .5s ease;cursor:pointer}
+.splash.out{opacity:0;visibility:hidden;transform:scale(1.04)}
+.sp-yol{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.sp-yol path{fill:none;stroke:#fff;stroke-linecap:round}
+.sp-yol .y1{stroke-width:2;opacity:.14;stroke-dasharray:1400;stroke-dashoffset:1400;animation:spCiz 2.6s .1s ease-out forwards}
+.sp-yol .y2{stroke-width:1.2;opacity:.10;stroke-dasharray:1400;stroke-dashoffset:1400;animation:spCiz 3s .4s ease-out forwards}
+.sp-mid{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.sp-mid img{width:104px;height:104px;border-radius:24px;box-shadow:0 20px 50px rgba(0,10,40,.5),0 0 0 1px rgba(255,255,255,.12);animation:spPop .8s cubic-bezier(.2,.9,.3,1) both}
+.sp-app{font-size:42px;font-weight:800;letter-spacing:-1px;margin:22px 0 0;line-height:1;animation:spUp .7s .25s ease both}
+.sp-tag{font-size:15px;font-weight:500;opacity:.82;margin:10px 0 0;animation:spUp .7s .35s ease both}
+.sp-say{display:flex;gap:8px;margin-top:22px;animation:spUp .7s .5s ease both}
+.sp-say span{font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
+.sp-yuk{width:132px;height:3px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:34px;animation:spUp .7s .6s ease both}
+.sp-yuk i{display:block;height:100%;width:0;background:#fff;border-radius:3px;animation:spDol 2.9s .3s cubic-bezier(.4,0,.2,1) forwards}
+.sp-by{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;animation:spUp .7s .7s ease both}
+.sp-by small{font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;font-weight:600}
+.sp-by b{font-size:19px;font-weight:700;letter-spacing:.3px}
+.sp-by span{font-size:11px;opacity:.5;margin-top:4px}
+@keyframes spPop{from{opacity:0;transform:translateY(10px) scale(.88)}to{opacity:1;transform:none}}
+@keyframes spUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes spCiz{to{stroke-dashoffset:0}}
+@keyframes spDol{to{width:100%}}
+@media (prefers-reduced-motion:reduce){.sp-mid img,.sp-app,.sp-tag,.sp-say,.sp-yuk,.sp-by,.sp-yol path,.sp-yuk i{animation:none;stroke-dashoffset:0;width:100%}}
 .kopya{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:#c2462e;color:#fff;font:600 13px/1.4 system-ui,sans-serif;text-align:center;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
 .kopya a{color:#fff}
 </style>
 </head>
 <body>
 <div class="splash" id="splash" aria-hidden="true">
+  <svg class="sp-yol" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
+    <path class="y1" d="M-40 760 C 80 700, 60 600, 180 560 S 360 470, 300 380 S 120 260, 220 170 S 420 90, 460 -20"/>
+    <path class="y2" d="M-60 620 C 40 590, 120 640, 200 600 S 300 520, 380 540 S 470 470, 480 430"/>
+  </svg>
   <div class="sp-mid">
     <img src="icon-512.png" alt="">
     <p class="sp-app">Yoldayız</p>
-    <p class="sp-tag">Türkiye'nin 81 ilinde gezilecek yerler</p>
+    <p class="sp-tag">Türkiye'yi keşfetmenin en kolay yolu</p>
+    <div class="sp-say"><span>81 il</span><span>950+ ilçe</span><span>2.400+ yer</span></div>
+    <div class="sp-yuk"><i></i></div>
   </div>
   <div class="sp-by">
     <small>Hazırlayan</small>
@@ -134,7 +150,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=3.5"></script>
+<script src="app.js?v=3.6"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
