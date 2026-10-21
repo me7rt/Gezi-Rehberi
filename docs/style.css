@@ -175,3 +175,14 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .arakutu #search{padding-right:46px}
 #search::-webkit-search-cancel-button{display:none}
 .arasil{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:0;background:var(--line);color:var(--fg);font-size:22px;line-height:1;cursor:pointer}
+/* 4.1: gezi haritası */
+:root{--hbos:#d9e2e5}
+@media (prefers-color-scheme:dark){:root{--hbos:#2a3a42}}
+.harita{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 8px 8px}
+.trh{width:100%;height:auto;display:block}
+.trh path{stroke:var(--surface);stroke-width:1.2;cursor:pointer;transition:fill .6s ease}
+.trh path:active{opacity:.7}
+.hleg{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:4px}
+.hleg span{display:flex;align-items:center;gap:5px}
+.hleg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.hnot{margin:6px 6px 2px;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.4}

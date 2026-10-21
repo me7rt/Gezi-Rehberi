@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=4.0">
+<link rel="stylesheet" href="style.css?v=4.1">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
   padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(30px + env(safe-area-inset-bottom,0px));
@@ -100,7 +100,7 @@
     </button>
     <section class="kesfet"><h2 class="sec">Keşfet</h2><div class="tchips" id="temaChips"></div></section>
     <div id="gunun"></div>
-    <section id="gezSec" class="gez" hidden><button class="gezbtn" id="gezBtn"><span class="gezust"><b id="gezSay"></b><small id="gezAlt"></small></span><span class="bar"><i id="gezBar"></i></span></button><ul class="list" id="gezList" hidden></ul></section>
+    <section id="gezSec" class="gez" hidden><h2 class="sec">Gezi haritan</h2><div class="harita" id="gezHarita"></div><button class="gezbtn" id="gezBtn"><span class="gezust"><b id="gezSay"></b><small id="gezAlt"></small></span><span class="bar"><i id="gezBar"></i></span></button><ul class="list" id="gezList" hidden></ul></section>
     <section id="favSec" hidden><h2 class="sec">Gideceğim yerler</h2><ul class="list" id="favList"></ul></section>
     <h2 class="sec">81 il</h2>
     <ul class="ils" id="ilGrid"><li class="empty">Yükleniyor…</li></ul>
@@ -170,7 +170,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=4.0"></script>
+<script src="app.js?v=4.1"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {

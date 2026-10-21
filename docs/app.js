@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "4.0";
+  const SURUM = "4.1";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -86,15 +86,16 @@
     IL.set(s, d);
     return d;
   }
-  async function loadAra() {
-    if (ARA || araYukleniyor) return;
-    araYukleniyor = true;
-    try {
-      const a = await getJSON(`data/ara.json?v=${IDX.surum}-2`);
+  let araSoz = null;
+  function loadAra() {
+    if (ARA) return Promise.resolve();
+    if (araSoz) return araSoz;
+    araSoz = getJSON(`data/ara.json?v=${IDX.surum}-2`).then((a) => {
       ARA = a.map(([ad, s, j, lat, lng, k, f]) => [sade(ad), ad, s, j, lat, lng, k, f]);
       if (view && view.mode === "tema") renderTema();
-      if (!$("home").hidden) renderHome();
-    } catch { araYukleniyor = false; }
+      if (!$("home").hidden && $("search").value.trim().length >= 2) renderHome();
+    }).catch(() => { araSoz = null; });
+    return araSoz;
   }
 
   // ---------- durum ----------
@@ -157,6 +158,7 @@
       }
       if (open) renderFacts(open);
       if (!$("home").hidden && (!homeMe || km(homeMe, me) > 2)) { homeMe = me; renderHome(); }
+      if (!kesifYakin && !$("home").hidden) gununKesfi();
       if (hemen && view && view.mode === "tema") renderTema();
     }, hemen ? 0 : 400);
   }
@@ -262,8 +264,9 @@
   }
   function renderGez() {
     const a = gittiklerim();
-    $("gezSec").hidden = !a.length;
-    if (!a.length) return;
+    $("gezSec").hidden = false; renderHarita();
+    $("gezBtn").hidden = !a.length;
+    if (!a.length) { $("gezList").hidden = true; return; }
     const iller = new Set(a.map((x) => x.s)).size;
     $("gezSay").textContent = `Gezdiğin iller: ${iller} / 81`;
     $("gezAlt").textContent = `${a.length} yere gittin · listeyi gör`;
@@ -390,20 +393,55 @@
     });
     ciz(); document.body.appendChild(d);
   }
-  // ---------- günün keşfi ----------
-  let gunYuk = false;
+  // ---------- keşif kartı: her açılışta rastgele, konum açıksa yakından ----------
+  let kesifYuk = false, kesifYakin = false;
   async function gununKesfi() {
-    if (gunYuk) return; gunYuk = true;
+    if (kesifYuk && (kesifYakin || !me)) return;
+    kesifYuk = true; kesifYakin = !!me;
     try {
-      const gun = Math.floor((Date.now() + 108e5) / 864e5);
-      const il = IDX.iller[(gun * 7) % IDX.iller.length];
-      const d = await loadIl(il.s);
-      const iyi = d.yerler.filter((y) => y.f && y.q && y.one);
-      const liste = iyi.length ? iyi : d.yerler.filter((y) => y.f && y.q);
-      const p = liste[gun % liste.length]; if (!p) return;
-      const src = foto(p.f, 960);
-      $("gunun").innerHTML = `<button class="gunun" data-go="#/il/${d.s}/yer/${p.q}">${src ? `<img src="${src}" alt="" onerror="this.remove()">` : ""}<span class="gtxt"><small>Günün keşfi</small><b>${esc(p.ad)}</b><span>${esc([...new Set([p.ilce, p.il].filter(Boolean))].join(", "))}</span></span></button>`;
-    } catch (e) { gunYuk = false; }
+      await loadAra(); if (!ARA) { kesifYuk = false; return; }
+      let aday = ARA.filter((x) => x[7] === 1);
+      if (me) {
+        const u = aday.map((x) => [km(me, { lat: x[4], lng: x[5] }), x]).sort((a, b) => a[0] - b[0]);
+        const yakin = u.filter((x) => x[0] <= 60);
+        aday = (yakin.length >= 5 ? yakin : u.slice(0, 20)).map((x) => x[1]);
+      }
+      const x = aday[Math.floor(Math.random() * aday.length)]; if (!x) return;
+      const d = await loadIl(x[2]); const p = d.yerler[x[3]]; if (!p) return;
+      const k = foto(p.f, 960), k2 = foto(p.f, 500);
+      const yer = esc([...new Set([p.ilce, p.il].filter(Boolean))].join(", "));
+      $("gunun").innerHTML = `<button class="gunun" data-go="#/il/${d.s}/yer/${p.q}">${k ? `<img src="${k}" alt="" onerror="if(this.dataset.y){this.remove()}else{this.dataset.y=1;this.src='${k2}'}">` : ""}<span class="gtxt"><small>${me ? "Yakınında keşfet · " + fmt(km(me, p)) : "Bugün keşfet"}</small><b>${esc(p.ad)}</b><span>${yer}</span></span></button>`;
+    } catch (e) { kesifYuk = false; }
+  }
+  // ---------- gezi haritası: ilçelerini gezdikçe il boyanır ----------
+  let HARITA = null, haritaSoz = null;
+  async function renderHarita() {
+    const kutu = $("gezHarita"); if (!kutu || !IDX) return;
+    try {
+      if (!HARITA) { haritaSoz = haritaSoz || getJSON("tr-harita.json?v=2"); HARITA = await haritaSoz; }
+      const a = gittiklerim(), ilBy = new Map();
+      for (const x of a) { if (!ilBy.has(x.s)) ilBy.set(x.s, []); ilBy.get(x.s).push(x); }
+      const oran = new Map();
+      for (const [s, liste] of ilBy) {
+        const ozet = IDX.ilBy.get(s); if (!ozet) continue;
+        let d = null; try { d = await loadIl(s); } catch (e) {}
+        const toplam = ozet.ilceler.filter((z) => z[3] > 0).length || 1;
+        const gidilen = new Set();
+        for (const x of liste) { const y = d && d.yerler.find((t) => t.q === x.q); if (y && y.i >= 0) gidilen.add(y.i); }
+        oran.set(s, Math.max(0.12, Math.min(1, gidilen.size / toplam)));
+      }
+      let tam = 0;
+      const yollar = Object.entries(HARITA).map(([s, d]) => {
+        const il = IDX.ilBy.get(s); if (!il) return "";
+        const o = oran.get(il.s) || 0; if (o >= 1) tam++;
+        const renk = o >= 1 ? "#1f9d55" : o > 0 ? `color-mix(in srgb,#2fb36a ${Math.round(25 + o * 60)}%,var(--hbos))` : "var(--hbos)";
+        return `<path d="${d}" style="fill:${renk}" data-go="#/il/${il.s}"><title>${esc(il.ad)}${o ? " · %" + Math.round(o * 100) : ""}</title></path>`;
+      }).join("");
+      kutu.innerHTML = `<svg viewBox="80 0 1050 585" class="trh" role="img" aria-label="Gezi haritan">${yollar}</svg>
+        <div class="hleg"><span><i style="background:var(--hbos)"></i>Gitmedin</span><span><i style="background:color-mix(in srgb,#2fb36a 45%,var(--hbos))"></i>Başladın</span><span><i style="background:#1f9d55"></i>Tüm ilçeler</span></div>
+        <p class="hnot">${a.length ? `${ilBy.size} ile gittin${tam ? `, ${tam} ilin tüm ilçelerini gezdin 🏆` : ""}. Bir ilin ilçelerini gezdikçe rengi koyulaşır.` : `Bir yere "Buraya gittim" dediğinde o il haritada yeşile boyanmaya başlar. İlçelerini gezdikçe rengi koyulaşır.`}</p>`;
+      try { const sv = kutu.querySelector("svg"), b = sv.getBBox(); if (b.width) sv.setAttribute("viewBox", `${b.x - 4} ${b.y - 4} ${b.width + 8} ${b.height + 8}`); } catch (e) {}
+    } catch (e) {}
   }
   // ---------- paylaş ----------
   function paylas(p) {
