@@ -186,3 +186,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .hleg span{display:flex;align-items:center;gap:5px}
 .hleg i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .hnot{margin:6px 6px 2px;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.4}
+/* 4.3: yer öner */
+.onerbtn{border:1px dashed var(--line);background:var(--surface);color:var(--fg);border-radius:14px;padding:14px;font:inherit;font-size:14px;cursor:pointer}
+.onerbtn b{color:var(--cobalt)}
+.oner{text-align:left}
+.oner .temo,.oner h2,.oner p{text-align:center}
+.oner label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--muted);margin-top:12px}
+.oner input,.oner textarea{font:inherit;font-size:16px;font-weight:400;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;resize:vertical}
+.oner .tbtn{margin-top:16px}
