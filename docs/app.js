@@ -4,6 +4,8 @@
 (function () {
   "use strict";
   const SURUM = "3.3";
+  // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
+  const HARITA_ANAHTAR = "";
 
   const SVG = {
     t: '<path d="M4 20h16M6 20v-7M18 20v-7M5 13h14M7 13a5 5 0 0 1 10 0M12 4v4"/>',
@@ -401,7 +403,8 @@
   function ensureMap() {
     if (map) { setTimeout(() => map.invalidateSize(), 60); return; }
     map = L.map("map", { zoomControl: true, attributionControl: true }).setView([39, 35], 6);
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+    if (HARITA_ANAHTAR) L.tileLayer(`https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=${HARITA_ANAHTAR}`, { maxZoom: 19, attribution: "© MapTiler © OpenStreetMap" }).addTo(map);
+    else L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
     layer = L.layerGroup().addTo(map);
   }
   function drawPins() {
