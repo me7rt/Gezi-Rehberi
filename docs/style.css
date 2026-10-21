@@ -194,3 +194,17 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .oner label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--muted);margin-top:12px}
 .oner input,.oner textarea{font:inherit;font-size:16px;font-weight:400;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;resize:vertical}
 .oner .tbtn{margin-top:16px}
+/* 4.5: rozetler */
+.rozetler{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rozet{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 6px}
+.rozet i{font-style:normal;font-size:28px;line-height:1.1;filter:grayscale(1);opacity:.45}
+.rozet b{font-size:12px;line-height:1.2;color:var(--muted)}
+.rozet small{font-size:11px;color:var(--muted)}
+.rozet.on{border-color:#e3b25a;background:linear-gradient(160deg,color-mix(in srgb,#f5b544 14%,var(--surface)),var(--surface))}
+.rozet.on i{filter:none;opacity:1}
+.rozet.on b{color:var(--fg)}
+.rozet.on small{color:#b7791f;font-weight:700}
+#rozetSay{color:var(--fg);margin-left:4px}
+.rkutla small{display:block;margin-top:6px;color:#b7791f;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+.rkutla .temo{font-size:64px;animation:spPop .6s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes spPop{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:none}}
