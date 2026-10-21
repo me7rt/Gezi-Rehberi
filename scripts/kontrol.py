@@ -1,6 +1,6 @@
 # Fotoğrafları gözle kontrol etmek için küçük resim sayfaları (kontak baskı) üretir.
 # Girdi: kontrol/liste.json (uret.mjs yazar). Çıktı: kontrol/sayfa-XXX.jpg ve kontrol/sayfalar.txt
-import json, os, io, time, urllib.request, urllib.parse
+import json, os, io, time, urllib.request, urllib.parse, urllib.error
 from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, ImageDraw, ImageFont
 
@@ -8,24 +8,33 @@ UA = "GeziRehberi/1.0 (https://github.com/me7rt/Gezi-Rehberi; kontrol betigi)"
 K = "kontrol"
 liste = json.load(open(f"{K}/liste.json", encoding="utf-8"))
 
+BASLA = time.time()
+SURE = 20 * 60  # en fazla 20 dakika indir, kalanları atla
+
 def url(e, W=250):
     p = e["p"]; ad = p.split("/")[-1]
     if e["w"] <= W: return "https://upload.wikimedia.org/wikipedia/commons/" + p
     return f"https://upload.wikimedia.org/wikipedia/commons/thumb/{p}/{W}px-{ad}"
 
 def indir(e):
-    for d in range(5):
+    err = ""
+    for d in range(4):
+        if time.time() - BASLA > SURE: return None
         try:
             req = urllib.request.Request(url(e), headers={"User-Agent": UA})
             with urllib.request.urlopen(req, timeout=40) as r:
                 return Image.open(io.BytesIO(r.read())).convert("RGB")
+        except urllib.error.HTTPError as ex:
+            err = str(ex)
+            bekle = ex.headers.get("Retry-After") if ex.headers else None
+            time.sleep(min(int(bekle) if bekle and bekle.isdigit() else 3 + 5 * d, 30))
         except Exception as ex:
             err = str(ex)
             time.sleep(2 + 4 * d)
     print("indirilemedi", e["ad"], err)
     return None
 
-with ThreadPoolExecutor(6) as ex:
+with ThreadPoolExecutor(4) as ex:
     resimler = list(ex.map(indir, liste))
 
 def ahash(im):
