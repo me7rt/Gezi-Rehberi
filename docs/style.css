@@ -100,3 +100,15 @@ h1{font-size:22px;line-height:1.1;margin:2px 0 0;font-weight:800;white-space:now
 .me{width:16px;height:16px;border-radius:50%;background:#1f4fa3;border:3px solid #fff;box-shadow:0 0 0 6px rgba(31,79,163,.25)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:12px;font-size:14px;z-index:3000;max-width:90vw}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+
+/* 3.3: favori, paylaş, günün keşfi */
+.fav{position:absolute;right:56px;top:12px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;font-size:20px;line-height:1;cursor:pointer}
+.fav.on{color:#ff5a6e}
+.btn.share{grid-column:1/-1;font:inherit;font-weight:700;cursor:pointer;background:#25a35a;border-color:#25a35a;color:#fff}
+.gunun{position:relative;display:block;width:100%;aspect-ratio:16/9;border:0;padding:0;border-radius:16px;overflow:hidden;background:var(--teal);color:#fff;text-align:left;cursor:pointer}
+.gunun img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gtxt{position:absolute;left:0;right:0;bottom:0;padding:40px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75));display:flex;flex-direction:column;gap:1px}
+.gtxt small{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;opacity:.9}
+.gtxt b{font-size:19px;line-height:1.2}
+.gtxt span{font-size:13px;opacity:.9}
+#favSec{display:flex;flex-direction:column;gap:8px}
