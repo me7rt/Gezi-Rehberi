@@ -224,3 +224,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .rno{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:#0f6e8c;color:#fff}
 .rno.on{background:#1f9d55}
 .rotaac{display:block;text-align:center;text-decoration:none;margin:14px 0 6px}
+/* 4.8 il içi arama, rozet sayfası */
+.ilarakutu{margin:10px 0 8px}
+#ilAra{width:100%;font:inherit;padding:11px 46px 11px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+#ilAra::-webkit-search-cancel-button{display:none}
+.rozetbtn{flex-direction:row;align-items:center;justify-content:space-between;margin-top:10px}
+.rbtnust{display:flex;flex-direction:column;gap:4px}
+.rbtnust small{color:var(--muted);font-size:13px}
+.rbtnust small.emo{font-size:20px;color:inherit}

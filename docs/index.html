@@ -15,9 +15,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Yoldayız">
+<meta name="application-name" content="Yoldayız">
+<meta name="apple-mobile-web-app-title" content="Yoldayız">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=4.7">
+<link rel="stylesheet" href="style.css?v=4.8">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
   padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(30px + env(safe-area-inset-bottom,0px));
@@ -101,7 +103,7 @@
     <section class="kesfet"><h2 class="sec">Keşfet</h2><div class="tchips" id="temaChips"></div></section>
     <section id="rotaSec" hidden><h2 class="sec">Hazır rotalar</h2><div class="rkartlar" id="rotaKart"></div></section>
     <div id="gunun"></div>
-    <section id="gezSec" class="gez" hidden><h2 class="sec">Gezi haritan</h2><div class="harita" id="gezHarita"></div><button class="gezbtn" id="gezBtn"><span class="gezust"><b id="gezSay"></b><small id="gezAlt"></small></span><span class="bar"><i id="gezBar"></i></span></button><ul class="list" id="gezList" hidden></ul><h2 class="sec">Rozetlerin <span id="rozetSay"></span></h2><ul class="rozetler" id="rozetList"></ul></section>
+    <section id="gezSec" class="gez" hidden><h2 class="sec">Gezi haritan</h2><div class="harita" id="gezHarita"></div><button class="gezbtn" id="gezBtn"><span class="gezust"><b id="gezSay"></b><small id="gezAlt"></small></span><span class="bar"><i id="gezBar"></i></span></button><ul class="list" id="gezList" hidden></ul><button class="gezbtn rozetbtn" id="rozetBtn" data-go="#/rozetler"></button></section>
     <section id="favSec" hidden><h2 class="sec">Gideceğim yerler</h2><ul class="list" id="favList"></ul></section>
     <h2 class="sec">81 il</h2>
     <ul class="ils" id="ilGrid"><li class="empty">Yükleniyor…</li></ul>
@@ -125,6 +127,11 @@
   <p class="tsay">Mesafeler yaklaşık. Durağa dokununca ayrıntısını görürsün.</p>
 </main>
 
+<main id="rozet" class="view" hidden>
+  <p class="tsay">Kazandığın rozetler: <b id="rozetSay"></b>. Bir yerin sayfasında "Buraya gittim" dedikçe yenileri açılır.</p>
+  <ul class="rozetler" id="rozetList"></ul>
+</main>
+
 <main id="city" class="view" hidden>
   <section class="hero" id="hero">
     <div class="heroimg" id="heroImg"></div>
@@ -142,6 +149,7 @@
   <div id="tabYer">
     <div id="map" class="map"></div>
     <div class="chips" id="chips" role="group" aria-label="Kategori"></div>
+    <div class="arakutu ilarakutu"><input id="ilAra" type="search" placeholder="Bu ilde yer ara… (ör. kale, şelale)" autocomplete="off" enterkeyhint="search"><button id="ilAraSil" class="arasil" aria-label="Aramayı temizle" hidden>×</button></div>
     <div class="sort"><span id="count"></span><span class="seg" id="sortSeg"></span></div>
     <ul class="list" id="list"></ul>
     <button class="morebtn" id="moreBtn" hidden>Daha fazla göster</button>
@@ -181,7 +189,7 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=4.7"></script>
+<script src="app.js?v=4.8"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
