@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.5";
+  const SURUM = "5.6";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -1030,6 +1030,26 @@
       cikisZamani = Date.now(); toast(T("Çıkmak için tekrar geri bas"));
     });
   }
+  // ---------- özel günler: milli bayramlar, anma günleri, dini bayramlar ----------
+  async function ozelGun() {
+    try {
+      const o = await getJSON(`ozel-gunler.json?v=${SURUM}`);
+      const n = new Date(), iki = (x) => String(x).padStart(2, "0");
+      const gun = `${n.getFullYear()}-${iki(n.getMonth() + 1)}-${iki(n.getDate())}`;
+      const g = o.sabit[gun.slice(5)] || (o.degisken || []).find((x) => gun >= x.bas && gun <= x.bit);
+      if (!g) return;
+      const msj = TL(g.tr, g.en || g.tr);
+      // açılış ekranı
+      const t2 = document.querySelector(".sp-tag2"); if (t2) { t2.textContent = `${g.e} ${msj}`; t2.classList.add("sp-ozel"); }
+      if (g.yas) document.documentElement.classList.add("yas");
+      // ana sayfa şeridi
+      const b = $("ozelGun");
+      b.innerHTML = `<i>${g.e}</i><span><b>${esc(msj)}</b>${g.bayram ? `<small>${TL("Bayram tatili için hazır rotalara göz at ›", "Browse ready-made routes for the holiday ›")}</small>` : ""}</span>`;
+      b.classList.toggle("yas", !!g.yas); b.hidden = false;
+      if (g.bayram) b.onclick = () => { const r = $("rotaSec"); if (r) r.scrollIntoView({ behavior: "smooth", block: "start" }); };
+    } catch (e) {}
+  }
+  ozelGun();
   temaChips();
   rotaKartlar();
   route();

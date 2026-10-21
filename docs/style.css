@@ -247,3 +247,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .karnebtn{display:block;width:100%;margin-top:10px}
 .karnek{padding:14px 14px 12px}
 .karnek img{display:block;width:100%;max-height:68vh;object-fit:contain;border-radius:14px}
+
+/* 5.6: özel günler şeridi */
+.ozelgun{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:14px 16px;border-radius:16px;background:linear-gradient(120deg,#c8102e,#e3313f);color:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(200,16,46,.25)}
+.ozelgun i{font-style:normal;font-size:30px;line-height:1}
+.ozelgun span{display:flex;flex-direction:column;gap:3px}
+.ozelgun b{font-size:15px;line-height:1.35}
+.ozelgun small{font-size:13px;opacity:.9;font-weight:600}
+.ozelgun.yas{background:linear-gradient(120deg,#1b1f24,#3a4048);box-shadow:none}

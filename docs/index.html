@@ -18,7 +18,7 @@
 <meta name="application-name" content="Rota Cepte">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="style.css?v=5.5">
+<link rel="stylesheet" href="style.css?v=5.6">
 <style>
 .splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:space-between;overflow:hidden;
   padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(30px + env(safe-area-inset-bottom,0px));
@@ -38,6 +38,8 @@
 .sp-app span{display:inline-block;opacity:0;animation:spHarf .5s cubic-bezier(.2,.9,.3,1.3) forwards}
 .sp-tag{font-size:15px;font-weight:500;opacity:0;margin:10px 0 0;animation:spUp .7s 2.9s ease forwards}
 .sp-tag b{color:#f5b544;font-weight:800;font-size:19px}
+.sp-tag2.sp-ozel{font-size:15px;letter-spacing:0;max-width:340px;line-height:1.4;color:#ffe2a8;font-weight:600}
+html.yas .sp-tag2.sp-ozel{color:#fff}
 .sp-tag2{font-size:13px;margin-top:6px;letter-spacing:.5px;animation-delay:3.2s}
 .sp-by{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:0;animation:spUp .7s 3.1s ease forwards}
 .sp-by small{font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;font-weight:600}
@@ -97,6 +99,7 @@
   <div class="arakutu"><input id="search" type="search" placeholder="İl, ilçe ya da yer ara… (ör. Uşak)" autocomplete="off" enterkeyhint="search"><button class="arasil" id="araSil" aria-label="Aramayı temizle" hidden>×</button></div>
   <ul class="list" id="results" hidden></ul>
   <div id="homeMain">
+    <div class="ozelgun" id="ozelGun" hidden></div>
     <button class="near" id="nearBtn">
       <b>Yakınımdaki yerler</b>
       <small id="nearSub">Konumunu aç, sana en yakın gezilecek yerleri sıralayalım</small>
@@ -193,8 +196,8 @@
 </div>
 
 <script src="vendor/leaflet.js"></script>
-<script src="i18n.js?v=5.5"></script>
-<script src="app.js?v=5.5"></script>
+<script src="i18n.js?v=5.6"></script>
+<script src="app.js?v=5.6"></script>
 <script>
 /* Açılış ekranı ve kopya uyarısı · © 2026 Mert Turanlıoğlu */
 (function () {
