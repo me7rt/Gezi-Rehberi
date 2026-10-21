@@ -11,3 +11,7 @@ Türkiye'nin 81 ili ve tüm ilçelerinde gezilecek yerler: harita, canlı konuma
 - Kategoriler: t = Tarihi, d = Doğa & Manzara, m = Müze, c = Çarşı & Lezzet, s = Şehir & Semt
 
 Bilgiler Vikipedi (CC BY-SA), fotoğraflar Wikimedia Commons (her fotoğrafın yazarı ve lisansı uygulamada gösterilir), harita © OpenStreetMap katkıcıları.
+
+## Telif
+
+© 2026 Mert Turanlıoğlu. Tüm hakları saklıdır. Kod, tasarım, ikon ve açılış ekranı izinsiz kopyalanamaz, başka bir adla yayınlanamaz veya mağazalara yüklenemez. Ayrıntılar: [LICENSE](LICENSE).

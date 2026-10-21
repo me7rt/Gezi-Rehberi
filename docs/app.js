@@ -1,8 +1,9 @@
-/* Gezi Rehberi 3: 81 il, tüm ilçeler, canlı konum.
+/* Gezi Rehberi · © 2026 Mert Turanlıoğlu · Tüm hakları saklıdır. İzinsiz kopyalanamaz ve yayınlanamaz.
+   Gezi Rehberi 3: 81 il, tüm ilçeler, canlı konum.
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "3.1";
+  const SURUM = "3.2";
 
   const SVG = {
     t: '<path d="M4 20h16M6 20v-7M18 20v-7M5 13h14M7 13a5 5 0 0 1 10 0M12 4v4"/>',

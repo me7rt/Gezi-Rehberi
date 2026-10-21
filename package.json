@@ -1,9 +1,13 @@
 {
   "name": "gezi-rehberi",
-  "version": "3.0.0",
+  "version": "3.2.0",
   "private": true,
   "description": "81 il ve tüm ilçeler için gezi rehberi: canlı konum, harita, fotoğraf ve bilgi",
-  "scripts": { "start": "npx serve docs" },
+  "author": "Mert Turanlıoğlu",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "npx serve docs"
+  },
   "dependencies": {
     "leaflet": "1.9.4",
     "@capacitor/core": "^7.0.0",
