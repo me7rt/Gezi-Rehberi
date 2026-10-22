@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.7";
+  const SURUM = "5.8";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -459,7 +459,7 @@
   const TEMA = {
     selale: { ad: T("Şelaleler"), e: "💧", k: ["selale"] },
     magara: { ad: T("Mağaralar"), e: "🕳️", k: ["magara"] },
-    kanyon: { ad: T("Kanyon ve vadiler"), e: "🏞️", k: ["kanyon", "vadi"] },
+    kanyon: { ad: T("Kanyon ve vadiler"), e: "🧗", k: ["kanyon", "vadi"] },
     gol: { ad: T("Göller"), e: "🌊", k: ["golu", "gol "], d: 1 },
     ada: { ad: T("Adalar ve koylar"), e: "🏝️", k: ["adasi", "koyu", "plaj"] },
     park: { ad: T("Milli parklar"), e: "🌲", k: ["milli park", "tabiat park"] },

@@ -261,11 +261,14 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .mvust small{display:block;color:var(--muted);font-size:13px;margin:2px 0 10px}
 .mvchips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mvchips .tchip{padding:8px 10px;font-size:13px}
-.indirsec{margin-top:12px}
-.indirbtn{display:block;width:100%;text-align:left;border:1px dashed var(--green);background:var(--surface);color:var(--fg);border-radius:14px;padding:11px 14px;font:inherit;cursor:pointer}
+.indirsec{margin:4px 0 12px}
+.indirbtn{display:block;width:100%;text-align:left;border:0;background:var(--green);color:#fff;box-shadow:0 4px 14px color-mix(in srgb,var(--green) 35%,transparent);border-radius:14px;padding:11px 14px;font:inherit;cursor:pointer}
 .indirbtn b{display:block;font-size:15px}
-.indirbtn small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.indirbtn small{display:block;color:#fff;opacity:.9;font-size:12.5px;margin-top:2px}
 .indirbtn .bar{margin-top:8px}
-.indirbtn.hazir{border-style:solid;background:color-mix(in srgb,var(--green) 10%,var(--surface))}
+.indirbtn.hazir{border:1px solid var(--green);background:color-mix(in srgb,var(--green) 12%,var(--surface));color:var(--fg);box-shadow:none}
+.indirbtn.hazir small{color:var(--muted);opacity:1}
+.indirbtn .bar{background:rgba(255,255,255,.3)}
+.indirbtn .bar i{background:#fff}
 .indirbtn:disabled{cursor:progress}
 .indirsil{margin-top:4px;font-size:13px}
