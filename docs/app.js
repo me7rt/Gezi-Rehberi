@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.12";
+  const SURUM = "5.13";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -107,7 +107,7 @@
     if (ARA) return Promise.resolve();
     if (araSoz) return araSoz;
     araSoz = getJSON(`data/ara.json?v=${IDX.surum}-2`).then((a) => {
-      ARA = a.map(([ad, s, j, lat, lng, k, f]) => [sade(ad), ad, s, j, lat, lng, k, f]);
+      ARA = a.map(([ad, s, j, lat, lng, k, f, p]) => [sade(ad), ad, s, j, lat, lng, k, f, p]);
       if (view && view.mode === "tema") renderTema();
       if (view && view.mode === "rota") renderRota();
       if (!$("home").hidden) renderFav();
@@ -505,7 +505,7 @@
     $("temaSay").textContent = TL(`${r.length} yer` + (me ? " · sana en yakından uzağa" : " · konumunu açarsan yakından uzağa sıralarız"), `${r.length} places` + (me ? " · nearest first" : " · turn on location to sort by distance"));
     $("temaList").innerHTML = r.length ? r.map((x) => {
       const c = CATS[x[6]] || CATS.t, il = (IDX.ilBy.get(x[2]) || {}).ad || "";
-      return `<li><button class="row res" data-yer="${x[2]}|${x[3]}"><span class="thumb" style="--c:${c.renk}">${icon(x[6] || "t", 20)}</span><span class="rt"><b>${esc(x[1])}</b><small>${esc(il)}</small></span><span class="km">${me ? fmt(km(me, { lat: x[4], lng: x[5] })) : "›"}</span></button></li>`;
+      return `<li><button class="row res" data-yer="${x[2]}|${x[3]}">${x[8] ? thumb({ p: x[8], w: 1e5 }, x[6] || "t") : `<span class="thumb" style="--c:${c.renk}">${icon(x[6] || "t", 20)}</span>`}<span class="rt"><b>${esc(x[1])}</b><small>${esc(il)}</small></span><span class="km">${me ? fmt(km(me, { lat: x[4], lng: x[5] })) : "›"}</span></button></li>`;
     }).join("") : `<li class="empty">${T("Bu türde yer bulunamadı.")}</li>`;
   }
   // ---------- internetsiz kullanım: ilin verisini ve fotoğraflarını telefona indir ----------
