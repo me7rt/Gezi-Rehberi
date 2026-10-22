@@ -20,6 +20,8 @@ jobs:
         run: DIL=tr node .github/tanitim.mjs && mkdir -p cikti && mv tanitim/*.mp4 cikti/
       - name: İngilizce film
         run: DIL=en node .github/tanitim.mjs && mv tanitim/*.mp4 cikti/
+      - name: Dikey kısa film (Instagram/TikTok)
+        run: DIL=tr DIKEY=1 node .github/tanitim.mjs && mv tanitim/*.mp4 cikti/
       - name: tanitim-video dalina koy
         run: |
           cd cikti
