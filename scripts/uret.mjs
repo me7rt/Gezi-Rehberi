@@ -746,7 +746,8 @@ for (const o of tumYer) {
 let galeriSay = 0;
 for (const o of tumYer) {
   if (!o.one || !o.foto || !o.cat) continue;
-  const ek = (await kategoriFoto(o.cat, o.ad).catch(() => [])).filter((a) => a !== o.foto && !KULLANILAN.has(a) && FOTO.get(a).w >= 800 && adPuan(a, o.ad) >= 2).slice(0, 4);
+  const adK = o.ad.split(/\s+/).filter((k) => ascii(k) !== ascii(o.ilAd || "")).join(" "); // il adı tek başına yetmez
+  const ek = (await kategoriFoto(o.cat, o.ad).catch(() => [])).filter((a) => a !== o.foto && !KULLANILAN.has(a) && FOTO.get(a).w >= 800 && adPuan(a, adK) >= 2).slice(0, 4);
   if (ek.length >= 2) { o.galeri = ek; galeriSay++; }
 }
 rapor("galerili öne çıkan yer:", galeriSay);
