@@ -130,14 +130,16 @@ await git2("#/rota/kapadokya"); await bekle(1500); await resimler(); await bekle
 await kay(400, 1800); await bekle(1500);
 // 8) gezi haritası ve rozetler
 await yaz(t("Gezdiğin illeri boya", "Colour in your travels"), t("Gittiğin yerleri işaretle, Türkiye haritan dolsun, rozetleri topla.", "Mark the places you've been, fill your Türkiye map and collect badges."));
-await git2("#/"); await bekle(1200);
+await git2("#/"); await bekle(2500); await resimler(); await bekle(800);
 await kayEl("#gezSec", 1800); await bekle(3500);
 await git2("#/rozetler"); await bekle(1500); await bekle(3000);
 // 9) internetsiz
 await yaz(t("Çekmeyen yerde bile", "Even with no signal"), t("İli telefonuna indir, dağda bayırda internetsiz aç.", "Download a province and use it offline in the mountains."));
 await git2("#/il/antalya"); await bekle(2000); await resimler(); await bekle(1000);
+// iframe içinde servis çalışanı devreye girmezse buton gizli kalır; filmde yine de görünsün
+await A(() => { const s = document.getElementById("indirSec"), b = document.getElementById("indirBtn"); if (s.hidden) { s.hidden = false; b.innerHTML = window.DIL === "en" ? "<b>📥 Use offline</b><small>Save this province's places and photos to your phone</small>" : "<b>📥 İnternetsiz kullan</b><small>Bu ilin yerlerini ve fotoğraflarını telefona indir, çekmeyen yerde de aç</small>"; } });
 await kayEl("#indirSec", 1400, 260); await bekle(1200);
-if (await A(() => !document.getElementById("indirSec").hidden)) { await dokun("#indirBtn"); await bekle(5000); } else await bekle(3000);
+await dokun("#indirBtn"); await bekle(5000);
 // 10) kapanış
 await p.evaluate(() => { document.getElementById("son").classList.add("ac"); });
 await bekle(6500);
