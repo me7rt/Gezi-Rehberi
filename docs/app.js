@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.10";
+  const SURUM = "5.11";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -1132,6 +1132,12 @@
     $("dDir").href = `https://www.google.com/maps/dir/?api=1&destination=${hedef}`;
     $("dYakin").innerHTML = [["🍽️", T("Yemek"), "restoran"], ["☕", T("Kafe"), "kafe"], ["🏨", T("Konaklama"), "otel"], ["⛽", T("Benzin"), "benzin istasyonu"], ["🅿️", T("Otopark"), "otopark"]].map(([e, ad, ara]) =>
       `<a class="ykn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent(ara)}/@${p.lat},${p.lng},15z">${e} ${ad}</a>`).join("");
+    // Yakındaki gezilecek yerler (aynı ilde, 25 km içinde, en yakın 5)
+    const il = IL.get(p.ilS);
+    const cevre = il ? il.yerler.filter((y) => y !== p).map((y) => [y, km(p, y)]).filter((x) => x[1] < 25).sort((a, b) => a[1] - b[1]).slice(0, 5) : [];
+    $("dCevreBas").hidden = !cevre.length;
+    $("dCevreBas").textContent = TL("Yakındaki gezilecek yerler", "Nearby places to see");
+    $("dCevre").innerHTML = cevre.map(([y, d]) => `<li><button class="row" data-s="${y.ilS}" data-j="${y.j}">${thumb(y.f, y.k)}<span class="rt"><b>${y.one ? `<i class="star">★</i>` : ""}${esc(adi(y))}</b><small>${esc(CATS[y.k].ad)}</small></span><span class="km">${fmt(d)}</span></button></li>`).join("");
     const wk = DIL === "en" ? p.we || p.w : p.w;
     $("dWiki").hidden = !wk;
     $("dWiki").href = wikiUrl(wk);
@@ -1187,6 +1193,10 @@
   });
   $("heroMore").addEventListener("click", () => { $("heroText").classList.remove("clamp"); $("heroMore").hidden = true; });
   $("dClose").addEventListener("click", closeDetail);
+  $("dCevre").addEventListener("click", (e) => {
+    const b = e.target.closest(".row"); if (!b) return;
+    const d = IL.get(b.dataset.s); if (d) { dinleDurdur(); openDetail(d.yerler[+b.dataset.j]); }
+  });
   $("sheet").addEventListener("click", (e) => { if (e.target === $("sheet")) closeDetail(); });
   $("dFav").addEventListener("click", () => { if (open) favDegis(open); });
   $("dShare").addEventListener("click", () => { if (open) paylas(open); });
