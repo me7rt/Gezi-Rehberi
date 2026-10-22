@@ -934,7 +934,8 @@ for (const il of ilSirali) {
   for (const o of il.yerler) if (o.enA) en.y[o.q] = [o.enA.replace(/ \(.*\)$/, ""), enM.get(o.enA) || "", o.enA];
   fs.writeFileSync(`${OUT}/en/${il.s}.json`, JSON.stringify(en));
   index.iller.push({ ad: il.ad, s: il.s, q: il.q, lat: dosya.lat, lng: dosya.lng, plaka: dosya.plaka, f: dosya.f, n: yerler.length, ilceler: ilceCikti.map((d) => [d.ad, d.lat, d.lng, d.n]) });
-  yerler.forEach((y, j) => ara.push([y.ad, il.s, j, Math.round(y.lat * 1e3) / 1e3, Math.round(y.lng * 1e3) / 1e3, y.k, y.f ? 1 : 0]));
+  // Arama/tema listesi: [ad, il, sıra, enlem, boylam, kategori, fotoğraf var mı, fotoğraf yolu (varsa; tema listesinde küçük resim)]
+  yerler.forEach((y, j) => { const r = [y.ad, il.s, j, Math.round(y.lat * 1e3) / 1e3, Math.round(y.lng * 1e3) / 1e3, y.k, y.f ? 1 : 0]; if (y.f) r.push(y.f.p); ara.push(r); });
   // Kontrol listesi: il kapağı, ilçe kapakları, seçkin yerler ve her ilin en ünlü 8 yeri
   const kk = (tur, ad, a, kaynak) => a && kontrol.push({ tur, il: il.ad, ad, dosya: a, p: FOTO.get(a).p, w: FOTO.get(a).w, kaynak });
   kk("il", il.ad, il.foto, il.fotoKaynak);
