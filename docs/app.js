@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.6";
+  const SURUM = "5.7";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -195,6 +195,7 @@
     $("rota").hidden = v !== "rota";
     $("rozet").hidden = v !== "rozet";
     $("city").hidden = v !== "city";
+    $("indirSec").hidden = true;
     $("back").hidden = v === "home";
     if (degisti || v === "city") window.scrollTo(0, 0);
   }
@@ -469,7 +470,20 @@
     han: { ad: T("Han ve kervansaraylar"), e: "🐫", k: ["kervansaray", " hani", "bedesten"] },
     muze: { ad: T("Müzeler"), e: "🏛️", k: ["muze"] }
   };
+  // Mevsime göre öneri: ayına göre 4 tema
+  const MEVSIM = [
+    { ay: [12, 1, 2], e: "❄️", ad: TL("Kış önerisi", "Winter picks"), not: TL("Soğukta içeride gezmelik: mağaralar, müzeler, saraylar ve kervansaraylar", "Indoor gems for cold days: caves, museums, palaces and caravanserais"), t: ["magara", "muze", "saray", "han"] },
+    { ay: [3, 4, 5], e: "🌸", ad: TL("İlkbahar önerisi", "Spring picks"), not: TL("Karlar eridi, şelaleler coştu, vadiler yeşerdi", "Snow has melted: waterfalls at full flow, green valleys"), t: ["selale", "kanyon", "park", "kopru"] },
+    { ay: [6, 7, 8], e: "☀️", ad: TL("Yaz önerisi", "Summer picks"), not: TL("Denize, göle ya da serin yaylalara kaç", "Head for the sea, a lake or the cool highlands"), t: ["ada", "gol", "dag", "kanyon"] },
+    { ay: [9, 10, 11], e: "🍂", ad: TL("Sonbahar önerisi", "Autumn picks"), not: TL("Ormanlar renk renk, hava tam yürüyüşlük", "Colourful forests and perfect walking weather"), t: ["park", "gol", "selale", "kale"] }
+  ];
+  function mevsimKart() {
+    const m = MEVSIM.find((x) => x.ay.includes(new Date().getMonth() + 1));
+    $("mevsim").innerHTML = `<div class="mvust"><b>${m.e} ${esc(m.ad)}</b><small>${esc(m.not)}</small></div><div class="mvchips">${m.t.map((k) =>
+      `<button class="tchip" data-go="#/tema/${k}"><i>${TEMA[k].e}</i><span>${esc(TEMA[k].ad)}</span></button>`).join("")}</div>`;
+  }
   function temaChips() {
+    mevsimKart();
     $("temaChips").innerHTML = Object.entries(TEMA).map(([k, t]) =>
       `<button class="tchip" data-go="#/tema/${k}"><i>${t.e}</i><span>${esc(t.ad)}</span></button>`).join("");
   }
@@ -491,6 +505,78 @@
       const c = CATS[x[6]] || CATS.t, il = (IDX.ilBy.get(x[2]) || {}).ad || "";
       return `<li><button class="row res" data-yer="${x[2]}|${x[3]}"><span class="thumb" style="--c:${c.renk}">${icon(x[6] || "t", 20)}</span><span class="rt"><b>${esc(x[1])}</b><small>${esc(il)}</small></span><span class="km">${me ? fmt(km(me, { lat: x[4], lng: x[5] })) : "›"}</span></button></li>`;
     }).join("") : `<li class="empty">${T("Bu türde yer bulunamadı.")}</li>`;
+  }
+  // ---------- internetsiz kullanım: ilin verisini ve fotoğraflarını telefona indir ----------
+  const INDK = "gezi-indirilen", INDC = "gezi-indir";
+  function indirilenler() { try { return JSON.parse(localStorage.getItem(INDK)) || {}; } catch (e) { return {}; } }
+  function indirKaydet(o) { try { localStorage.setItem(INDK, JSON.stringify(o)); } catch (e) {} }
+  let indiriliyor = null;
+  function indirBtn() {
+    const b = $("indirBtn"), k = $("indirSil");
+    const olur = view && view.mode === "il" && "caches" in window && navigator.serviceWorker && navigator.serviceWorker.controller;
+    $("indirSec").hidden = !olur;
+    if (!olur || indiriliyor === view.d.s) return;
+    const ind = indirilenler()[view.d.s];
+    b.disabled = false; k.hidden = !ind;
+    b.classList.toggle("hazir", !!ind);
+    b.innerHTML = ind
+      ? `<b>${TL("✓ İnternetsiz hazır", "✓ Ready offline")}</b><small>${TL(`${ind.n} fotoğraf · ${new Date(ind.t).toLocaleDateString("tr-TR")} · güncellemek için dokun`, `${ind.n} photos · ${new Date(ind.t).toLocaleDateString("en-GB")} · tap to update`)}</small>`
+      : `<b>${TL("📥 İnternetsiz kullan", "📥 Use offline")}</b><small>${TL("Bu ilin yerlerini ve fotoğraflarını telefona indir, çekmeyen yerde de aç", "Save this province's places and photos to your phone")}</small>`;
+  }
+  async function ilIndir() {
+    if (indiriliyor || !view || view.mode !== "il") return;
+    const d = view.d, s = d.s, b = $("indirBtn");
+    indiriliyor = s; b.disabled = true; $("indirSil").hidden = true;
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+    try {
+      const c = await caches.open(INDC);
+      for (const u of [`data/il/${s}.json?v=${IDX.surum}`, `data/en/${s}.json?v=${IDX.surum}`, `data/index.json?v=${SURUM}`, `data/ara.json?v=${IDX.surum}-2`, `yemek.json?v=${SURUM}`]) {
+        try { const r = await fetch(u); if (r.ok) await c.put(u, r); } catch (e) {}
+      }
+      const set = new Set();
+      const ekle = (f, W) => { const u = foto(f, W); if (u) set.add(u); };
+      ekle(d.f, 960); if (d.kapak) ekle(d.kapak, 960);
+      d.yerler.forEach((y) => { ekle(y.f, 250); ekle(y.f, 960); });
+      d.ilceler.forEach((z) => ekle(z.f, 250));
+      const list = [...set]; let i = 0, tamam = 0, ok = 0;
+      const goster = () => { if (view && view.mode === "il" && view.d.s === s) b.innerHTML = `<b>${TL("İndiriliyor…", "Downloading…")} ${Math.round((tamam / list.length) * 100)}%</b><small>${tamam} / ${list.length} ${TL("fotoğraf", "photos")}</small><span class="bar"><i style="width:${(tamam / list.length) * 100}%"></i></span>`; };
+      goster();
+      const isci = async () => {
+        while (i < list.length) {
+          const u = list[i++];
+          try {
+            if (!(await c.match(u, { ignoreVary: true }))) {
+              let r = await fetch(u, { mode: "cors" }).catch(() => null);
+              if (!r || !r.ok) r = await fetch(u, { mode: "no-cors" });
+              if (r.ok || r.type === "opaque") { await c.put(u, r); ok++; }
+            } else ok++;
+          } catch (e) {}
+          tamam++; if (tamam % 3 === 0 || tamam === list.length) goster();
+        }
+      };
+      await Promise.all([1, 2, 3, 4, 5, 6].map(isci));
+      const o = indirilenler(); o[s] = { t: Date.now(), n: ok }; indirKaydet(o);
+      toast(ok < list.length * 0.8 ? TL(`${d.ad} indirildi, ama ${list.length - ok} fotoğraf alınamadı. İnternet iyiyken tekrar dene.`, `${d.ad} saved, but ${list.length - ok} photos failed. Try again on a better connection.`)
+        : TL(`${d.ad} artık internetsiz de açılır. Harita için yine internet gerekir.`, `${d.ad} now works offline. The map still needs internet.`));
+    } catch (e) {
+      console.error(e); toast(TL("İndirme olmadı, telefonda yer kalmamış olabilir.", "Download failed, your phone may be out of space."));
+    }
+    indiriliyor = null; indirBtn();
+  }
+  async function ilIndirSil() {
+    if (!view || view.mode !== "il") return;
+    const d = view.d;
+    try {
+      const c = await caches.open(INDC);
+      const sil = new Set();
+      d.yerler.forEach((y) => { sil.add(foto(y.f, 250)); sil.add(foto(y.f, 960)); });
+      d.ilceler.forEach((z) => sil.add(foto(z.f, 250)));
+      // Başka bir indirilmiş ilde de kullanılan fotoğraflar (ör. il kapağı) kalsın diye yalnızca bu ilinkileri sil
+      await Promise.all([...sil].filter(Boolean).map((u) => c.delete(u, { ignoreVary: true })));
+    } catch (e) {}
+    const o = indirilenler(); delete o[d.s]; indirKaydet(o);
+    toast(TL(`${d.ad} telefondan kaldırıldı.`, `${d.ad} removed from your phone.`));
+    indirBtn();
   }
   // ---------- hazır gezi rotaları ----------
   let ROTA = null;
@@ -763,6 +849,7 @@
     $("tabBtnIlce").textContent = `${T("İlçeler")} (${d.ilceler.length})`;
     $("tabBtnYer").textContent = `${T("Gezilecek yerler")} (${d.yerler.length})`;
     havaGoster(IDX.ilBy.get(d.s) || d); yemekGoster(d);
+    indirBtn();
     places = d.yerler; cat = "hepsi"; shown = 60; fitted = false;
     ilAraSifirla();
     sortMode = me ? "yakin" : "oner";
@@ -1011,6 +1098,8 @@
   $("dDinle").addEventListener("click", dinle);
   $("gezBtn").addEventListener("click", () => { $("gezList").hidden = !$("gezList").hidden; });
   $("karneBtn").addEventListener("click", karne);
+  $("indirBtn").addEventListener("click", ilIndir);
+  $("indirSil").addEventListener("click", ilIndirSil);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDetail(); });
   window.addEventListener("popstate", () => { if (!$("sheet").hidden) hideSheet(); });
   window.addEventListener("hashchange", route);
