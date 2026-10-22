@@ -387,19 +387,27 @@ rapor("Türkiye geneli aday yer:", HAM.size);
 const MADDESIZ = "Q34038 Q23397 Q35509 Q150784 Q40080 Q23442 Q39816 Q46169 Q179049 Q177380 Q23413 Q839954 Q15661340 Q12280 Q12518 Q33506 Q8502".split(" ");
 {
   const ek = new Map(); const trD = new Map();
-  try {
-    const rows = await sparql(`SELECT ${SECIM} ?trD WHERE {
-      VALUES ?cls { ${MADDESIZ.map((q) => "wd:" + q).join(" ")} }
-      ?p wdt:P31 ?cls ; wdt:P17 wd:Q43 ; wdt:P18 ?img ; wdt:P625 ?coord ; wikibase:sitelinks ?sl ; rdfs:label ?trL . FILTER(LANG(?trL) = "tr")
-      FILTER NOT EXISTS { ?a1 schema:about ?p ; schema:isPartOf <https://tr.wikipedia.org/> }
-      FILTER NOT EXISTS { ?a2 schema:about ?p ; schema:isPartOf <https://en.wikipedia.org/> }
-      FILTER NOT EXISTS { ?p wdt:P576 [] }
-      FILTER NOT EXISTS { ?p wdt:P361 [] }
-      OPTIONAL { ?p schema:description ?trD . FILTER(LANG(?trD) = "tr") }
-      ${YER_EK} }`);
-    satirlariTopla(rows, ek);
-    for (const b of rows) if (val(b, "trD")) trD.set(qid(val(b, "p")), val(b, "trD"));
-  } catch (e) { rapor("  UYARI maddesiz yer sorgusu:", e.message.slice(0, 100)); }
+  async function maddesizSorgu(grup) {
+    try {
+      const rows = await sparql(`SELECT ${SECIM} ?trD WHERE {
+        VALUES ?cls { ${grup.map((q) => "wd:" + q).join(" ")} }
+        ?p wdt:P31 ?cls ; wdt:P17 wd:Q43 ; wdt:P18 ?img ; wdt:P625 ?coord ; wikibase:sitelinks ?sl ; rdfs:label ?trL . FILTER(LANG(?trL) = "tr")
+        FILTER NOT EXISTS { ?a1 schema:about ?p ; schema:isPartOf <https://tr.wikipedia.org/> }
+        FILTER NOT EXISTS { ?a2 schema:about ?p ; schema:isPartOf <https://en.wikipedia.org/> }
+        FILTER NOT EXISTS { ?p wdt:P576 [] }
+        FILTER NOT EXISTS { ?p wdt:P361 [] }
+        OPTIONAL { ?p schema:description ?trD . FILTER(LANG(?trD) = "tr") }
+        ${YER_EK} }`, 0, true);
+      satirlariTopla(rows, ek);
+      for (const b of rows) if (val(b, "trD")) trD.set(qid(val(b, "p")), val(b, "trD"));
+    } catch (e) {
+      if (!e.zaman || grup.length === 1) { rapor("  UYARI maddesiz yer sorgusu:", grup.join(","), e.message.slice(0, 80)); return; }
+      const y = Math.ceil(grup.length / 2);
+      await maddesizSorgu(grup.slice(0, y)); await maddesizSorgu(grup.slice(y));
+    }
+    await sleep(500);
+  }
+  for (const grup of parca(MADDESIZ, 4)) await maddesizSorgu(grup);
   let n = 0;
   for (const [q, o] of ek) if (!HAM.has(q) && o.ad && !/^Q\d+$/.test(o.ad)) { o.wd = 1; o.aciklama = trD.get(q) || ""; HAM.set(q, o); n++; }
   rapor("maddesiz ama fotoğraflı aday:", n);
@@ -552,7 +560,7 @@ for (const x of ikinci) {
 // 3. tur: Wikidata araması (Türkçe ad; maddesi olmayan kayıtlar da)
 for (const x of ucuncu) {
   const kok = x.w.replace(/\s*\(.*\)$/, "");
-  const j = await fetch("https://www.wikidata.org/w/api.php?" + new URLSearchParams({ action: "wbsearchentities", format: "json", language: "tr", uselang: "tr", type: "item", limit: "5", search: kok }), { headers: { "User-Agent": UA } }).then((r) => r.json()).catch(() => ({}));
+  const j = await api("www.wikidata.org", { action: "wbsearchentities", language: "tr", uselang: "tr", type: "item", limit: "5", search: kok }).catch((e) => { rapor("  UYARI Wikidata araması:", kok, String(e).slice(0, 60)); return {}; });
   x.wd = ((j && j.search) || []).filter((r) => benzer(r.label || "", kok) && (!BASLIK_RED.test(r.label || "") || BASLIK_RED.test(kok))).map((r) => r.id);
   await sleep(200);
 }
