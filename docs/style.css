@@ -272,3 +272,20 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .indirbtn .bar i{background:#fff}
 .indirbtn:disabled{cursor:progress}
 .indirsil{margin-top:4px;font-size:13px}
+/* v5.9: 1 günlük plan + paylaş/beğeni */
+.plan{margin:6px 0 14px;border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:14px}
+.plust{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.plust h3{margin:0;font-size:17px}
+.plust .linkbtn{flex:none;font-size:13px}
+.plalt{display:block;color:var(--muted);font-size:13px;margin:2px 0 8px}
+.plist{list-style:none;margin:0 0 10px;padding:0;position:relative}
+.plist:before{content:"";position:absolute;left:21px;top:14px;bottom:14px;border-left:2px dashed color-mix(in srgb,var(--cobalt) 45%,transparent)}
+.plist li{position:relative}
+.plist .row{grid-template-columns:44px 56px 1fr;padding-left:0;margin-bottom:6px}
+.plist time{flex:none;width:44px;font-size:12px;font-weight:800;color:var(--cobalt);background:var(--surface);position:relative;z-index:1;text-align:center}
+.plyemek{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:14px;color:var(--muted)}
+.plyemek time{color:var(--sesame)}
+.plyemek b{color:var(--fg)}
+.plan .rotaac{display:block;text-align:center}
+.paylasbtn{border:0;background:linear-gradient(135deg,var(--cobalt),var(--teal));color:#fff;border-radius:14px;padding:14px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;width:100%;margin-top:10px}
+.tsonra{display:block;margin:10px auto 0;font-size:13px;color:var(--muted)}

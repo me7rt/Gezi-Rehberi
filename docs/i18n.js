@@ -22,6 +22,7 @@
     "Konumunu aç, sana en yakın gezilecek yerleri sıralayalım": "Turn on location to see the nearest places to visit",
     "Sana en yakın gezilecek yerler, canlı mesafeyle": "The nearest places to visit, with live distance",
     "Telefondan kaldır": "Remove from phone",
+    "📣 Rota Cepte'yi arkadaşlarına öner": "📣 Recommend Rota Cepte to friends",
     "Keşfet": "Explore", "Hazır rotalar": "Ready-made routes", "Gezi haritan": "Your travel map",
     "Gideceğim yerler": "My wish list", "81 il": "81 provinces", "Yükleniyor…": "Loading…",
     "📍 Burada olmayan bir yer mi biliyorsun?": "📍 Know a place that's missing?",
