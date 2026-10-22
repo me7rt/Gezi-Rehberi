@@ -1,5 +1,5 @@
 /* Rota Cepte · © 2026 Mert Turanlıoğlu · Çevrimdışı açılış (önce internet, yoksa kayıtlı kopya) */
-const C = "gezi-5.7";
+const C = "gezi-5.8";
 const IND = "gezi-indir"; // "İnternetsiz kullan" ile indirilen il verisi ve fotoğraflar (sürüm değişse de silinmez)
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(
