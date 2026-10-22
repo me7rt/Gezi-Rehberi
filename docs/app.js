@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.13";
+  const SURUM = "5.14";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -898,13 +898,13 @@
       });
     }
     if (ARA) {
-      for (const [b, ad, ils, j] of ARA) if (b.includes(s)) res.push({ p: b.startsWith(s) ? 2 : 5, yer: `${ils}|${j}`, k: "t", ad, alt: (IDX.ilBy.get(ils) || {}).ad || "" });
+      for (const [b, ad, ils, j, , , k, , fp] of ARA) if (b.includes(s)) res.push({ p: b.startsWith(s) ? 2 : 5, yer: `${ils}|${j}`, k: CATS[k] ? k : "t", fp, ad, alt: [(IDX.ilBy.get(ils) || {}).ad, CATS[k] && CATS[k].ad].filter(Boolean).join(" · ") });
     } else loadAra();
     res.sort((a, b) => a.p - b.p || a.ad.localeCompare(b.ad, "tr"));
     $("homeMain").hidden = true; $("results").hidden = false;
     $("results").innerHTML = res.length
       ? res.slice(0, 80).map((r) =>
-        `<li><button class="row res" ${r.go ? `data-go="${r.go}"` : `data-yer="${r.yer}"`}><span class="thumb" style="--c:${r.k === "t" ? CATS.t.renk : BOLGE_RENK}">${icon(r.k, 20)}</span><span class="rt"><b>${esc(r.ad)}</b><small>${esc(r.alt)}</small></span><span class="km">›</span></button></li>`).join("")
+        `<li><button class="row res" ${r.go ? `data-go="${r.go}"` : `data-yer="${r.yer}"`}>${r.fp ? thumb({ p: r.fp, w: 1e5 }, r.k) : `<span class="thumb" style="--c:${r.yer && CATS[r.k] ? CATS[r.k].renk : BOLGE_RENK}">${icon(r.k, 20)}</span>`}<span class="rt"><b>${esc(r.ad)}</b><small>${esc(r.alt)}</small></span><span class="km">›</span></button></li>`).join("")
       : `<li class="empty">${ARA ? T("Sonuç bulunamadı.") : T("Aranıyor…")}</li>`;
   }
 
