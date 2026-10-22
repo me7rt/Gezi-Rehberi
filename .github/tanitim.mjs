@@ -139,7 +139,19 @@ await git2("#/il/antalya"); await bekle(2000); await resimler(); await bekle(100
 // iframe içinde servis çalışanı devreye girmezse buton gizli kalır; filmde yine de görünsün
 await A(() => { const s = document.getElementById("indirSec"), b = document.getElementById("indirBtn"); if (s.hidden) { s.hidden = false; b.innerHTML = window.DIL === "en" ? "<b>📥 Use offline</b><small>Save this province's places and photos to your phone</small>" : "<b>📥 İnternetsiz kullan</b><small>Bu ilin yerlerini ve fotoğraflarını telefona indir, çekmeyen yerde de aç</small>"; } });
 await kayEl("#indirSec", 1400, 260); await bekle(1200);
-await dokun("#indirBtn"); await bekle(5000);
+// Filmde gerçek indirme yerine aynı görünümde ilerleme canlandırması (iframe'de servis çalışanı olmayabilir)
+await A(() => {
+  const b = document.getElementById("indirBtn"), r = b.getBoundingClientRect(), d = document.createElement("div"), en = window.DIL === "en";
+  d.style.cssText = `position:fixed;z-index:99999;left:${r.left + r.width / 2 - 28}px;top:${r.top + r.height / 2 - 28}px;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.55);border:3px solid rgba(31,79,163,.8);pointer-events:none;transition:transform .5s,opacity .5s`;
+  document.body.appendChild(d); setTimeout(() => { d.style.transform = "scale(1.6)"; d.style.opacity = "0"; }, 350); setTimeout(() => d.remove(), 900);
+  const N = 214; let i = 0;
+  setTimeout(() => { const t = setInterval(() => {
+    i = Math.min(N, i + 7); const y = Math.round((i / N) * 100);
+    b.innerHTML = `<b>${en ? "Downloading…" : "İndiriliyor…"} ${y}%</b><small>${i} / ${N} ${en ? "photos" : "fotoğraf"}</small><span class="bar"><i style="width:${y}%"></i></span>`;
+    if (i >= N) { clearInterval(t); setTimeout(() => { b.classList.add("hazir"); b.innerHTML = `<b>${en ? "✓ Ready offline" : "✓ İnternetsiz hazır"}</b><small>${N} ${en ? "photos · works without internet" : "fotoğraf · internetsiz de açılır"}</small>`; }, 300); }
+  }, 90); }, 500);
+});
+await bekle(6500);
 // 10) kapanış
 await p.evaluate(() => { document.getElementById("son").classList.add("ac"); });
 await bekle(6500);
