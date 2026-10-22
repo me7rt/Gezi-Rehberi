@@ -255,3 +255,17 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .ozelgun b{font-size:15px;line-height:1.35}
 .ozelgun small{font-size:13px;opacity:.9;font-weight:600}
 .ozelgun.yas{background:linear-gradient(120deg,#1b1f24,#3a4048);box-shadow:none}
+/* v5.7: mevsim önerisi + internetsiz kullanım */
+.mevsim{border:1px solid var(--line);background:linear-gradient(135deg,color-mix(in srgb,var(--green) 12%,var(--surface)),var(--surface));border-radius:16px;padding:12px;margin-bottom:10px}
+.mvust b{display:block;font-size:16px}
+.mvust small{display:block;color:var(--muted);font-size:13px;margin:2px 0 10px}
+.mvchips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mvchips .tchip{padding:8px 10px;font-size:13px}
+.indirsec{margin-top:12px}
+.indirbtn{display:block;width:100%;text-align:left;border:1px dashed var(--green);background:var(--surface);color:var(--fg);border-radius:14px;padding:11px 14px;font:inherit;cursor:pointer}
+.indirbtn b{display:block;font-size:15px}
+.indirbtn small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.indirbtn .bar{margin-top:8px}
+.indirbtn.hazir{border-style:solid;background:color-mix(in srgb,var(--green) 10%,var(--surface))}
+.indirbtn:disabled{cursor:progress}
+.indirsil{margin-top:4px;font-size:13px}
