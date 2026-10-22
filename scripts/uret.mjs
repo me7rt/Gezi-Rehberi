@@ -51,11 +51,13 @@ const KOTU_KELIME = new Set(("map maps harita haritasi haritalari karte carte ma
   "portrait portre scheme layout floorplan sketch drawing cizim illustration engraving gravur painting lithograph postcard kartpostal " +
   "census population administrative idari blank outline coa ilceleri districts position astronaut worldview").split(/\s+/));
 const KOTU_PARCA = ["coat of arms", "location map", "harita", "locator", "landsat", "sentinel", "satellit", "lokasyon", "topograf",
-  "logo", "emblem", "amblem", "bayrak", "flag", "grundriss", "floor plan", "plan of", "kartpostal", "postcard"];
+  "logo", "emblem", "amblem", "bayrak", "flag", "grundriss", "floor plan", "plan of", "kartpostal", "postcard",
+  "kiepert", "putzger", "munzkabinett", "uydu", "karte ", "inscription", "exhibition"];
 const ascii = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ı/g, "i");
 function dosyaKotu(name) {
   const n = ascii(name.replace(/\.[A-Za-z0-9]+$/, "")).replace(/_/g, " ");
   if (/\biss\d|\bsts-\d/.test(n)) return true;
+  if (/map$|map\s|map\d/.test(n)) return true;
   for (const t of n.split(/[^a-z0-9]+/)) if (KOTU_KELIME.has(t)) return true;
   for (const p of KOTU_PARCA) if (n.includes(p)) return true;
   return false;
@@ -664,6 +666,8 @@ rapor("fotoğraf bilgisi alınan dosya:", FOTO.size, "| uygun:", [...FOTO.keys()
 
 // Commons kategorisinden ya da yakındaki fotoğraflardan yedek bulma
 const istenmeyenAd = new Set("ve bir the of in de da ile camii cami kalesi kale müzesi muzesi köprüsü koprusu kilisesi han hanı hamamı türbesi medresesi çeşmesi dağı gölü şelalesi mağarası milli parkı parki tabiat".split(" ").map(ascii));
+// Yedek kaynaklarda (kategori, arama, yakın) 1930'dan eski tarihli dosyalar çoğunlukla gravür, eski harita ya da soluk eski fotoğraf
+const yedekUygun = (a) => { const f = FOTO.get(a); return fotoUygun(a) && !(f.y && f.y < 1930); };
 function adPuan(dosya, ad) {
   const d = ascii(dosya); let p = 0;
   for (const k of ascii(ad).split(/[^a-z0-9]+/)) if (k.length > 3 && !istenmeyenAd.has(k) && d.includes(k)) p += 2;
@@ -676,7 +680,7 @@ async function kategoriFoto(cat, ad) {
   for (const pg of (j.query && j.query.pages) || []) {
     const a = pg.title.replace(/^File:/, ""); const ii = pg.imageinfo && pg.imageinfo[0];
     if (!ii) continue; if (!FOTO.has(a)) FOTO.set(a, fotoKaydi(a, ii));
-    if (fotoUygun(a)) { const f = FOTO.get(a); out.push({ a, puan: adPuan(a, ad) + (f.w >= f.h ? 1 : 0) + (f.w >= 1200 ? 1 : 0) }); }
+    if (yedekUygun(a)) { const f = FOTO.get(a); out.push({ a, puan: adPuan(a, ad) + (f.w >= f.h ? 1 : 0) + (f.w >= 1200 ? 1 : 0) }); }
   }
   out.sort((x, y) => y.puan - x.puan);
   return out.map((x) => x.a);
@@ -692,13 +696,13 @@ async function commonsAra(ad, ek) {
   const j = await api("commons.wikimedia.org", { action: "query", list: "search", srnamespace: "6", srlimit: "20", srsearch: `${ad} ${ek || ""}`.trim() }).catch(() => ({}));
   const adlar = ((j.query && j.query.search) || []).map((x) => x.title.replace(/^File:/, "")).filter((a) => adTam(a, ad));
   await fotoBilgi(adlar);
-  return adlar.filter(fotoUygun).sort((x, y) => (FOTO.get(y).w >= FOTO.get(y).h ? 1 : 0) - (FOTO.get(x).w >= FOTO.get(x).h ? 1 : 0));
+  return adlar.filter(yedekUygun).sort((x, y) => (FOTO.get(y).w >= FOTO.get(y).h ? 1 : 0) - (FOTO.get(x).w >= FOTO.get(x).h ? 1 : 0));
 }
 async function yakinFoto(lat, lng, ad) {
   const j = await api("commons.wikimedia.org", { action: "query", list: "geosearch", gsnamespace: "6", gscoord: `${lat}|${lng}`, gsradius: "400", gslimit: "30" });
   const adlar = ((j.query && j.query.geosearch) || []).map((g) => g.title.replace(/^File:/, ""));
   await fotoBilgi(adlar);
-  const ok = adlar.filter(fotoUygun);
+  const ok = adlar.filter(yedekUygun);
   ok.sort((x, y) => adPuan(y, ad) - adPuan(x, ad));
   return ok;
 }
