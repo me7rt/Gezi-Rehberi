@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.8";
+  const SURUM = "5.9";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -196,6 +196,7 @@
     $("rozet").hidden = v !== "rozet";
     $("city").hidden = v !== "city";
     $("indirSec").hidden = true;
+    $("plan").hidden = true;
     $("back").hidden = v === "home";
     if (degisti || v === "city") window.scrollTo(0, 0);
   }
@@ -578,6 +579,90 @@
     toast(TL(`${d.ad} telefondan kaldırıldı.`, `${d.ad} removed from your phone.`));
     indirBtn();
   }
+  // ---------- 1 günlük plan: ilin öne çıkan yerlerinden birbirine yakın 5 durak ----------
+  let planBas = 0;
+  function planYap(d) {
+    // Semt/ilçe/bölge adları durak olmasın (ör. "Osmaneli", "Kapadokya")
+    const genel = new Set([d.ad, "Kapadokya", ...d.ilceler.map((z) => z.ad)]);
+    const ad = d.yerler.filter((y) => y.lat != null && y.f && y.k !== "s" && !genel.has(y.ad)).sort((a, b) => (b.one ? 1 : 0) - (a.one ? 1 : 0) || a.j - b.j).slice(0, 30);
+    if (ad.length < 2) return null;
+    for (let t = 0; t < ad.length; t++) {
+      const bas = ad[(planBas + t) % ad.length];
+      // Başlangıca en fazla 40 km uzaktakiler: bir günde gezilebilsin
+      const kalan = ad.filter((x) => x !== bas && km(bas, x) <= 40), sira = [bas];
+      let cur = bas;
+      while (sira.length < 5 && kalan.length) {
+        let bi = 0;
+        kalan.forEach((x, i) => { if (km(cur, x) < km(cur, kalan[bi])) bi = i; });
+        cur = kalan.splice(bi, 1)[0]; sira.push(cur);
+      }
+      if (sira.length >= 3 || (sira.length >= 2 && t === ad.length - 1)) { planBas = (planBas + t) % ad.length; return sira; }
+    }
+    return null;
+  }
+  async function planGoster(d) {
+    const kutu = $("plan");
+    const s = planYap(d);
+    if (!s) { kutu.hidden = true; return; }
+    try { if (!YEMEK) YEMEK = await getJSON(`yemek.json?v=${SURUM}`); } catch (e) {}
+    if (!view || view.mode !== "il" || view.d.s !== d.s) return;
+    const yemek = YEMEK && YEMEK[d.s] && YEMEK[d.s][0];
+    let top = 0; for (let i = 1; i < s.length; i++) top += km(s[i - 1], s[i]);
+    const saat = ["09:00", "11:00", "14:00", "16:00", "18:00"];
+    const nk = (x) => x.lat + "," + x.lng, son = s[s.length - 1], ara = s.slice(0, -1).map(nk).join("|");
+    kutu.innerHTML = `<div class="plust"><h3>🗓️ ${TL(esc(d.ad) + ekDe(d.ad) + " 1 günlük plan", "A day in " + esc(d.ad))}</h3><button class="linkbtn" id="planYeni">🔀 ${TL("Başka plan", "Another plan")}</button></div>
+      <small class="plalt">${TL(`${s.length} durak · aralarda toplam ~${fmt(top * 1.3)} yol`, `${s.length} stops · ~${fmt(top * 1.3)} of driving in between`)}</small>
+      <ol class="plist">${s.map((p, i) => `${i === 2 ? `<li class="plyemek"><time>13:00</time><span>🍽️ ${TL("Öğle arası", "Lunch break")}${yemek ? `: <b>${esc(yemek)}</b> ${TL("dene", "")}` : ""}</span></li>` : ""}<li><button class="row" data-s="${p.ilS}" data-j="${p.j}"><time>${saat[i]}</time>${thumb(p.f, p.k)}<span class="rt"><b>${esc(adi(p))}</b><small>${i ? "↓ " + fmt(km(s[i - 1], p) * 1.3) + TL(" yol", " drive") : esc(p.ilce || d.ad)}</small></span></button></li>`).join("")}</ol>
+      <a class="btn primary rotaac" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${nk(son)}&waypoints=${encodeURIComponent(ara)}&travelmode=driving">🧭 ${TL("Planı Google Maps'te aç", "Open plan in Google Maps")}</a>`;
+    kutu.hidden = false;
+  }
+  // ---------- uygulamayı paylaş + beğeni sorusu ----------
+  const ANDROID = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === "android");
+  const PLAY = "https://play.google.com/store/apps/details?id=io.github.me7rt.rotacepte";
+  const SITE = "https://me7rt.github.io/Rota-Cepte/";
+  function disAc(url) { const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove(); }
+  async function uygulamaPaylas() {
+    const link = ANDROID ? PLAY : SITE;
+    const metin = TL("Türkiye'de gezilecek yerler için süper bir uygulama: Rota Cepte. 81 il, harita, hazır rotalar, internetsiz kullanım. ", "A great app for exploring Türkiye: Rota Cepte. 81 provinces, maps, ready-made routes, works offline. ");
+    const P = window.Capacitor && window.Capacitor.Plugins;
+    try {
+      if (P && P.Share) return await P.Share.share({ title: "Rota Cepte", text: metin, url: link });
+      if (navigator.share) return await navigator.share({ title: "Rota Cepte", text: metin, url: link });
+      await navigator.clipboard.writeText(metin + link); toast(TL("Bağlantı kopyalandı, istediğin yere yapıştır.", "Link copied."));
+    } catch (e) {}
+  }
+  function puanSor() {
+    let o = { n: 0 };
+    try { o = JSON.parse(localStorage.getItem("gezi-puan")) || o; } catch (e) { return; }
+    o.n++;
+    const kayit = () => { try { localStorage.setItem("gezi-puan", JSON.stringify(o)); } catch (e) {} };
+    // 4. açılıştan sonra, listesine yer eklemiş ya da bir yere gitmiş kişiye bir kez sor; "Sonra" derse 6 açılış sonra tekrar
+    if (o.bitti || o.n < (o.sonra || 4) || (!favs().length && !gittiklerim().length)) { kayit(); return; }
+    kayit();
+    setTimeout(() => {
+      if (document.querySelector(".tanit") || !$("sheet").hidden) return;
+      o.sonra = o.n + 6; kayit();
+      const d = document.createElement("div"); d.className = "tanit";
+      const kapat = () => { d.classList.add("out"); setTimeout(() => d.remove(), 300); };
+      const adim1 = `<div class="tkart"><div class="temo">😍</div><h2>${TL("Rota Cepte'yi sevdin mi?", "Enjoying Rota Cepte?")}</h2><p>${TL("Bu uygulamayı tek başıma geliştiriyorum. Fikrin benim için çok değerli.", "I build this app on my own. Your opinion means a lot.")}</p><div class="tbtn"><button class="linkbtn" data-k="hayir">${TL("Pek değil", "Not really")}</button><button class="btn primary" data-k="evet">${TL("Evet, sevdim!", "Yes, I love it!")}</button></div><button class="linkbtn tsonra" data-k="sonra">${TL("Sonra sor", "Ask me later")}</button></div>`;
+      d.innerHTML = adim1;
+      d.addEventListener("click", (e) => {
+        const k = e.target.closest("[data-k]"); if (e.target === d) return kapat(); if (!k) return;
+        const v = k.dataset.k;
+        if (v === "sonra" || v === "kapat") return kapat();
+        if (v === "evet") {
+          o.bitti = 1; kayit();
+          d.innerHTML = `<div class="tkart"><div class="temo">⭐</div><h2>${TL("Çok sevindim!", "Awesome!")}</h2><p>${ANDROID ? TL("Play Store'da 5 yıldız ve kısa bir yorum bırakırsan, başka gezginler de bizi bulur.", "A 5-star rating on Google Play helps other travellers find us.") : TL("Arkadaşlarınla paylaşırsan çok mutlu olurum.", "Sharing it with friends would make my day.")}</p><div class="tbtn"><button class="linkbtn" data-k="kapat">${T("Kapat")}</button><button class="btn primary" data-k="${ANDROID ? "yildiz" : "paylas"}">${ANDROID ? "⭐ " + TL("Puan ver", "Rate") : "📣 " + TL("Paylaş", "Share")}</button></div></div>`;
+        } else if (v === "hayir") {
+          o.bitti = 1; kayit();
+          d.innerHTML = `<div class="tkart"><div class="temo">🛠️</div><h2>${TL("Neyi düzeltelim?", "What should we improve?")}</h2><p>${TL("Eksik ya da hoşuna gitmeyen ne varsa yaz, ilk güncellemede bakayım.", "Tell me what's missing or annoying and I'll look at it in the next update.")}</p><div class="tbtn"><button class="linkbtn" data-k="kapat">${T("Kapat")}</button><button class="btn primary" data-k="yaz">✉️ ${TL("Görüş yaz", "Send feedback")}</button></div></div>`;
+        } else if (v === "yildiz") { disAc(PLAY); kapat(); }
+        else if (v === "paylas") { uygulamaPaylas(); kapat(); }
+        else if (v === "yaz") { location.href = `mailto:${ILETISIM}?subject=${encodeURIComponent("Rota Cepte görüş")}&body=${encodeURIComponent("\n\n(Sürüm " + SURUM + ")")}`; kapat(); }
+      });
+      document.body.appendChild(d);
+    }, 25000);
+  }
   // ---------- hazır gezi rotaları ----------
   let ROTA = null;
   const rt = (r, k) => (DIL === "en" && r[k + "_en"]) || r[k];
@@ -849,6 +934,7 @@
     $("tabBtnIlce").textContent = `${T("İlçeler")} (${d.ilceler.length})`;
     $("tabBtnYer").textContent = `${T("Gezilecek yerler")} (${d.yerler.length})`;
     havaGoster(IDX.ilBy.get(d.s) || d); yemekGoster(d);
+    planBas = 0; planGoster(d);
     indirBtn();
     places = d.yerler; cat = "hepsi"; shown = 60; fitted = false;
     ilAraSifirla();
@@ -1099,6 +1185,13 @@
   $("gezBtn").addEventListener("click", () => { $("gezList").hidden = !$("gezList").hidden; });
   $("karneBtn").addEventListener("click", karne);
   $("indirBtn").addEventListener("click", ilIndir);
+  $("plan").addEventListener("click", (e) => {
+    if (e.target.closest("#planYeni")) { planBas++; planGoster(view.d); return; }
+    const b = e.target.closest(".row"); if (!b) return;
+    const d = IL.get(b.dataset.s); if (d) openDetail(d.yerler[+b.dataset.j]);
+  });
+  $("paylasBtn").addEventListener("click", uygulamaPaylas);
+  puanSor();
   $("indirSil").addEventListener("click", ilIndirSil);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDetail(); });
   window.addEventListener("popstate", () => { if (!$("sheet").hidden) hideSheet(); });
