@@ -1,0 +1,30 @@
+name: Tanitim filmi
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  film:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Playwright ve yazı tipleri
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-color-emoji ffmpeg
+          npm install --no-save --no-audit --no-fund playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: Türkçe film
+        run: DIL=tr node .github/tanitim.mjs && mkdir -p cikti && mv tanitim/*.mp4 cikti/
+      - name: İngilizce film
+        run: DIL=en node .github/tanitim.mjs && mv tanitim/*.mp4 cikti/
+      - name: tanitim-video dalina koy
+        run: |
+          cd cikti
+          git init -q -b tanitim-video
+          git config user.name "Mert Turanlıoğlu"
+          git config user.email "me7rtt@gmail.com"
+          git add . && git commit -qm "Tanıtım filmi"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tanitim-video
