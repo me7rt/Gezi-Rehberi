@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.9";
+  const SURUM = "5.9.1";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -706,7 +706,7 @@
     $("rotaAc").hidden = !ds.length;
   }
   // ---------- yer öner (e-posta taslağı açar) ----------
-  const ILETISIM = "me7rtt@gmail.com";
+  const ILETISIM = "mertturanlioglu.apps@gmail.com";
   function yerOner() {
     const il = view && view.d ? view.d.ad : "";
     const d = document.createElement("div"); d.className = "tanit";
