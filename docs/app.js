@@ -3,7 +3,7 @@
    Veri docs/data altında; GitHub Actions'ta Wikidata, Vikipedi ve Commons'tan hazırlanır (scripts/uret.mjs). */
 (function () {
   "use strict";
-  const SURUM = "5.9.1";
+  const SURUM = "5.10";
   // MapTiler harita anahtarı (boşsa OpenStreetMap kullanılır)
   const HARITA_ANAHTAR = "pI5pMuHAI4gLw3aqy35G";
 
@@ -93,7 +93,8 @@
       const en = await getJSON(`data/en/${s}.json?v=${IDX.surum}`).catch(() => null);
       if (en) {
         // Vikipedi girişlerindeki parantezleri (okunuş, Türkçe adı) at: "Cappadocia (; Turkish: Kapadokya) is..." -> "Cappadocia is..."
-        const sade = (t) => (t || "").replace(/\s*\([^()]*\)/g, "").replace(/\s+([,.])/g, "$1");
+        // Okunuş parantezlerini at; Vikipedi özeti bazen kapanmayan parantez bırakır: "Cyzicus ( SIZ-ik-əs; ...; was an ..."
+        const sade = (t) => (t || "").replace(/\s*\([^()]*\)/g, "").replace(/\s*\((?![^()]*\))[^()]*?;\s+(?=[a-z])/, " ").replace(/\s+([,.])/g, "$1");
         d.me = sade(en.m); d.we = en.w;
         d.yerler.forEach((y) => { const e = en.y && en.y[y.q]; if (e) { y.ae = e[0]; y.me = sade(e[1]); y.we = "en:" + e[2]; } });
       }
@@ -524,6 +525,8 @@
       ? `<b>${TL("✓ İnternetsiz hazır", "✓ Ready offline")}</b><small>${TL(`${ind.n} fotoğraf · ${new Date(ind.t).toLocaleDateString("tr-TR")} · güncellemek için dokun`, `${ind.n} photos · ${new Date(ind.t).toLocaleDateString("en-GB")} · tap to update`)}</small>`
       : `<b>${TL("📥 İnternetsiz kullan", "📥 Use offline")}</b><small>${TL("Bu ilin yerlerini ve fotoğraflarını telefona indir, çekmeyen yerde de aç", "Save this province's places and photos to your phone")}</small>`;
   }
+  // İlk açılışta servis çalışanı sayfayı devralınca "İnternetsiz kullan" düğmesi hemen görünsün
+  if (navigator.serviceWorker) navigator.serviceWorker.addEventListener("controllerchange", () => { try { indirBtn(); } catch (e) {} });
   async function ilIndir() {
     if (indiriliyor || !view || view.mode !== "il") return;
     const d = view.d, s = d.s, b = $("indirBtn");
@@ -955,9 +958,16 @@
     show("city");
     $("eyebrow").textContent = `${d.ad} · ${T("İlçe")}`;
     $("title").textContent = z.ad;
-    renderHero({ f: z.f, m: DIL === "en" ? "" : z.m, w: DIL === "en" ? "" : z.w, facts: [nufusBilgi(z), alanBilgi(z), [T("Gezilecek yer"), z.n]] });
+    // Vikipedi metni olmayan ilçeler için kısa bilgi cümlesi
+    const ilceMetin = DIL === "en"
+      ? `${z.ad} is a district of ${d.ad} Province, Türkiye.${z.nuf ? ` Population: ${nf(z.nuf)}${z.nufY ? " (" + z.nufY + ")" : ""}.` : ""}`
+      : z.m || `${z.ad}, ${d.ad} iline bağlı bir ilçedir.${z.nuf ? ` Nüfusu ${nf(z.nuf)}${z.nufY ? " (" + z.nufY + ")" : ""}.` : ""}${z.alan ? ` Yüzölçümü ${nf(z.alan)} km².` : ""}`;
+    renderHero({ f: z.f, m: ilceMetin, w: DIL === "en" ? "" : z.w, facts: [nufusBilgi(z), alanBilgi(z), [T("Gezilecek yer"), z.n]] });
     $("tabs").hidden = true;
     places = d.yerler.filter((y) => y.i === i); cat = "hepsi"; shown = 60; fitted = false;
+    // İlçede kayıtlı yer yoksa ilçe merkezine en yakın yerleri göster (35 km içinde)
+    view.yakin = !places.length;
+    if (view.yakin) places = d.yerler.map((y) => [y, km(z, y)]).filter((x) => x[1] < 35).sort((a, b) => a[1] - b[1]).slice(0, 15).map((x) => x[0]);
     ilAraSifirla();
     sortMode = me ? "yakin" : "oner";
     $("tabYer").hidden = false; $("tabIlce").hidden = true;
@@ -1028,7 +1038,8 @@
       $("moreBtn").hidden = true;
       return;
     }
-    $("list").innerHTML = v.slice(0, shown).map((p) =>
+    const not = view.mode === "ilce" && view.yakin ? `<li class="empty">${TL("Bu ilçede kayıtlı gezi noktası yok. İlçe merkezine en yakın yerler:", "No places listed in this district yet. Nearest places to the district centre:")}</li>` : "";
+    $("list").innerHTML = not + v.slice(0, shown).map((p) =>
       `<li><button class="row" data-s="${p.ilS}" data-j="${p.j}">${thumb(p.f, p.k)}<span class="rt"><b>${p.one ? `<i class="star" title="${T("Öne çıkan")}">★</i>` : ""}${esc(adi(p))}</b><small>${esc(altYazi(p))}</small></span><span class="km">${me ? fmt(km(me, p)) : ""}</span></button></li>`).join("");
     $("moreBtn").hidden = v.length <= shown;
     $("moreBtn").textContent = `${T("Daha fazla göster")} (${v.length - shown})`;
