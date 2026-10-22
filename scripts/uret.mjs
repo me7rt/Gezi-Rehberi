@@ -52,7 +52,8 @@ const KOTU_KELIME = new Set(("map maps harita haritasi haritalari karte carte ma
   "census population administrative idari blank outline coa ilceleri districts position astronaut worldview").split(/\s+/));
 const KOTU_PARCA = ["coat of arms", "location map", "harita", "locator", "landsat", "sentinel", "satellit", "lokasyon", "topograf",
   "logo", "emblem", "amblem", "bayrak", "flag", "grundriss", "floor plan", "plan of", "kartpostal", "postcard",
-  "kiepert", "putzger", "munzkabinett", "uydu", "karte ", "inscription", "exhibition"];
+  "kiepert", "putzger", "munzkabinett", "uydu", "karte ", "inscription", "exhibition", "dirham", "drachm", "obverse", "reverse",
+  "miniature", "manuscript", "nusretname", "folio", "план", "карта", "схема"];
 const ascii = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ı/g, "i");
 function dosyaKotu(name) {
   const n = ascii(name.replace(/\.[A-Za-z0-9]+$/, "")).replace(/_/g, " ");
@@ -745,7 +746,7 @@ for (const o of tumYer) {
 let galeriSay = 0;
 for (const o of tumYer) {
   if (!o.one || !o.foto || !o.cat) continue;
-  const ek = (await kategoriFoto(o.cat, o.ad).catch(() => [])).filter((a) => a !== o.foto && !KULLANILAN.has(a) && FOTO.get(a).w >= 800).slice(0, 4);
+  const ek = (await kategoriFoto(o.cat, o.ad).catch(() => [])).filter((a) => a !== o.foto && !KULLANILAN.has(a) && FOTO.get(a).w >= 800 && adPuan(a, o.ad) >= 2).slice(0, 4);
   if (ek.length >= 2) { o.galeri = ek; galeriSay++; }
 }
 rapor("galerili öne çıkan yer:", galeriSay);
