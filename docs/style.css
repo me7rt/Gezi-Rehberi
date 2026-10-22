@@ -289,3 +289,4 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .plan .rotaac{display:block;text-align:center}
 .paylasbtn{border:0;background:linear-gradient(135deg,var(--cobalt),var(--teal));color:#fff;border-radius:14px;padding:14px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;width:100%;margin-top:10px}
 .tsonra{display:block;margin:10px auto 0;font-size:13px;color:var(--muted)}
+.cevre{margin-bottom:4px}.cevre .row{padding:6px 10px 6px 6px}
