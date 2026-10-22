@@ -174,34 +174,125 @@ rapor("il sayısı", iller.size, "| eşleşmeyen seçkin il:", [...seckinAnahtar
   "| seçkinsiz il:", [...iller.values()].filter((i) => !i.anahtar).map((i) => i.ad).join(",") || "yok");
 
 // ---------- 2. İlçeler ----------
+// Resmî ilçe listesi data/ilceler.json (973 ilçe). Wikidata kayıtları bu listeyle ada göre eşlenir;
+// listede olmayan eski kayıtlar (ör. büyükşehirlerdeki "Merkez") atılır, eksik kalanlar kasaba kaydından tamamlanır.
 rapor("== İlçeler");
-const ilceler = new Map();
+const RESMI = okuJSON("data/ilceler.json", {});
+const ilceHam = new Map();
 for (const b of await sparql(`SELECT ?ilce ?ilceLabel ?trL ?il ?coord ?img ?trA ?cat ?alan WHERE {
-  ?ilce p:P31 ?s1 . ?s1 ps:P31 wd:Q1147395 . FILTER NOT EXISTS { ?s1 pq:P582 [] } FILTER NOT EXISTS { ?s1 wikibase:rank wikibase:DeprecatedRank }
-  ?ilce p:P131 ?s2 . ?s2 ps:P131 ?il . FILTER NOT EXISTS { ?s2 pq:P582 [] } FILTER NOT EXISTS { ?s2 wikibase:rank wikibase:DeprecatedRank }
+  ?ilce p:P31 ?s1 . ?s1 ps:P31 wd:Q1147395 . FILTER NOT EXISTS { ?s1 wikibase:rank wikibase:DeprecatedRank }
+  ?ilce p:P131 ?s2 . ?s2 ps:P131 ?il . FILTER NOT EXISTS { ?s2 wikibase:rank wikibase:DeprecatedRank }
   ?il wdt:P31 wd:Q48336 .
-  FILTER NOT EXISTS { ?ilce wdt:P576 [] }
-  ?ilce wdt:P625 ?coord .
+  OPTIONAL { ?ilce wdt:P625 ?coord }
   OPTIONAL { ?trA schema:about ?ilce ; schema:isPartOf <https://tr.wikipedia.org/> }
   OPTIONAL { ?ilce rdfs:label ?trL . FILTER(LANG(?trL) = "tr") }
   OPTIONAL { ?ilce wdt:P18 ?img } OPTIONAL { ?ilce wdt:P2046 ?alan } OPTIONAL { ?ilce wdt:P373 ?cat }
+  BIND(EXISTS { ?ilce wdt:P576 [] } || EXISTS { ?s1 pq:P582 [] } || EXISTS { ?s2 pq:P582 [] } AS ?eski)
   ${LBL} }`)) {
   const q = qid(val(b, "ilce")); const ilq = qid(val(b, "il"));
   if (!iller.has(ilq)) continue;
-  const o = ilceler.get(q) || { q, il: ilq, ad: temizAd(val(b, "ilceLabel")).replace(/\s+[Dd]istrict$/, "").replace(/\s+(ilçesi|İlçesi|Merkez)$/u, ""), imgs: [], puan: (val(b, "trA") ? 2 : 0) + (val(b, "trL") ? 1 : 0) };
+  const o = ilceHam.get(q) || { q, il: ilq, etiket: val(b, "trL") || val(b, "ilceLabel"), imgs: [], puan: (val(b, "trA") ? 2 : 0) + (val(b, "trL") ? 1 : 0) };
   o.koor ||= nokta(val(b, "coord")); o.alan ||= +val(b, "alan") || 0; o.cat ||= val(b, "cat"); o.trA ||= makale(val(b, "trA"));
+  if (val(b, "eski") === "true") o.eski = 1;
   const f = dosyaAdi(val(b, "img")); if (f && !o.imgs.includes(f)) o.imgs.push(f);
-  ilceler.set(q, o);
+  ilceHam.set(q, o);
 }
-// Aynı ilde aynı adlı ikinci kayıtları ele
-const ilceAd = new Map();
-for (const o of [...ilceler.values()].sort((a, b) => b.puan - a.puan)) {
-  const k = o.il + "|" + nrm(o.ad);
-  if (ilceAd.has(k) || /^Q\d+$/.test(o.ad) || /'(n[ıiuü]n|[ıiuü]n)$/u.test(o.ad)) { ilceler.delete(o.q); continue; }
-  ilceAd.set(k, o.q);
+// Ad anahtarları: "Edremit (Balıkesir)" → edremit, balikesir; "Güzelyurt, Aksaray" → guzelyurt; "Ordu (Altınordu)" → altinordu
+const IKAME = { kazan: "kahramankazan", ondokuzmayis: "19mayis", eyup: "eyupsultan", selcuklular: "selcuklu", merkezefendi: "merkezefendi" };
+function adAnahtar(s) {
+  const k = new Set(); const ekle = (x) => { x = nrm(x); if (x) { k.add(x); if (IKAME[x]) k.add(IKAME[x]); } };
+  ekle(s); ekle(s.replace(/\s*\([^)]*\)/g, "")); ekle(s.split(",")[0]);
+  ekle(s.replace(/\s+(ilçesi|İlçesi|Merkez|merkez ilçesi|District|district)$/u, ""));
+  for (const m of s.matchAll(/\(([^)]*)\)/g)) ekle(m[1]);
+  return k;
 }
+const ilceler = new Map();
+const eksikIlce = [];
+let ilceEslesen = 0;
+for (const il of iller.values()) {
+  const resmi = RESMI[il.anahtar] || [];
+  if (!resmi.length) rapor("UYARI resmî ilçe listesi yok:", il.ad);
+  const adaylar = [...ilceHam.values()].filter((o) => o.il === il.q).map((o) => ({ o, k: adAnahtar(o.etiket) }));
+  const kullanildi = new Set();
+  for (const ad of resmi) {
+    const n = nrm(ad); const merkezMi = n === nrm(il.ad);
+    const uygun = adaylar.filter((a) => !kullanildi.has(a.o.q) && (a.k.has(n) || (merkezMi && a.k.has("merkez"))));
+    const pu = (a) => (a.o.eski ? 0 : 8) + (a.o.koor ? 4 : 0) + a.o.puan + (a.k.has(n) ? 1 : 0);
+    uygun.sort((x, y) => pu(y) - pu(x));
+    const sec = uygun[0];
+    if (sec) { kullanildi.add(sec.o.q); const o = sec.o; o.ad = ad; ilceler.set(o.q, o); ilceEslesen++; }
+    else eksikIlce.push({ il, ad });
+  }
+  const atilan = adaylar.filter((a) => !kullanildi.has(a.o.q)).map((a) => a.o.etiket);
+  if (atilan.length) console.log(`  ${il.ad}: listede olmayan Wikidata ilçe kayıtları atıldı: ${atilan.join(", ")}`);
+}
+rapor("resmî ilçe:", Object.values(RESMI).reduce((s, a) => s + a.length, 0), "| Wikidata ile eşleşen:", ilceEslesen, "| ilçe kaydı bulunamayan:", eksikIlce.length);
+
+// İlçe merkezi (kasaba): koordinat, Vikipedi maddesi ve fotoğraf çoğu zaman ilçe yerine bu kayıtta
+for (const p of parca([...ilceler.values()], 120)) {
+  const rows = await sparql(`SELECT ?ilce ?m ?mc ?img ?trA ?cat WHERE { VALUES ?ilce { ${p.map((o) => "wd:" + o.q).join(" ")} }
+    { ?ilce wdt:P36 ?m } UNION { ?m wdt:P1376 ?ilce }
+    OPTIONAL { ?m wdt:P625 ?mc } OPTIONAL { ?m wdt:P18 ?img } OPTIONAL { ?m wdt:P373 ?cat }
+    OPTIONAL { ?trA schema:about ?m ; schema:isPartOf <https://tr.wikipedia.org/> } }`).catch((e) => { rapor("  UYARI ilçe merkezi sorgusu:", e.message.slice(0, 80)); return []; });
+  for (const b of rows) {
+    const o = ilceler.get(qid(val(b, "ilce"))); if (!o) continue;
+    const il = iller.get(o.il); const t = makale(val(b, "trA"));
+    if (!o.koor && val(b, "mc")) { o.koor = nokta(val(b, "mc")); o.koorKaynak = "merkez"; }
+    if (!o.trA && t && t !== il.trA) { o.trA = t; o.metinKaynak = "merkez"; }
+    if (!o.cat && val(b, "cat")) o.cat = val(b, "cat");
+    const f = dosyaAdi(val(b, "img")); if (f && !o.imgs.includes(f)) o.imgs.push(f);
+  }
+  await sleep(400);
+}
+// Wikidata'da ilçe kaydı hiç olmayanlar: ildeki aynı adlı kasaba/yerleşim kaydı
+if (eksikIlce.length) {
+  const ilQ2 = [...new Set(eksikIlce.map((e) => e.il.q))];
+  const rows = await sparql(`SELECT ?t ?l ?il ?c ?img ?trA ?cat ?alan WHERE {
+    VALUES ?l { ${[...new Set(eksikIlce.map((e) => JSON.stringify(e.ad) + "@tr"))].join(" ")} }
+    VALUES ?il { ${ilQ2.map((q) => "wd:" + q).join(" ")} }
+    ?t rdfs:label ?l ; wdt:P625 ?c ; wdt:P131+ ?il .
+    OPTIONAL { ?t wdt:P18 ?img } OPTIONAL { ?t wdt:P373 ?cat } OPTIONAL { ?t wdt:P2046 ?alan }
+    OPTIONAL { ?trA schema:about ?t ; schema:isPartOf <https://tr.wikipedia.org/> } }`).catch((e) => { rapor("  UYARI eksik ilçe sorgusu:", e.message.slice(0, 80)); return []; });
+  for (const e of eksikIlce) {
+    const r = rows.filter((b) => val(b, "l") === e.ad && qid(val(b, "il")) === e.il.q);
+    r.sort((x, y) => (val(y, "trA") ? 1 : 0) - (val(x, "trA") ? 1 : 0));
+    if (!r.length) { rapor(`  UYARI ilçe bulunamadı: ${e.il.ad} / ${e.ad}`); continue; }
+    const b = r[0]; const q = qid(val(b, "t"));
+    if (ilceler.has(q)) continue;
+    const imgs = [...new Set(r.map((x) => dosyaAdi(val(x, "img"))).filter(Boolean))];
+    ilceler.set(q, { q, il: e.il.q, ad: e.ad, etiket: e.ad, koor: nokta(val(b, "c")), imgs, cat: val(b, "cat"), trA: makale(val(b, "trA")), alan: +val(b, "alan") || 0, puan: 0, koorKaynak: "kasaba" });
+    rapor(`  ilçe kasaba kaydından eklendi: ${e.il.ad} / ${e.ad} (${q})`);
+  }
+}
+// Maddesi hâlâ olmayan ilçeler: olası Vikipedi başlıkları (koordinatı ilçeye 25 km'den yakın olmalı)
+{
+  const eksik = [...ilceler.values()].filter((o) => !o.trA || !o.koor);
+  for (const o of eksik) { const il = iller.get(o.il); o.tahmin = [`${o.ad}, ${il.ad}`, `${o.ad} (${il.ad})`, `${o.ad} ilçesi`, o.ad]; }
+  const sayfa = new Map();
+  for (const p of parca([...new Set(eksik.flatMap((o) => o.tahmin))], 50)) {
+    const { bul } = await apiSayfalar("tr.wikipedia.org", { action: "query", titles: p.join("|"), redirects: "1", prop: "pageprops|coordinates|pageimages", ppprop: "disambiguation", piprop: "name", pilimit: "50", colimit: "50" });
+    for (const t of p) sayfa.set(t, bul(t));
+  }
+  let bulunan = 0;
+  for (const o of eksik) {
+    const il = iller.get(o.il);
+    for (const t of o.tahmin) {
+      const s = sayfa.get(t);
+      if (!s || s.missing || !s.title || (s.pageprops && s.pageprops.disambiguation !== undefined) || s.title === il.trA) continue;
+      const c = s.coordinates && s.coordinates[0]; if (!c) continue;
+      if (o.koor && mesafe(o.koor[0], o.koor[1], c.lat, c.lon) > 25) continue;
+      if (!o.koor) { if (!il.koor || mesafe(il.koor[0], il.koor[1], c.lat, c.lon) > 150) continue; o.koor = [+c.lat.toFixed(5), +c.lon.toFixed(5)]; o.koorKaynak = "vikipedi"; }
+      if (!o.trA) { o.trA = s.title; o.metinKaynak = "tahmin"; bulunan++; }
+      if (s.pageimage) o.sayfaFoto = s.pageimage.replace(/_/g, " ");
+      break;
+    }
+  }
+  rapor("ilçe maddesi tahminle bulunan:", bulunan);
+}
+for (const o of [...ilceler.values()]) if (!o.koor) { rapor(`  UYARI koordinatsız ilçe atıldı: ${iller.get(o.il).ad} / ${o.ad}`); ilceler.delete(o.q); }
 for (const o of ilceler.values()) iller.get(o.il).ilceler.push(o);
-rapor("ilçe sayısı", ilceler.size, "| koordinatsız:", [...ilceler.values()].filter((o) => !o.koor).map((o) => o.ad).join(",") || "yok");
+rapor("ilçe sayısı", ilceler.size, "| Vikipedi maddeli:", [...ilceler.values()].filter((o) => o.trA).length,
+  "| merkezden:", [...ilceler.values()].filter((o) => o.metinKaynak === "merkez").length);
 for (const il of iller.values()) if (!il.ilceler.length) rapor("UYARI ilçesiz il", il.ad);
 
 // Nüfus (en güncel tarihli değer)
@@ -264,6 +355,26 @@ async function sinifSorgu(grup) {
 }
 for (const grup of parca([...SINIF_KAT.keys()], 10)) await sinifSorgu(grup);
 rapor("Türkiye geneli aday yer:", HAM.size);
+// Vikipedi maddesi olmayan ama Wikidata'da fotoğrafı ve Türkçe adı olan doğa/tarih yerleri (cami ve kilise hariç: çok sayıda ve çoğu az bilinen)
+const MADDESIZ = "Q34038 Q23397 Q35509 Q150784 Q40080 Q23442 Q39816 Q46169 Q179049 Q177380 Q23413 Q839954 Q15661340 Q12280 Q12518 Q33506 Q8502".split(" ");
+{
+  const ek = new Map(); const trD = new Map();
+  try {
+    const rows = await sparql(`SELECT ${SECIM} ?trD WHERE {
+      VALUES ?cls { ${MADDESIZ.map((q) => "wd:" + q).join(" ")} }
+      ?p wdt:P31 ?cls ; wdt:P17 wd:Q43 ; wdt:P18 ?img ; wdt:P625 ?coord ; wikibase:sitelinks ?sl ; rdfs:label ?trL . FILTER(LANG(?trL) = "tr")
+      FILTER NOT EXISTS { ?a1 schema:about ?p ; schema:isPartOf <https://tr.wikipedia.org/> }
+      FILTER NOT EXISTS { ?a2 schema:about ?p ; schema:isPartOf <https://en.wikipedia.org/> }
+      FILTER NOT EXISTS { ?p wdt:P576 [] }
+      OPTIONAL { ?p schema:description ?trD . FILTER(LANG(?trD) = "tr") }
+      ${YER_EK} }`);
+    satirlariTopla(rows, ek);
+    for (const b of rows) if (val(b, "trD")) trD.set(qid(val(b, "p")), val(b, "trD"));
+  } catch (e) { rapor("  UYARI maddesiz yer sorgusu:", e.message.slice(0, 100)); }
+  let n = 0;
+  for (const [q, o] of ek) if (!HAM.has(q) && o.ad && !/^Q\d+$/.test(o.ad)) { o.wd = 1; o.aciklama = trD.get(q) || ""; HAM.set(q, o); n++; }
+  rapor("maddesiz ama fotoğraflı aday:", n);
+}
 
 // Her yerin ilini ve ilçesini yukarı doğru (P131 zinciri) bul
 async function ataBul(qids) {
@@ -302,60 +413,129 @@ rapor("ili bulunamayan yer:", ilsiz);
 for (const il of iller.values()) console.log(`  ${il.ad}: ${il.ham.size} aday`);
 
 // ---------- 4. Seçkin (elle seçilmiş) yerler ----------
+// 1. tur: yerler-ham.json'daki başlık. Bulunamazsa 2. tur: "Ad (İl)", "Ad, İl" ve Vikipedi araması;
+// 3. tur: Wikidata araması (maddesi olmayan kayıtlar). Her aday aynı denetimlerden geçer (il, şehir sayfası, koordinat).
 rapor("== Seçkin yerler");
 const ilQ = new Set(iller.keys()), ilceQ = new Set(ilceler.keys()), basQ = new Set([...iller.values()].map((i) => i.bas).filter(Boolean));
 const seckinListe = [];
 for (const il of iller.values()) for (const [w, k] of SECKIN[il.anahtar] || []) seckinListe.push({ il, w, k });
 const trSayfa = new Map();
-for (const p of parca([...new Set(seckinListe.map((x) => x.w))], 50)) {
-  const { bul } = await apiSayfalar("tr.wikipedia.org", { action: "query", titles: p.join("|"), redirects: "1", prop: "pageprops|coordinates|pageimages", ppprop: "wikibase_item|disambiguation", piprop: "name", pilimit: "50", colimit: "50" });
-  for (const t of p) trSayfa.set(t, bul(t));
-}
-const seckinQ = [...new Set([...trSayfa.values()].map((s) => s && s.pageprops && s.pageprops.wikibase_item).filter(Boolean))];
 const seckinVeri = new Map(); const seckinIl = new Map(); const seckinSinif = new Map();
-for (const p of parca(seckinQ, 60)) {
-  const rows = await sparql(`SELECT ${SECIM} WHERE { VALUES ?p { ${p.map((q) => "wd:" + q).join(" ")} }
-    OPTIONAL { ?p wdt:P31 ?cls } OPTIONAL { ?p wdt:P625 ?coord } OPTIONAL { ?p wikibase:sitelinks ?sl } OPTIONAL { ?p wdt:P18 ?img }
-    OPTIONAL { ?trA schema:about ?p ; schema:isPartOf <https://tr.wikipedia.org/> }
-    OPTIONAL { ?enA schema:about ?p ; schema:isPartOf <https://en.wikipedia.org/> }
-    ${YER_EK} }`);
-  satirlariTopla(rows, seckinVeri);
-  for (const b of rows) {
-    const q = qid(val(b, "p"));
-    if (val(b, "cls")) { const s = seckinSinif.get(q) || new Set(); s.add(qid(val(b, "cls"))); seckinSinif.set(q, s); }
+async function sayfaGetir(basliklar) {
+  const yeni = [...new Set(basliklar.filter((t) => t && !trSayfa.has(t)))];
+  for (const p of parca(yeni, 50)) {
+    const { bul } = await apiSayfalar("tr.wikipedia.org", { action: "query", titles: p.join("|"), redirects: "1", prop: "pageprops|coordinates|pageimages", ppprop: "wikibase_item|disambiguation", piprop: "name", pilimit: "50", colimit: "50" });
+    for (const t of p) trSayfa.set(t, bul(t));
   }
-  await sleep(600);
 }
-const seckinAta = await ataBul(seckinQ);
-for (const [q, s] of seckinAta) seckinIl.set(q, new Set([...s].filter((x) => iller.has(x))));
-for (const [q, o] of seckinVeri) if (!HAM.has(q)) o.ilceler = new Set([...(seckinAta.get(q) || [])].filter((x) => ilceler.has(x)));
-let seckinTamam = 0;
-for (const { il, w, k } of seckinListe) {
-  const s = trSayfa.get(w);
-  const red = (neden) => rapor(`  RED ${il.ad} / ${w}: ${neden}`);
-  if (!s || s.missing) { red("Vikipedi'de yok"); continue; }
-  if (s.pageprops && s.pageprops.disambiguation !== undefined) { red("anlam ayrımı sayfası"); continue; }
-  const q = s.pageprops && s.pageprops.wikibase_item;
-  if (!q) { red("Wikidata yok"); continue; }
-  if (CIKAR.has(q)) { red("elle çıkarıldı"); continue; }
-  if (ilQ.has(q) || ilceQ.has(q) || basQ.has(q)) { red(`il/ilçe/şehir sayfasına düşüyor (${s.title})`); continue; }
+async function wdGetir(qids) {
+  const yeni = [...new Set(qids.filter((q) => q && !seckinVeri.has(q)))];
+  for (const p of parca(yeni, 60)) {
+    const rows = await sparql(`SELECT ${SECIM} WHERE { VALUES ?p { ${p.map((q) => "wd:" + q).join(" ")} }
+      OPTIONAL { ?p wdt:P31 ?cls } OPTIONAL { ?p wdt:P625 ?coord } OPTIONAL { ?p wikibase:sitelinks ?sl } OPTIONAL { ?p wdt:P18 ?img }
+      OPTIONAL { ?trA schema:about ?p ; schema:isPartOf <https://tr.wikipedia.org/> }
+      OPTIONAL { ?enA schema:about ?p ; schema:isPartOf <https://en.wikipedia.org/> }
+      ${YER_EK} }`);
+    satirlariTopla(rows, seckinVeri);
+    for (const b of rows) {
+      const q = qid(val(b, "p"));
+      if (val(b, "cls")) { const s = seckinSinif.get(q) || new Set(); s.add(qid(val(b, "cls"))); seckinSinif.set(q, s); }
+    }
+    await sleep(600);
+  }
+  const ata = await ataBul(yeni);
+  for (const [q, s] of ata) seckinIl.set(q, new Set([...s].filter((x) => iller.has(x))));
+  for (const q of yeni) { const o = seckinVeri.get(q); if (o && !HAM.has(q)) o.ilceler = new Set([...(ata.get(q) || [])].filter((x) => ilceler.has(x))); }
+}
+// Bir adayı dener: kabul edilirse null, edilmezse ret nedeni döndürür
+const KOY = new Set(["Q1529096", "Q17051044", "Q3957", "Q486972", "Q5084", "Q15284", "Q815324", "Q532"]);
+function seckinDene(il, w, k, s, qZorla, siki) {
+  if (!qZorla) {
+    if (!s || s.missing) return "Vikipedi'de yok";
+    if (s.pageprops && s.pageprops.disambiguation !== undefined) return "anlam ayrımı sayfası";
+  }
+  const q = qZorla || (s.pageprops && s.pageprops.wikibase_item);
+  if (!q) return "Wikidata yok";
+  if (CIKAR.has(q)) return "elle çıkarıldı";
+  const baslik = s ? s.title : w;
+  if (ilQ.has(q) || ilceQ.has(q) || basQ.has(q)) return `il/ilçe/şehir sayfasına düşüyor (${baslik})`;
   const sin = seckinSinif.get(q) || new Set();
-  if ([...sin].some((c) => YERLESIM.has(c))) { red(`şehir sayfası (${s.title})`); continue; }
-  const v = il.ham.get(q) || seckinVeri.get(q) || { q, ad: s.title, siniflar: sin, imgs: [], ilceler: new Set() };
-  if (!v.koor && s.coordinates && s.coordinates[0]) v.koor = [+s.coordinates[0].lat.toFixed(5), +s.coordinates[0].lon.toFixed(5)];
-  if (!v.koor) { red("koordinat yok"); continue; }
+  if ([...sin].some((c) => YERLESIM.has(c))) return `şehir sayfası (${baslik})`;
+  if (siki && k !== "s" && [...sin].some((c) => KOY.has(c))) return `köy/mahalle sayfası (${baslik})`;
+  const v = il.ham.get(q) || seckinVeri.get(q) || { q, ad: baslik, siniflar: sin, imgs: [], ilceler: new Set() };
+  if (!v.koor && s && s.coordinates && s.coordinates[0]) v.koor = [+s.coordinates[0].lat.toFixed(5), +s.coordinates[0].lon.toFixed(5)];
+  if (!v.koor) return "koordinat yok";
   const ils = seckinIl.get(q);
-  if (ils && ils.size && !ils.has(il.q)) { red(`başka ilde (${[...ils].map((x) => (iller.get(x) || {}).ad).join(",")})`); continue; }
-  if ((!ils || !ils.size) && il.koor && mesafe(il.koor[0], il.koor[1], v.koor[0], v.koor[1]) > 130) { red("il merkezine çok uzak"); continue; }
-  if (v.one) { red("aynı yere ikinci kez düşüyor"); continue; }
+  if (ils && ils.size && !ils.has(il.q)) return `başka ilde (${[...ils].map((x) => (iller.get(x) || {}).ad).join(",")})`;
+  if ((!ils || !ils.size) && il.koor && mesafe(il.koor[0], il.koor[1], v.koor[0], v.koor[1]) > 130) return "il merkezine çok uzak";
+  if (v.one) return "aynı yere ikinci kez düşüyor";
   const o = v;
-  o.one = 1; o.k = k; o.trA ||= s.title; o.trSayfaFoto = s.pageimage ? s.pageimage.replace(/_/g, " ") : "";
+  o.one = 1; o.k = k; if (s && !qZorla) o.trA ||= s.title; o.trSayfaFoto = s && s.pageimage ? s.pageimage.replace(/_/g, " ") : "";
   if (IPUCU[w]) o.ip = IPUCU[w];
-  if (!o.ad || /^Q\d+$/.test(o.ad)) o.ad = temizAd(s.title);
-  o.seckinSira = seckinTamam++;
+  if (!o.ad || /^Q\d+$/.test(o.ad)) o.ad = temizAd(baslik);
+  o.seckinSira = seckinSira++;
   il.ham.set(q, o);
+  return null;
 }
-rapor("seçkin kabul:", seckinTamam, "/", seckinListe.length);
+let seckinSira = 0;
+// Başlık benzerliği: aranan adın ayırt edici kelimelerinin çoğu (ilk 4 harfiyle) başlıkta geçmeli
+function benzer(baslik, w) {
+  const b = ascii(baslik);
+  const k = ascii(w.replace(/\s*\(.*\)$/, "")).split(/[^a-z0-9]+/).filter((x) => x.length > 2 && !istenmeyenAdS.has(x));
+  if (!k.length) return false;
+  const tut = k.filter((x) => b.includes(x.slice(0, Math.min(4, x.length)))).length;
+  return tut >= Math.ceil(k.length * 0.6);
+}
+const istenmeyenAdS = new Set("ve bir the of in de da ile".split(" "));
+await sayfaGetir(seckinListe.map((x) => x.w));
+await wdGetir([...trSayfa.values()].map((s) => s && s.pageprops && s.pageprops.wikibase_item));
+const TEKRAR = /^(Vikipedi'de yok|anlam ayrımı|Wikidata yok|başka ilde)/;
+const ikinci = [];
+for (const x of seckinListe) {
+  const neden = seckinDene(x.il, x.w, x.k, trSayfa.get(x.w));
+  if (neden && TEKRAR.test(neden)) { x.neden = neden; ikinci.push(x); } else if (neden) rapor(`  RED ${x.il.ad} / ${x.w}: ${neden}`);
+}
+// 2. tur: başlık çeşitleri ve Vikipedi araması
+for (const x of ikinci) {
+  const kok = x.w.replace(/\s*\(.*\)$/, "");
+  x.alt = [`${kok} (${x.il.ad})`, `${kok}, ${x.il.ad}`];
+  const j = await api("tr.wikipedia.org", { action: "query", list: "search", srsearch: `${kok} ${x.il.ad}`, srlimit: "5", srnamespace: "0" }).catch(() => ({}));
+  for (const r of (j.query && j.query.search) || []) if (benzer(r.title, kok) && !x.alt.includes(r.title) && r.title !== x.w) x.alt.push(r.title);
+  const j2 = await api("tr.wikipedia.org", { action: "query", list: "search", srsearch: kok, srlimit: "5", srnamespace: "0" }).catch(() => ({}));
+  for (const r of (j2.query && j2.query.search) || []) if (benzer(r.title, kok) && !x.alt.includes(r.title) && r.title !== x.w) x.alt.push(r.title);
+}
+await sayfaGetir(ikinci.flatMap((x) => x.alt));
+await wdGetir([...trSayfa.values()].map((s) => s && s.pageprops && s.pageprops.wikibase_item));
+const ucuncu = [];
+for (const x of ikinci) {
+  let tamam = false;
+  for (const t of x.alt) {
+    const s = trSayfa.get(t);
+    if (!s || s.missing) continue;
+    const neden = seckinDene(x.il, x.w, x.k, s, null, t !== x.alt[0] && t !== x.alt[1]);
+    if (!neden) { rapor(`  DÜZELDİ ${x.il.ad} / ${x.w} → ${s.title}`); tamam = true; break; }
+  }
+  if (!tamam) ucuncu.push(x);
+}
+// 3. tur: Wikidata araması (Türkçe ad; maddesi olmayan kayıtlar da)
+for (const x of ucuncu) {
+  const kok = x.w.replace(/\s*\(.*\)$/, "");
+  const j = await fetch("https://www.wikidata.org/w/api.php?" + new URLSearchParams({ action: "wbsearchentities", format: "json", language: "tr", uselang: "tr", type: "item", limit: "5", search: kok }), { headers: { "User-Agent": UA } }).then((r) => r.json()).catch(() => ({}));
+  x.wd = ((j && j.search) || []).filter((r) => benzer(r.label || "", kok)).map((r) => r.id);
+  await sleep(200);
+}
+await wdGetir(ucuncu.flatMap((x) => x.wd || []));
+const dorduncu = [];
+for (const x of ucuncu) {
+  let tamam = false;
+  for (const q of x.wd || []) {
+    const v = seckinVeri.get(q);
+    const neden = seckinDene(x.il, x.w, x.k, null, q, true);
+    if (!neden) { rapor(`  DÜZELDİ ${x.il.ad} / ${x.w} → Wikidata ${q} ${v ? v.ad : ""}`); tamam = true; break; }
+  }
+  if (!tamam) { rapor(`  RED ${x.il.ad} / ${x.w}: ${x.neden}`); dorduncu.push(x); }
+}
+rapor("seçkin kabul:", seckinSira, "/", seckinListe.length);
 
 // ---------- 5. Ön eleme ve ilçeye bağlama ----------
 for (const il of iller.values()) {
@@ -366,9 +546,10 @@ for (const il of iller.values()) {
     o.k ||= kategori(o.siniflar);
     if (!o.k) continue;
     if (!o.one) {
-      // Ünlü olması şart değil: Türkçe maddesi olan her yer aday (fotoğrafı yoksa Commons kategorisinden aranır)
-      if (!o.imgs.length && !(o.trA && o.cat)) continue;
-      if (!o.trA && o.sl < 3) continue;
+      // Ünlü olması şart değil: Türkçe maddesi olan her yer aday (fotoğrafı yoksa Vikipedi sayfa resmi,
+      // Commons kategorisi ve Commons aramasıyla aranır). Maddesizler için Wikidata fotoğrafı şart.
+      if (o.wd) { if (!o.imgs.length) continue; }
+      else if (!o.trA && (o.sl < 2 || (!o.imgs.length && !o.cat))) continue;
     }
     let ic = [...o.ilceler].find((q) => ilceler.has(q) && ilceler.get(q).il === il.q);
     if (!ic) {
@@ -425,11 +606,31 @@ function fotoUygun(a) {
 const ilkAday = [];
 for (const il of iller.values()) {
   ilkAday.push(...il.imgs, ...il.basImgs);
-  for (const d of il.ilceler) ilkAday.push(...d.imgs);
-  for (const o of il.adaylar) ilkAday.push(...o.imgs, o.trSayfaFoto || "");
+  for (const d of il.ilceler) ilkAday.push(...d.imgs, d.sayfaFoto || "");
+  for (const o of il.adaylar) { o.ilAd = il.ad; ilkAday.push(...o.imgs, o.trSayfaFoto || ""); }
 }
 await fotoBilgi(ilkAday);
 rapor("fotoğraf bilgisi alınan dosya:", FOTO.size, "| uygun:", [...FOTO.keys()].filter(fotoUygun).length);
+// Wikidata fotoğrafı uygun olmayan maddeli yerler için Vikipedi sayfasının kendi resmi
+{
+  const gerek = [];
+  for (const il of iller.values()) for (const o of il.adaylar) if (!o.one && o.trA && !o.imgs.some(fotoUygun)) gerek.push(o);
+  const pi = new Map();
+  for (const p of parca([...new Set(gerek.map((o) => o.trA))], 50)) {
+    const { bul } = await apiSayfalar("tr.wikipedia.org", { action: "query", titles: p.join("|"), redirects: "1", prop: "pageimages", piprop: "name", pilimit: "50" });
+    for (const t of p) { const pg = bul(t); if (pg && pg.pageimage) pi.set(t, pg.pageimage.replace(/_/g, " ")); }
+  }
+  const ilceGerek = [];
+  for (const il of iller.values()) for (const d of il.ilceler) if (d.trA && !d.sayfaFoto && !d.imgs.some(fotoUygun)) ilceGerek.push(d);
+  for (const p of parca([...new Set(ilceGerek.map((d) => d.trA))], 50)) {
+    const { bul } = await apiSayfalar("tr.wikipedia.org", { action: "query", titles: p.join("|"), redirects: "1", prop: "pageimages", piprop: "name", pilimit: "50" });
+    for (const t of p) { const pg = bul(t); if (pg && pg.pageimage) pi.set(t, pg.pageimage.replace(/_/g, " ")); }
+  }
+  for (const d of ilceGerek) if (pi.has(d.trA)) d.sayfaFoto = pi.get(d.trA);
+  for (const o of gerek) if (pi.has(o.trA)) o.trSayfaFoto = pi.get(o.trA);
+  await fotoBilgi([...pi.values()]);
+  rapor("Vikipedi sayfa resmi aranan yer:", gerek.length, "| uygun resim bulunan:", gerek.filter((o) => o.trSayfaFoto && fotoUygun(o.trSayfaFoto)).length);
+}
 
 // Commons kategorisinden ya da yakındaki fotoğraflardan yedek bulma
 const istenmeyenAd = new Set("ve bir the of in de da ile camii cami kalesi kale müzesi muzesi köprüsü koprusu kilisesi han hanı hamamı türbesi medresesi çeşmesi dağı gölü şelalesi mağarası milli parkı parki tabiat".split(" ").map(ascii));
@@ -450,6 +651,19 @@ async function kategoriFoto(cat, ad) {
   out.sort((x, y) => y.puan - x.puan);
   return out.map((x) => x.a);
 }
+// Adın bütün ayırt edici kelimeleri dosya adında geçmeli (ör. "Sütüven Şelalesi" → "sutuven")
+function adTam(dosya, ad) {
+  const d = ascii(dosya);
+  const k = ascii(ad).split(/[^a-z0-9]+/).filter((x) => x.length > 3 && !istenmeyenAd.has(x));
+  return k.length > 0 && k.every((x) => d.includes(x));
+}
+// Commons'ta dosya araması (kategori ve konum bilgisi olmayan yerler için son çare)
+async function commonsAra(ad, ek) {
+  const j = await api("commons.wikimedia.org", { action: "query", list: "search", srnamespace: "6", srlimit: "20", srsearch: `${ad} ${ek || ""}`.trim() }).catch(() => ({}));
+  const adlar = ((j.query && j.query.search) || []).map((x) => x.title.replace(/^File:/, "")).filter((a) => adTam(a, ad));
+  await fotoBilgi(adlar);
+  return adlar.filter(fotoUygun).sort((x, y) => (FOTO.get(y).w >= FOTO.get(y).h ? 1 : 0) - (FOTO.get(x).w >= FOTO.get(x).h ? 1 : 0));
+}
 async function yakinFoto(lat, lng, ad) {
   const j = await api("commons.wikimedia.org", { action: "query", list: "geosearch", gsnamespace: "6", gscoord: `${lat}|${lng}`, gsradius: "400", gslimit: "30" });
   const adlar = ((j.query && j.query.geosearch) || []).map((g) => g.title.replace(/^File:/, ""));
@@ -464,7 +678,7 @@ const KULLANILAN = new Set();
 const tumYer = [];
 for (const il of iller.values()) for (const o of il.adaylar) tumYer.push(o);
 tumYer.sort((a, b) => (b.one || 0) - (a.one || 0) || (a.seckinSira ?? 0) - (b.seckinSira ?? 0) || b.sl - a.sl);
-let yedekKat = 0, yedekYakin = 0, fotosuzSeckin = 0, yedekHak = 2500;
+let yedekKat = 0, yedekYakin = 0, yedekAra = 0, fotosuzSeckin = 0, yedekHak = 4000, araHak = 1500;
 for (const o of tumYer) {
   const adaylar = [...o.imgs, o.trSayfaFoto].filter(Boolean);
   let sec = adaylar.find((a) => fotoUygun(a) && !KULLANILAN.has(a));
@@ -473,22 +687,27 @@ for (const o of tumYer) {
     yedekHak--;
     for (const a of await kategoriFoto(o.cat, o.ad)) if (!KULLANILAN.has(a)) { sec = a; o.fotoKaynak = "kategori"; yedekKat++; break; }
   }
+  if (!sec && !o.one && o.trA && araHak > 0) {
+    araHak--;
+    for (const a of await commonsAra(temizAd(o.ad), o.ilAd)) if (!KULLANILAN.has(a)) { sec = a; o.fotoKaynak = "arama"; yedekAra++; break; }
+  }
   if (!sec && o.one) {
     for (const a of await kategoriFoto(o.cat, o.ad)) if (!KULLANILAN.has(a)) { sec = a; o.fotoKaynak = "kategori"; yedekKat++; break; }
     if (!sec) for (const a of await yakinFoto(o.koor[0], o.koor[1], o.ad)) if (!KULLANILAN.has(a)) { sec = a; o.fotoKaynak = "yakın"; yedekYakin++; break; }
+    if (!sec) for (const a of await commonsAra(temizAd(o.ad), o.ilAd)) if (!KULLANILAN.has(a)) { sec = a; o.fotoKaynak = "arama"; yedekAra++; break; }
     if (!sec) { fotosuzSeckin++; rapor(`  FOTOSUZ seçkin: ${o.ad} (${o.q})`); }
   }
   if (sec) { o.foto = sec; KULLANILAN.add(sec); }
 }
-rapor("yedek foto: kategori", yedekKat, "| yakın", yedekYakin, "| hiç bulunamayan", fotosuzSeckin);
+rapor("yedek foto: kategori", yedekKat, "| yakın", yedekYakin, "| Commons araması", yedekAra, "| hiç bulunamayan seçkin", fotosuzSeckin);
 
 // İl ve ilçe kapak fotoğrafları
 for (const il of iller.values()) {
   il.yerler = il.adaylar.filter((o) => o.foto);
-  // Son sınır: ilçe başına 30, ilçesiz 35, il başına 400
+  // Son sınır: ilçe başına 35, ilçesiz 40, il başına 400
   const say = new Map(); const son = [];
   for (const o of il.yerler) {
-    if (!o.one) { const key = o.ilce || "-"; const n = say.get(key) || 0; if (n >= (o.ilce ? 30 : 35)) continue; say.set(key, n + 1); }
+    if (!o.one) { const key = o.ilce || "-"; const n = say.get(key) || 0; if (n >= (o.ilce ? 35 : 40)) continue; say.set(key, n + 1); }
     son.push(o);
   }
   il.yerler = son.slice(0, 400);
@@ -499,7 +718,9 @@ for (const il of iller.values()) {
   if (!il.foto && ilkYer) { il.foto = ilkYer.foto; il.fotoKaynak = "yer"; }
   for (const d of il.ilceler) {
     d.foto = d.imgs.find(fotoUygun); d.fotoKaynak = d.foto ? "wikidata" : "";
+    if (!d.foto && d.sayfaFoto && fotoUygun(d.sayfaFoto)) { d.foto = d.sayfaFoto; d.fotoKaynak = "vikipedi"; }
     if (!d.foto && d.cat) { d.foto = (await kategoriFoto(d.cat, d.ad))[0]; d.fotoKaynak = d.foto ? "kategori" : ""; }
+    if (!d.foto) { d.foto = (await commonsAra(d.ad, il.ad))[0]; d.fotoKaynak = d.foto ? "arama" : ""; }
     if (!d.foto) { const y = il.yerler.find((o) => o.ilce === d.q); if (y) { d.foto = y.foto; d.fotoKaynak = "yer"; } }
   }
 }
@@ -526,6 +747,64 @@ for (const il of iller.values()) {
   }
 }
 rapor("güncel il kapağı: yerin kendi fotoğrafı", kapakGuncel, "| kategoriden", kapakKat, "| eski kural", iller.size - kapakGuncel - kapakKat);
+
+// ---------- 7b. Elle eklenen ve Vikipedi/Wikidata'da bulunamayan seçkin yerler: konum OpenStreetMap'ten ----------
+rapor("== Elle eklenen yerler (OSM)");
+let osmErisim = true;
+async function nominatim(q) {
+  if (!osmErisim) return null;
+  await sleep(1100); // Nominatim kullanım kuralı: saniyede en çok 1 istek
+  try {
+    const r = await fetch("https://nominatim.openstreetmap.org/search?" + new URLSearchParams({ format: "jsonv2", addressdetails: "1", limit: "5", countrycodes: "tr", "accept-language": "tr", q }), { headers: { "User-Agent": UA } });
+    if (!r.ok) { if (r.status === 403 || r.status === 429) osmErisim = false; return null; }
+    return await r.json();
+  } catch { return null; }
+}
+const OSM_RED = new Set(["highway", "boundary", "shop", "office", "railway", "landuse", "building"]);
+function osmSec(sonuc, il, ad) {
+  return (sonuc || []).find((x) => x.address && nrm(x.address.province || x.address.state || "") === nrm(il.ad) && !OSM_RED.has(x.category) && !(x.category === "amenity" && x.type === "parking") && benzer(x.name || x.display_name || "", ad));
+}
+function yakinIlceAdi(il, lat, lng) {
+  let en = null, d = 1e9;
+  for (const z of il.ilceler) { const m = mesafe(lat, lng, z.koor[0], z.koor[1]); if (m < d) { d = m; en = z; } }
+  return en && d < 40 ? en.ad : "";
+}
+let osmDuzelen = 0, osmEklenen = 0, elleFoto = 0;
+for (const il of iller.values()) {
+  for (const e of ELLE[il.s] || []) {
+    const x = osmSec(await nominatim(e.gq || `${e.ad}, ${il.ad}`), il, e.ad);
+    if (x) {
+      const lat = +(+x.lat).toFixed(5), lng = +(+x.lon).toFixed(5);
+      const fark = mesafe(e.lat, e.lng, lat, lng);
+      if (fark < 25) { if (fark > 0.3) { rapor(`  konum düzeldi: ${il.ad} / ${e.ad} (${fark.toFixed(1)} km)`); osmDuzelen++; } e.lat = lat; e.lng = lng; }
+      else rapor(`  UYARI OSM sonucu çok uzak, elle konum kaldı: ${il.ad} / ${e.ad} (${fark.toFixed(0)} km)`);
+    } else rapor(`  OSM'de bulunamadı (elle konum kaldı): ${il.ad} / ${e.ad}`);
+  }
+}
+// Vikipedi/Wikidata'da hiç bulunamayan seçkin yerler: OSM'de ilin içinde aynı adla bulunur ve fotoğrafı da çıkarsa eklenir
+for (const x of dorduncu) {
+  if (!/^Vikipedi'de yok|^Wikidata yok/.test(x.neden)) continue;
+  const kok = x.w.replace(/\s*\(.*\)$/, "");
+  if ((ELLE[x.il.s] || []).some((e) => benzer(e.ad, kok))) continue;
+  const o = osmSec(await nominatim(`${kok}, ${x.il.ad}`), x.il, kok);
+  if (!o) { rapor(`  OSM'de de yok: ${x.il.ad} / ${x.w}`); continue; }
+  (ELLE[x.il.s] ||= []).push({ ad: temizAd(kok), k: x.k, lat: +(+o.lat).toFixed(5), lng: +(+o.lon).toFixed(5), gq: `${kok}, ${x.il.ad}`, m: "", osm: 1 });
+  osmEklenen++;
+}
+// Elle/OSM yerlerine fotoğraf ve ilçe
+for (const il of iller.values()) {
+  const liste = ELLE[il.s] || [];
+  for (const e of liste) {
+    if (!e.ilce || !il.ilceler.some((d) => d.ad === e.ilce)) e.ilce = yakinIlceAdi(il, e.lat, e.lng);
+    let a = (await commonsAra(e.ad, ""))[0] || (await commonsAra(e.ad, il.ad))[0];
+    if (a && KULLANILAN.has(a)) a = null;
+    if (a) { e.foto = a; KULLANILAN.add(a); elleFoto++; }
+  }
+  // OSM'den gelip fotoğrafı ve metni olmayanlar eklenmez
+  ELLE[il.s] = liste.filter((e) => !e.osm || e.foto);
+  for (const e of liste) if (e.osm) rapor(`  ${e.foto ? "OSM'den eklendi" : "OSM'de var ama fotoğraf yok, eklenmedi"}: ${il.ad} / ${e.ad}`);
+}
+rapor("elle yer konumu düzelen:", osmDuzelen, "| OSM'den eklenen seçkin:", osmEklenen, "| elle/OSM yere bulunan fotoğraf:", elleFoto, osmErisim ? "" : "| UYARI OSM erişimi kesildi");
 
 // ---------- 8. Metinler ----------
 rapor("== Metinler");
@@ -561,11 +840,12 @@ for (const il of ilSirali) {
   const ilceSira = il.ilceler.filter((d) => d.koor).sort((a, b) => a.ad.localeCompare(b.ad, "tr"));
   const ilceNo = new Map(ilceSira.map((d, i) => [d.q, i]));
   const yerler = il.yerler.map((o) => {
-    const metin = o.trA ? trM.get(o.trA) : enM.get(o.enA);
+    const trMetin = o.trA && trM.get(o.trA);
+    const metin = trMetin || enM.get(o.enA);
     const y = { ad: temizAd(o.ad), q: o.q, lat: o.koor[0], lng: o.koor[1], k: o.k, i: ilceNo.has(o.ilce) ? ilceNo.get(o.ilce) : -1, f: fotoCikti(o.foto) };
     if (o.one) y.one = 1;
     if (o.ip) y.ip = o.ip;
-    if (metin) y.m = metin; if (!o.trA && metin) y.en = 1;
+    if (metin) y.m = metin; if (!trMetin && metin) y.en = 1;
     if (o.aciklama) y.ac = o.aciklama;
     y.w = o.trA ? "tr:" + o.trA : o.enA ? "en:" + o.enA : "";
     if (o.yil) y.yil = o.yil; if (o.rakim && o.k === "d") y.rak = o.rakim; if (o.unesco) y.un = 1;
@@ -575,7 +855,11 @@ for (const il of ilSirali) {
   const ilceAdlari = ilceSira.map((d) => d.ad.replace(/ \(.*\)$/, ""));
   (ELLE[il.s] || []).slice().reverse().forEach((e) => {
     const i = ilceAdlari.indexOf(e.ilce);
-    yerler.unshift({ ad: e.ad, q: "e-" + ascii(e.ad).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""), lat: e.lat, lng: e.lng, k: e.k, i, f: null, one: 1, m: e.m, w: "", sl: 0, gq: e.gq });
+    // Vikipedi/Wikidata'dan gelen aynı yer varsa elle kaydı ekleme
+    if (yerler.some((y) => mesafe(y.lat, y.lng, e.lat, e.lng) < (e.osm ? 0.5 : 3) && benzer(y.ad, e.ad))) { rapor(`  elle kayıt atlandı (zaten var): ${il.ad} / ${e.ad}`); return; }
+    const y = { ad: e.ad, q: "e-" + ascii(e.ad).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""), lat: e.lat, lng: e.lng, k: e.k, i, f: fotoCikti(e.foto), one: 1, w: "", sl: 0, gq: e.gq };
+    if (e.m) y.m = e.m;
+    yerler.unshift(y);
   });
   const ilceCikti = ilceSira.map((d) => ({ ad: d.ad, q: d.q, lat: d.koor[0], lng: d.koor[1], f: fotoCikti(d.foto), m: trM.get(d.trA) || "", w: d.trA ? "tr:" + d.trA : "", nuf: d.nufus || 0, nufY: d.nufusYil || "", alan: d.alan ? Math.round(d.alan) : 0, n: yerler.filter((y) => y.i === ilceNo.get(d.q)).length }));
   const dosya = { ad: il.ad, s: il.s, q: il.q, lat: il.koor ? il.koor[0] : 0, lng: il.koor ? il.koor[1] : 0, plaka: PLAKA[il.s] || il.plaka, f: fotoCikti(il.foto), m: trM.get(il.trA) || "", w: il.trA ? "tr:" + il.trA : "", nuf: il.nufus || 0, nufY: il.nufusYil || "", alan: il.alan ? Math.round(il.alan) : 0, ilceler: ilceCikti, yerler };
@@ -595,7 +879,11 @@ for (const il of ilSirali) {
   kk("il", il.ad, il.foto, il.fotoKaynak);
   for (const d of ilceSira) kk("ilce", d.ad, d.foto, d.fotoKaynak);
   for (const o of il.yerler.filter((o) => o.one)) kk("one", o.ad, o.foto, o.fotoKaynak);
-  for (const o of il.yerler.filter((o) => !o.one).slice(0, 8)) kk("yer", o.ad, o.foto, o.fotoKaynak);
+  for (const e of ELLE[il.s] || []) kk("one", e.ad, e.foto, "elle");
+  const ilk8 = il.yerler.filter((o) => !o.one).slice(0, 8);
+  for (const o of ilk8) kk("yer", o.ad, o.foto, o.fotoKaynak);
+  // Yeni (zayıf) kaynaklardan gelen fotoğraflar da kontrol edilsin
+  for (const o of il.yerler.filter((o) => !o.one && !ilk8.includes(o) && (o.wd || o.fotoKaynak === "arama" || o.fotoKaynak === "kategori"))) kk("yer", o.ad, o.foto, o.wd ? "maddesiz" : o.fotoKaynak);
   rapor(`${il.ad}: ${yerler.length} yer (${yerler.filter((y) => y.one).length} seçkin), ${ilceSira.length} ilçe, fotosuz ilçe ${ilceCikti.filter((d) => !d.f).length}, ilçesiz yer ${yerler.filter((y) => y.i < 0).length}`);
 }
 fs.writeFileSync(`${OUT}/index.json`, JSON.stringify(index));

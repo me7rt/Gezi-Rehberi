@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       gorev:
-        description: "teshis veya uret"
+        description: "teshis, uret veya dene (dene: main yerine veri-deneme dalina yazar)"
         default: "uret"
   push:
     branches: [main]
@@ -25,8 +25,21 @@ jobs:
       - name: Veriyi uret
         if: ${{ github.event.inputs.gorev != 'teshis' }}
         run: node scripts/uret.mjs
+      - name: Deneme verisini veri-deneme dalina yukle
+        if: ${{ github.event.inputs.gorev == 'dene' }}
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p /tmp/d && cp -r docs/data /tmp/d/data && cp kontrol/rapor.txt kontrol/liste.json /tmp/d/
+          cd /tmp/d
+          git init -q -b veri-deneme
+          git config user.name "Mert Turanlıoğlu"
+          git config user.email "me7rtt@gmail.com"
+          git add -A
+          git commit -q -m "Deneme verisi"
+          git push -f "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git" veri-deneme
       - name: Veriyi main'e yukle
-        if: ${{ github.event.inputs.gorev != 'teshis' }}
+        if: ${{ github.event.inputs.gorev != 'teshis' && github.event.inputs.gorev != 'dene' }}
         run: |
           git config user.name "Mert Turanlıoğlu"
           git config user.email "me7rtt@gmail.com"

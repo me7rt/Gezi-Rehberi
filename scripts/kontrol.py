@@ -59,7 +59,7 @@ for e, im in zip(liste, resimler):
     nedenler = []
     if top3 > 0.72: nedenler.append(f"az renk {top3:.2f}")
     if beyaz > 0.3: nedenler.append(f"beyaz {beyaz:.2f}")
-    if e["kaynak"] in ("yakın", "kategori"): nedenler.append("yedek kaynak")
+    if e["kaynak"] in ("yakın", "kategori", "arama", "elle", "maddesiz"): nedenler.append("yedek kaynak")
     e["suphe"] = ", ".join(nedenler)
 
 # Aynı ilde birbirine çok benzeyen fotoğraflar
