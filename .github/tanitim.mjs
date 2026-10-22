@@ -6,10 +6,12 @@ import fs from "fs";
 import { execFileSync } from "child_process";
 const BASE = process.env.BASE || "https://me7rt.github.io/Rota-Cepte/";
 const DIL = process.env.DIL || "tr";
+const DIKEY = process.env.DIKEY === "1"; // Instagram/TikTok için 1080x1920
+const W = DIKEY ? 1080 : 1920, H = DIKEY ? 1920 : 1080;
 const OUT = "tanitim"; fs.rmSync(OUT, { recursive: true, force: true }); fs.mkdirSync(OUT + "/kare", { recursive: true });
 
 const b = await chromium.launch({ args: ["--disable-site-isolation-trials", "--disable-features=IsolateOrigins,site-per-process"] });
-const ctx = await b.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1, locale: DIL === "en" ? "en-US" : "tr-TR" });
+const ctx = await b.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1, locale: DIL === "en" ? "en-US" : "tr-TR" });
 const p = await ctx.newPage();
 const bekle = (ms) => p.waitForTimeout(ms);
 
@@ -34,7 +36,7 @@ const t = (tr, en) => (EN ? en : tr);
 await p.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0}
-body{width:1920px;height:1080px;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:#fff;
+body{width:${W}px;height:${H}px;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:#fff;
  background:radial-gradient(1200px 800px at 15% 20%,#2a5bd7 0%,transparent 60%),radial-gradient(900px 700px at 90% 90%,#13707a 0%,transparent 60%),#0b1730}
 .logo{position:absolute;left:120px;top:90px;display:flex;align-items:center;gap:18px;font-weight:900;font-size:34px;letter-spacing:.5px}
 .logo img{width:64px;height:64px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
@@ -53,7 +55,12 @@ body{width:1920px;height:1080px;overflow:hidden;font-family:Inter,system-ui,sans
 .son h2{font-size:110px;font-weight:900;margin-top:40px;letter-spacing:-2px}
 .son p{font-size:44px;color:#cfe0ff;margin-top:12px}
 .son .rozet{margin-top:44px;font-size:32px;font-weight:800;background:#fff;color:#0b1730;padding:18px 40px;border-radius:999px}
-</style></head><body>
+body.dikey .logo{left:50%;transform:translateX(-50%);top:80px}
+body.dikey .yazi{left:70px;right:70px;top:190px;bottom:auto;width:auto;justify-content:flex-start;text-align:center}
+body.dikey .yazi h1{font-size:86px}
+body.dikey .yazi p{font-size:40px;margin-top:20px}
+body.dikey .tel{right:auto;left:50%;top:auto;bottom:80px;transform:translateX(-50%) scale(1.22);transform-origin:bottom center}
+</style></head><body class="${DIKEY ? "dikey" : ""}">
 <div class="logo"><img src="${BASE}icon-192.png">Rota Cepte</div>
 <div class="yazi" id="yazi"></div>
 <div class="tel"><iframe id="app" src="${BASE}"></iframe></div>
@@ -93,7 +100,7 @@ cdp.on("Page.screencastFrame", async (f) => {
   kareler.push(f.metadata.timestamp);
   cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId }).catch(() => {});
 });
-await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, maxWidth: 1920, maxHeight: 1080, everyNthFrame: 1 });
+await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, maxWidth: W, maxHeight: H, everyNthFrame: 1 });
 // ekran değişmeyince kare gelmez; sahnede hep çok hafif hareket olsun diye görünmez bir sayaç döndür
 await p.evaluate(() => { const d = document.createElement("div"); d.style.cssText = "position:absolute;right:0;bottom:0;width:2px;height:2px;opacity:.01"; document.body.appendChild(d); let i = 0; setInterval(() => { d.style.background = i++ % 2 ? "#0b1730" : "#0b1731"; }, 33); });
 
@@ -167,6 +174,6 @@ for (let i = 0; i < kareler.length; i++) {
 }
 satir.push(`file 'kare/${String(kareler.length - 1).padStart(5, "0")}.jpg'`);
 fs.writeFileSync(`${OUT}/liste.txt`, satir.join("\n"));
-const ad = EN ? "rota-cepte-tanitim-en.mp4" : "rota-cepte-tanitim.mp4";
-execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${OUT}/liste.txt`, "-vf", "fps=30,scale=1920:1080,format=yuv420p", "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-movflags", "+faststart", `${OUT}/${ad}`]);
+const ad = `rota-cepte-tanitim${EN ? "-en" : ""}${DIKEY ? "-dikey" : ""}.mp4`;
+execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${OUT}/liste.txt`, "-vf", `fps=30,scale=${W}:${H},format=yuv420p`, "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-movflags", "+faststart", `${OUT}/${ad}`]);
 console.log("bitti", kareler.length, "kare", ((kareler.at(-1) - kareler[0]) | 0) + " sn");
