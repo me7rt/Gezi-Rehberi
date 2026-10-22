@@ -540,7 +540,7 @@
       const set = new Set();
       const ekle = (f, W) => { const u = foto(f, W); if (u) set.add(u); };
       ekle(d.f, 960); if (d.kapak) ekle(d.kapak, 960);
-      d.yerler.forEach((y) => { ekle(y.f, 250); ekle(y.f, 960); });
+      d.yerler.forEach((y) => { ekle(y.f, 250); ekle(y.f, 960); (y.g || []).forEach((f) => { ekle(f, 250); ekle(f, 960); }); });
       d.ilceler.forEach((z) => ekle(z.f, 250));
       const list = [...set]; let i = 0, tamam = 0, ok = 0;
       const goster = () => { if (view && view.mode === "il" && view.d.s === s) b.innerHTML = `<b>${TL("İndiriliyor…", "Downloading…")} ${Math.round((tamam / list.length) * 100)}%</b><small>${tamam} / ${list.length} ${TL("fotoğraf", "photos")}</small><span class="bar"><i style="width:${(tamam / list.length) * 100}%"></i></span>`; };
@@ -1113,6 +1113,10 @@
     const src = foto(p.f, 960);
     $("dImg").innerHTML = src ? `<img src="${src}" alt="${esc(p.ad)}" onerror="fotoHata(this)">` : "";
     $("dCredit").textContent = p.f && p.f.a ? T("Fotoğraf:") + " " + p.f.a + " · Wikimedia Commons" : "";
+    // Galeri: öne çıkan yerlerde ek fotoğraflar (dokununca büyük fotoğraf değişir)
+    const gal = p.f && p.g && p.g.length ? [p.f, ...p.g] : [];
+    $("dGaleri").hidden = !gal.length;
+    $("dGaleri").innerHTML = gal.map((f, i) => `<button class="gk${i ? "" : " on"}" data-i="${i}" aria-label="${TL("Fotoğraf", "Photo")} ${i + 1}"><img src="${foto(f, 250)}" alt="" loading="lazy" onerror="this.parentNode.remove()"></button>`).join("");
     renderFacts(p);
     favBtn(p); gitBtn(p); $("dFav").hidden = $("dShare").hidden = $("dGit").hidden = !p.q;
     dinleDurdur(); $("dDinle").hidden = !sesVar;
@@ -1193,6 +1197,13 @@
   });
   $("heroMore").addEventListener("click", () => { $("heroText").classList.remove("clamp"); $("heroMore").hidden = true; });
   $("dClose").addEventListener("click", closeDetail);
+  $("dGaleri").addEventListener("click", (e) => {
+    const b = e.target.closest(".gk"); if (!b || !open) return;
+    const gal = [open.f, ...(open.g || [])]; const f = gal[+b.dataset.i]; if (!f) return;
+    $("dImg").innerHTML = `<img src="${foto(f, 960)}" alt="${esc(adi(open))}" onerror="fotoHata(this)">`;
+    $("dCredit").textContent = f.a ? T("Fotoğraf:") + " " + f.a + " · Wikimedia Commons" : "";
+    for (const x of $("dGaleri").children) x.classList.toggle("on", x === b);
+  });
   $("dCevre").addEventListener("click", (e) => {
     const b = e.target.closest(".row"); if (!b) return;
     const d = IL.get(b.dataset.s); if (d) { dinleDurdur(); openDetail(d.yerler[+b.dataset.j]); }
