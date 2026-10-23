@@ -1,0 +1,330 @@
+== İller
+il sayısı 81 | eşleşmeyen seçkin il: yok | seçkinsiz il: yok
+== İlçeler
+resmî ilçe: 973 | Wikidata ile eşleşen: 938 | ilçe kaydı bulunamayan: 35
+  ilçe kasaba kaydından eklendi: Sivas / Altınyayla (Q447233)
+  ilçe kasaba kaydından eklendi: Antalya / Döşemealtı (Q1027553)
+  ilçe kasaba kaydından eklendi: Antalya / Kemer (Q217047)
+  ilçe kasaba kaydından eklendi: Antalya / Konyaaltı (Q1783599)
+  ilçe kasaba kaydından eklendi: Antalya / Muratpaşa (Q49277921)
+  ilçe kasaba kaydından eklendi: Artvin / Kemalpaşa (Q4817429)
+  ilçe kasaba kaydından eklendi: Yozgat / Aydıncık (Q2874885)
+  ilçe kasaba kaydından eklendi: Ağrı / Diyadin (Q932913)
+  ilçe kasaba kaydından eklendi: Van / İpekyolu (Q16848468)
+  ilçe kasaba kaydından eklendi: Van / Saray (Q1019904)
+  ilçe kasaba kaydından eklendi: Van / Tuşba (Q16968873)
+  ilçe kasaba kaydından eklendi: Denizli / Güney (Q10764024)
+  ilçe kasaba kaydından eklendi: Balıkesir / Edremit (Q1021818)
+  ilçe kasaba kaydından eklendi: Çanakkale / Yenice (Q6528036)
+  ilçe kasaba kaydından eklendi: Aydın / Kuşadası (Q211952)
+  ilçe kasaba kaydından eklendi: Malatya / Kale (Q1027176)
+  ilçe kasaba kaydından eklendi: Muğla / Kavaklıdere (Q1737217)
+  ilçe kasaba kaydından eklendi: Şanlıurfa / Eyyübiye (Q16957471)
+  ilçe kasaba kaydından eklendi: Şanlıurfa / Haliliye (Q16841546)
+  ilçe kasaba kaydından eklendi: Şanlıurfa / Karaköprü (Q6635526)
+  ilçe kasaba kaydından eklendi: Trabzon / Köprübaşı (Q2674001)
+  ilçe kasaba kaydından eklendi: Erzurum / Aziziye (Q15195666)
+  ilçe kasaba kaydından eklendi: Siirt / Şirvan (Q172902)
+  ilçe kasaba kaydından eklendi: Siirt / Tillo (Q792913)
+  ilçe kasaba kaydından eklendi: Kahramanmaraş / Onikişubat (Q16960466)
+  ilçe kasaba kaydından eklendi: Samsun / Ayvacık (Q2181540)
+  ilçe kasaba kaydından eklendi: Eskişehir / Odunpazarı (Q130470)
+  ilçe kasaba kaydından eklendi: Tokat / Pazar (Q2670995)
+  ilçe kasaba kaydından eklendi: Tokat / Yeşilyurt (Q10837621)
+  ilçe kasaba kaydından eklendi: Kayseri / Yahyalı (Q1011961)
+  ilçe kasaba kaydından eklendi: İstanbul / Çekmeköy (Q122320)
+  ilçe kasaba kaydından eklendi: İstanbul / Eyüpsultan (Q131691199)
+  ilçe kasaba kaydından eklendi: İstanbul / Gaziosmanpaşa (Q570826)
+  ilçe kasaba kaydından eklendi: İstanbul / Şile (Q241631)
+  ilçe Vikipedi'den eklendi: Zonguldak / Ereğli (Karadeniz Ereğli)
+ilçe maddesi tahminle bulunan: 633 | Vikipedi'den eklenen ilçe: 1
+ilçe sayısı 973 | Vikipedi maddeli: 960 | merkezden: 33
+== Yerler
+Türkiye geneli aday yer: 6151
+maddesiz ama fotoğraflı aday: 210
+ili bulunamayan yer: 236
+== Seçkin yerler
+  RED Bilecik / Söğüt: koordinat yok
+  RED Bolu / Gölcük Tabiat Parkı: koordinat yok
+  RED Balıkesir / Ayvalık: il/ilçe/şehir sayfasına düşüyor (Ayvalık)
+  RED Çanakkale / Gökçeada: il/ilçe/şehir sayfasına düşüyor (Gökçeada)
+  RED Tekirdağ / Şarköy: il/ilçe/şehir sayfasına düşüyor (Şarköy)
+  RED Mardin / Midyat: il/ilçe/şehir sayfasına düşüyor (Midyat)
+  RED Mersin / Tarsus: şehir sayfası (Tarsus)
+  RED Kocaeli / Kartepe: şehir sayfası (Kartepe)
+  RED Kocaeli / Kerpe: il merkezine çok uzak
+  RED Kocaeli / Kandıra: il/ilçe/şehir sayfasına düşüyor (Kandıra)
+  RED Hakkari / Zap Suyu: il merkezine çok uzak
+  RED Muğla / Datça: il/ilçe/şehir sayfasına düşüyor (Datça)
+  RED Çorum / Şapinuva: şehir sayfası (Şapinuva)
+  RED Osmaniye / Zorkun Yaylası: koordinat yok
+  RED Giresun / Kümbet Yaylası: koordinat yok
+  RED Giresun / Bektaş Yaylası: koordinat yok
+  RED Nevşehir / Uçhisar: şehir sayfası (Uçhisar, Nevşehir)
+  RED Nevşehir / Avanos: şehir sayfası (Avanos)
+  RED Nevşehir / Ürgüp: şehir sayfası (Ürgüp)
+  RED Gümüşhane / Santa Harabeleri: koordinat yok
+  RED Eskişehir / Odunpazarı: il/ilçe/şehir sayfasına düşüyor (Odunpazarı)
+  RED Şırnak / Cizre: şehir sayfası (Cizre)
+  DÜZELDİ Yalova / Atatürk Köşkü (Yalova) → Yalova Atatürk Köşkü
+  DÜZELDİ Sivas / Gürün Gökpınar Gölü → Gökpınar Gölü
+  DÜZELDİ Gaziantep / Gaziantep Emine Göğüş Mutfak Müzesi → Emine Göğüş Mutfak Müzesi
+  DÜZELDİ Antalya / Kaleiçi → Kaleiçi, Muratpaşa
+  DÜZELDİ Antalya / Olimpos → Olimpos, Kumluca
+  DÜZELDİ Bursa / Ulu Cami (Bursa) → Bursa Ulu Camii
+  DÜZELDİ Artvin / Şavşat Karagöl → Karagöl (Şavşat)
+  DÜZELDİ Artvin / Borçka Karagöl → Karagöl (Borçka)
+  DÜZELDİ Afyonkarahisar / Afyon Ulu Camii → Afyonkarahisar Ulu Camii
+  DÜZELDİ Afyonkarahisar / Afyonkarahisar Arkeoloji Müzesi → Afyonkarahisar Müzesi
+  DÜZELDİ Konya / Alâeddin Camii → Alâeddin Camii (Konya)
+  DÜZELDİ Denizli / Tripolis → Tripolis ad Meaendrum
+  DÜZELDİ Balıkesir / Kazdağları → Kazdağı Millî Parkı
+  DÜZELDİ Çanakkale / Gelibolu Yarımadası Tarihî Alanı → Çanakkale Savaşları Gelibolu Tarihî Alanı
+  DÜZELDİ Edirne / Eski Cami (Edirne) → Eski Cami
+  DÜZELDİ Edirne / Sultan II. Bayezid Külliyesi → II. Bayezid Külliyesi
+  DÜZELDİ Bitlis / Ahlat Selçuklu Meydan Mezarlığı → Ahlat Selçuklu Mezarlığı
+  DÜZELDİ Bitlis / Nemrut Krater Gölü → Nemrut Gölü
+  DÜZELDİ Bingöl / Yüzen Adalar → Yüzen Adalar Tabiat Anıtı
+  DÜZELDİ Amasya / Amasya Kral Kaya Mezarları → Kral Kaya Mezarları
+  DÜZELDİ Amasya / Yalıboyu Evleri → Amasya Yalıboyu Evleri
+  DÜZELDİ Amasya / Bayezid Paşa Camii → Bayezid Paşa Camii (Amasya)
+  DÜZELDİ Tekirdağ / Rakoczi Müzesi → Rakoçi Müzesi
+  DÜZELDİ Tekirdağ / Namık Kemal Evi → Namık Kemal Evi Müzesi
+  DÜZELDİ Mardin / Deyrulzafaran Manastırı → Deyrüzzaferân Manastırı
+  DÜZELDİ Mardin / Zinciriye Medresesi → Zinciriye Medresesi (Mardin)
+  DÜZELDİ Malatya / Nemrut Dağı → Nemrut Dağı Millî Parkı
+  DÜZELDİ Manisa / Manisa Muradiye Camii → Muradiye Camii (Manisa)
+  DÜZELDİ Mersin / Cennet ve Cehennem Obrukları → Cennet ve Cehennem Çökükleri
+  DÜZELDİ Kırklareli / İğneada Longozu → İğneada Longoz Ormanları Millî Parkı
+  DÜZELDİ Kırklareli / Vize Ayasofya Camii → Gazi Süleyman Paşa Camii (Vize)
+  DÜZELDİ Kocaeli / Kocaeli Müzesi → Kocaeli Arkeoloji Müzesi
+  DÜZELDİ Hakkari / Cilo Dağları → Hakkâri Cilo ve Sat Dağları Millî Parkı
+  DÜZELDİ Muğla / Ölüdeniz → Ölüdeniz-Kıdrak Tabiat Parkı
+  DÜZELDİ Muğla / Akyaka → Akyaka, Ula
+  DÜZELDİ Kırşehir / Kesikköprü → Kesikköprü, Kırşehir
+  DÜZELDİ Sinop / Erfelek Tatlıca Şelaleleri → Tatlıca Şelaleleri
+  DÜZELDİ Zonguldak / Filyos → Filyos Çayı
+  DÜZELDİ Zonguldak / Ereğli (Zonguldak) → Karadeniz Ereğli Müzesi
+  DÜZELDİ İzmir / Saat Kulesi (İzmir) → İzmir Saat Kulesi
+  DÜZELDİ İzmir / Asansör (İzmir) → Tarihî Asansör
+  DÜZELDİ İzmir / Agora (İzmir) → İzmir Agorası
+  DÜZELDİ Niğde / Niğde Alaeddin Camii → Alâeddin Camii (Niğde)
+  DÜZELDİ Trabzon / Trabzon Ayasofya Camii → Ayasofya (Trabzon)
+  DÜZELDİ Trabzon / Atatürk Köşkü (Trabzon) → Trabzon Atatürk Köşkü
+  DÜZELDİ Trabzon / Boztepe (Trabzon) → Boztepe, Trabzon
+  DÜZELDİ Düzce / Güzeldere Şelalesi → Güzeldere Şelalesi Tabiat Parkı
+  DÜZELDİ Düzce / Samandere Şelalesi → Samandere Şelalesi Tabiat Anıtı
+  DÜZELDİ Samsun / Bandırma Vapuru Müzesi → Bandırma Vapuru ve Millî Mücadele Parkı Açık Hava Müzesi
+  DÜZELDİ Eskişehir / Sazova Bilim, Kültür ve Sanat Parkı → Sazova Bilim Kültür ve Sanat Parkı
+  DÜZELDİ Eskişehir / Midas Anıtı → Midas Anıtı (Yazılıkaya)
+  DÜZELDİ Karaman / Hatuniye Medresesi → Hatuniye Medresesi (Karaman)
+  DÜZELDİ Karaman / Taşkale → Taşkale, Karaman
+  DÜZELDİ Ordu / Boztepe → Boztepe, Altınordu
+  DÜZELDİ Kayseri / Talas → Talas, Kayseri
+  DÜZELDİ Rize / Zil Kalesi → Zilkale
+  DÜZELDİ Kırıkkale / Hasandede → Hasandede, Kırıkkale
+  DÜZELDİ İstanbul / Balat → Balat, Fatih
+  RED Sivas / Balıklı Kaplıca: Vikipedi'de yok
+  DÜZELDİ Gaziantep / Zincirli Bedesten → Wikidata Q139435661 Zincirli Bedesten
+  DÜZELDİ Bursa / Osman Gazi Türbesi → Wikidata Q135583306 Osman Gazi Türbesi
+  DÜZELDİ Adıyaman / Arsameia → Wikidata Q704167 Arsameia
+  RED Ağrı / Diyadin Kaplıcaları: Vikipedi'de yok
+  DÜZELDİ Ağrı / Meteor Çukuru → Wikidata Q110980556 Meteor çukuru
+  RED Van / Çavuştepe: Vikipedi'de yok
+  DÜZELDİ Batman / Malabadi Köprüsü → Wikidata Q38252188 Malabadi Köprüsü
+  RED Balıkesir / Şeytan Sofrası: başka ilde (Şırnak)
+  RED Balıkesir / Adatepe: anlam ayrımı sayfası
+  RED Balıkesir / Sütüven Şelalesi: Vikipedi'de yok
+  RED Balıkesir / Hasanboğuldu: Vikipedi'de yok
+  RED Balıkesir / Kaz Dağları Millî Parkı: Vikipedi'de yok
+  RED Aksaray / Sultanhanı Kervansarayı: Vikipedi'de yok
+  RED Bingöl / Bingöl Kalesi: Vikipedi'de yok
+  DÜZELDİ Bingöl / Kral Kızı Kalesi → Wikidata Q133236544 Kral Kızı Kalesi
+  RED Aydın / Didim Apollon Tapınağı: Vikipedi'de yok
+  RED Amasya / Harşena Kalesi: Vikipedi'de yok
+  RED Kütahya / Germiyan Sokağı: Vikipedi'de yok
+  RED Kilis / Kilis Kalesi: Vikipedi'de yok
+  DÜZELDİ Kilis / Ravanda Kalesi → Wikidata Q131901862 Ravanda Kalesi
+  RED Malatya / Eski Malatya: Vikipedi'de yok
+  RED Malatya / Levent Vadisi: Vikipedi'de yok
+  DÜZELDİ Manisa / Niobe Kayası → Wikidata Q117037173 Niobe Kayası
+  RED Mersin / Ashab-ı Kehf (Tarsus): Vikipedi'de yok
+  RED Mersin / Anamurium: Vikipedi'de yok
+  RED Hatay / Harbiye Şelalesi: Vikipedi'de yok
+  DÜZELDİ Hatay / Musa Ağacı → Wikidata Q139436352 Musa Ağacı
+  RED Hatay / Uzun Çarşı (Antakya): Vikipedi'de yok
+  DÜZELDİ Hakkari / Meydan Medresesi → Wikidata Q131741399 Meydan Medresesi
+  RED Muğla / Dalyan: anlam ayrımı sayfası
+  RED Muş / Muş Lalesi: Vikipedi'de yok
+  DÜZELDİ Muş / Haspet Kalesi → Wikidata Q122936844 Haspet Kalesi
+  RED Kırşehir / Cacabey Camii: Vikipedi'de yok
+  DÜZELDİ Kırşehir / Aşık Paşa Türbesi → Wikidata Q96372899 Aşık Paşa Türbesi
+  RED Sinop / Hamsilos Koyu: Vikipedi'de yok
+  DÜZELDİ Çankırı / Çankırı Tuz Mağarası → Wikidata Q139437289 Çankırı Tuz Mağarası Tarihi
+  DÜZELDİ Çankırı / Çankırı Kalesi → Wikidata Q131901863 Çankırı Kalesi
+  DÜZELDİ Zonguldak / Cehennemağzı Mağaraları → Wikidata Q49319098 Cehennemağzı Mağaraları
+  DÜZELDİ İzmir / Bergama Akropolü → Wikidata Q69567912 Bergama Akropolü
+  RED Niğde / Eski Gümüşler: Vikipedi'de yok
+  DÜZELDİ Nevşehir / Paşabağ → Wikidata Q133612406 Paşabağ
+  DÜZELDİ Erzurum / Erzurum Kalesi → Wikidata Q107330417 Erzurum Kalesi
+  DÜZELDİ Gümüşhane / Zigana Dağları → Wikidata Q31559785 Zigana Dağları
+  DÜZELDİ Siirt / Veysel Karani Türbesi → Wikidata Q131391202 Veysel Karani Türbesi
+  RED Siirt / İbrahim Hakkı Erzurumi Türbesi: Vikipedi'de yok
+  RED Kahramanmaraş / Başkonuş Yaylası: Vikipedi'de yok
+  RED Karaman / Binbir Kilise: Vikipedi'de yok
+  RED Karabük / Cinci Hanı: Wikidata yok
+  RED Karabük / Kristal Teras: Vikipedi'de yok
+  DÜZELDİ Karabük / Yörük Köyü → Wikidata Q134734656 Yörük Köyü Mezarlığı
+  RED Karabük / Hıdırlık Tepesi: Vikipedi'de yok
+  RED Ordu / Çambaşı Yaylası: Vikipedi'de yok
+  DÜZELDİ Ordu / Paşaoğlu Konağı → Wikidata Q132089420 Paşaoğlu Konağı, Altınordu
+  RED Kastamonu / Ilgarini Mağarası: Vikipedi'de yok
+  RED Kastamonu / Horma Kanyonu: Vikipedi'de yok
+  RED Tunceli / Ovacık: anlam ayrımı sayfası
+  RED Tokat / Sulu Sokak: Vikipedi'de yok
+  RED Kayseri / Gevher Nesibe Şifahiyesi: Vikipedi'de yok
+seçkin kabul: 370 / 429
+== Fotoğraflar
+fotoğraf bilgisi alınan dosya: 3804 | uygun: 3369
+Vikipedi sayfa resmi aranan yer: 2285 | uygun resim bulunan: 323
+  FOTOSUZ seçkin: Sudüşen Şelalesi (Q97320238)
+  FOTOSUZ seçkin: Elazığ Arkeoloji Ve Etnografya Müzesi (Q28221154)
+  FOTOSUZ seçkin: Macaheli (Q259183)
+  FOTOSUZ seçkin: Kızılkeçili (Q6587543)
+  FOTOSUZ seçkin: Aydıntepe Yeraltı Şehri (Q28219863)
+  FOTOSUZ seçkin: MKE Silahsan Özel Müzesi (Q28136374)
+  FOTOSUZ seçkin: Kapulukaya Barajı ve Hidroelektrik Santrali (Q2885173)
+  FOTOSUZ seçkin: Kral Kızı Kalesi (Q133236544)
+  FOTOSUZ seçkin: Ravanda Kalesi (Q131901862)
+  FOTOSUZ seçkin: Cehennemağzı Mağaraları (Q49319098)
+  FOTOSUZ seçkin: Zigana Dağları (Q31559785)
+  FOTOSUZ seçkin: Yörük Köyü Mezarlığı (Q134734656)
+galerili öne çıkan yer: 244
+yedek foto: kategori 134 | yakın 9 | Commons araması 137 | hiç bulunamayan seçkin 12
+az yerli illere eklenen fotoğrafsız (metinli) yer: 91
+güncel il kapağı: yerin kendi fotoğrafı 13 | kategoriden 53 | eski kural 15
+== Elle eklenen yerler (OSM)
+  konum düzeldi: Balıkesir / Sütüven Şelalesi (5.8 km)
+  konum düzeldi: Balıkesir / Hasanboğuldu (1.9 km)
+  konum düzeldi: Balıkesir / Kızılkeçili (3.0 km)
+  OSM'de de yok: Balıkesir / Adatepe
+  OSM'de de yok: Balıkesir / Kaz Dağları Millî Parkı
+  OSM'de de yok: Aksaray / Sultanhanı Kervansarayı
+  OSM'de de yok: Bingöl / Bingöl Kalesi
+  OSM'de de yok: Aydın / Didim Apollon Tapınağı
+  OSM'de de yok: Amasya / Harşena Kalesi
+  OSM'de de yok: Kütahya / Germiyan Sokağı
+  OSM'de de yok: Kilis / Kilis Kalesi
+  OSM'de de yok: Malatya / Eski Malatya
+  OSM'de de yok: Muş / Muş Lalesi
+  OSM'de de yok: Kırşehir / Cacabey Camii
+  OSM'de de yok: Siirt / İbrahim Hakkı Erzurumi Türbesi
+  OSM'de de yok: Karabük / Kristal Teras
+  OSM'de de yok: Karabük / Hıdırlık Tepesi
+  OSM'de de yok: Kastamonu / Horma Kanyonu
+  OSM'de de yok: Tunceli / Ovacık
+  OSM'de de yok: Tokat / Sulu Sokak
+  OSM'de de yok: Kayseri / Gevher Nesibe Şifahiyesi
+  OSM'den eklendi: Sivas / Balıklı Kaplıca
+  OSM'de var ama fotoğraf yok, eklenmedi: Ağrı / Diyadin Kaplıcaları
+  OSM'de var ama fotoğraf yok, eklenmedi: Van / Çavuştepe
+  OSM'den eklendi: Balıkesir / Şeytan Sofrası
+  OSM'de var ama fotoğraf yok, eklenmedi: Malatya / Levent Vadisi
+  OSM'den eklendi: Mersin / Ashab-ı Kehf
+  OSM'den eklendi: Mersin / Anamurium
+  OSM'de var ama fotoğraf yok, eklenmedi: Hatay / Harbiye Şelalesi
+  OSM'den eklendi: Hatay / Uzun Çarşı
+  OSM'den eklendi: Muğla / Dalyan
+  OSM'den eklendi: Sinop / Hamsilos Koyu
+  OSM'de var ama fotoğraf yok, eklenmedi: Niğde / Eski Gümüşler
+  OSM'de var ama fotoğraf yok, eklenmedi: Kahramanmaraş / Başkonuş Yaylası
+  OSM'de var ama fotoğraf yok, eklenmedi: Karaman / Binbir Kilise
+  OSM'den eklendi: Karabük / Cinci Hanı
+  OSM'de var ama fotoğraf yok, eklenmedi: Ordu / Çambaşı Yaylası
+  OSM'de var ama fotoğraf yok, eklenmedi: Kastamonu / Ilgarini Mağarası
+elle yer konumu düzelen: 3 | OSM'den eklenen seçkin: 17 | elle/OSM yere bulunan fotoğraf: 9 
+== Metinler
+Türkçe metin: 3858 | İngilizce metin: 1925
+Adana: 55 yer (6 seçkin), 15 ilçe, fotosuz ilçe 0, ilçesiz yer 1
+Adıyaman: 15 yer (5 seçkin), 9 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Afyonkarahisar: 36 yer (5 seçkin), 18 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Ağrı: 12 yer (3 seçkin), 8 ilçe, fotosuz ilçe 0, ilçesiz yer 3
+Aksaray: 28 yer (4 seçkin), 8 ilçe, fotosuz ilçe 0, ilçesiz yer 1
+Amasya: 38 yer (5 seçkin), 7 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Ankara: 114 yer (7 seçkin), 25 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Antalya: 141 yer (9 seçkin), 19 ilçe, fotosuz ilçe 0, ilçesiz yer 4
+Ardahan: 18 yer (4 seçkin), 6 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Artvin: 54 yer (3 seçkin), 9 ilçe, fotosuz ilçe 0, ilçesiz yer 1
+Aydın: 71 yer (4 seçkin), 17 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Balıkesir: 50 yer (12 seçkin), 20 ilçe, fotosuz ilçe 1, ilçesiz yer 1
+Bartın: 15 yer (4 seçkin), 4 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Batman: 13 yer (3 seçkin), 6 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Bayburt: 9 yer (3 seçkin), 3 ilçe, fotosuz ilçe 0, ilçesiz yer 2
+Bilecik: 15 yer (3 seçkin), 8 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Bingöl: 5 yer (1 seçkin), 8 ilçe, fotosuz ilçe 2, ilçesiz yer 0
+Bitlis: 15 yer (5 seçkin), 7 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Bolu: 19 yer (4 seçkin), 9 ilçe, fotosuz ilçe 1, ilçesiz yer 1
+Burdur: 15 yer (4 seçkin), 11 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Bursa: 99 yer (8 seçkin), 17 ilçe, fotosuz ilçe 1, ilçesiz yer 1
+Çanakkale: 72 yer (5 seçkin), 12 ilçe, fotosuz ilçe 0, ilçesiz yer 3
+Çankırı: 15 yer (4 seçkin), 12 ilçe, fotosuz ilçe 1, ilçesiz yer 1
+Çorum: 21 yer (4 seçkin), 14 ilçe, fotosuz ilçe 2, ilçesiz yer 0
+Denizli: 26 yer (5 seçkin), 19 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Diyarbakır: 50 yer (6 seçkin), 17 ilçe, fotosuz ilçe 1, ilçesiz yer 1
+Düzce: 15 yer (4 seçkin), 8 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Edirne: 50 yer (7 seçkin), 9 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Elazığ: 15 yer (3 seçkin), 11 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Erzincan: 12 yer (4 seçkin), 9 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Erzurum: 37 yer (6 seçkin), 20 ilçe, fotosuz ilçe 2, ilçesiz yer 1
+Eskişehir: 40 yer (4 seçkin), 14 ilçe, fotosuz ilçe 4, ilçesiz yer 0
+Gaziantep: 34 yer (6 seçkin), 9 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Giresun: 15 yer (2 seçkin), 16 ilçe, fotosuz ilçe 2, ilçesiz yer 0
+Gümüşhane: 11 yer (2 seçkin), 6 ilçe, fotosuz ilçe 0, ilçesiz yer 1
+Hakkari: 5 yer (2 seçkin), 5 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Hatay: 34 yer (5 seçkin), 15 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Iğdır: 6 yer (2 seçkin), 4 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Isparta: 27 yer (5 seçkin), 13 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+İstanbul: 400 yer (19 seçkin), 39 ilçe, fotosuz ilçe 0, ilçesiz yer 1
+İzmir: 191 yer (11 seçkin), 30 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Kahramanmaraş: 16 yer (3 seçkin), 11 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Karabük: 18 yer (2 seçkin), 6 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Karaman: 15 yer (3 seçkin), 6 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Kars: 27 yer (5 seçkin), 8 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Kastamonu: 19 yer (4 seçkin), 20 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Kayseri: 37 yer (6 seçkin), 16 ilçe, fotosuz ilçe 1, ilçesiz yer 1
+Kırıkkale: 15 yer (3 seçkin), 9 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Kırklareli: 64 yer (4 seçkin), 8 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Kırşehir: 13 yer (3 seçkin), 7 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Kilis: 6 yer (1 seçkin), 4 ilçe, fotosuz ilçe 2, ilçesiz yer 3
+Kocaeli: 53 yer (3 seçkin), 12 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Konya: 80 yer (7 seçkin), 31 ilçe, fotosuz ilçe 2, ilçesiz yer 1
+Kütahya: 28 yer (3 seçkin), 13 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Malatya: 15 yer (3 seçkin), 13 ilçe, fotosuz ilçe 2, ilçesiz yer 0
+Manisa: 47 yer (5 seçkin), 17 ilçe, fotosuz ilçe 2, ilçesiz yer 1
+Mardin: 23 yer (6 seçkin), 10 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+  elle kayıt atlandı (zaten var): Mersin / Anamurium
+Mersin: 155 yer (5 seçkin), 13 ilçe, fotosuz ilçe 0, ilçesiz yer 1
+Muğla: 96 yer (8 seçkin), 13 ilçe, fotosuz ilçe 0, ilçesiz yer 4
+Muş: 15 yer (3 seçkin), 6 ilçe, fotosuz ilçe 0, ilçesiz yer 2
+Nevşehir: 31 yer (4 seçkin), 8 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Niğde: 20 yer (4 seçkin), 6 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Ordu: 20 yer (3 seçkin), 19 ilçe, fotosuz ilçe 4, ilçesiz yer 0
+Osmaniye: 15 yer (3 seçkin), 7 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Rize: 33 yer (5 seçkin), 12 ilçe, fotosuz ilçe 1, ilçesiz yer 1
+Sakarya: 23 yer (5 seçkin), 16 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Samsun: 38 yer (5 seçkin), 17 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Siirt: 10 yer (3 seçkin), 7 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Sinop: 18 yer (5 seçkin), 9 ilçe, fotosuz ilçe 2, ilçesiz yer 0
+Sivas: 29 yer (6 seçkin), 17 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Şanlıurfa: 33 yer (7 seçkin), 13 ilçe, fotosuz ilçe 0, ilçesiz yer 3
+Şırnak: 8 yer (2 seçkin), 7 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Tekirdağ: 15 yer (3 seçkin), 11 ilçe, fotosuz ilçe 0, ilçesiz yer 1
+Tokat: 30 yer (5 seçkin), 12 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+Trabzon: 37 yer (6 seçkin), 18 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Tunceli: 9 yer (2 seçkin), 8 ilçe, fotosuz ilçe 2, ilçesiz yer 1
+Uşak: 15 yer (3 seçkin), 6 ilçe, fotosuz ilçe 0, ilçesiz yer 0
+Van: 28 yer (5 seçkin), 13 ilçe, fotosuz ilçe 0, ilçesiz yer 2
+Yalova: 15 yer (4 seçkin), 6 ilçe, fotosuz ilçe 0, ilçesiz yer 1
+Yozgat: 15 yer (4 seçkin), 14 ilçe, fotosuz ilçe 5, ilçesiz yer 6
+Zonguldak: 15 yer (3 seçkin), 8 ilçe, fotosuz ilçe 1, ilçesiz yer 0
+TOPLAM: 81 il, 973 ilçe, 3112 yer, kontrol edilecek 2281 fotoğraf, sürüm 202610222359
