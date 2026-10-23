@@ -32,6 +32,9 @@ jobs:
           grep -n "permission" android/app/src/main/AndroidManifest.xml
           npx @capacitor/assets generate --android --iconBackgroundColor '#1f4fa3' --splashBackgroundColor '#1f4fa3' || echo "simge uretilemedi, varsayilan kullanilacak"
           npx cap sync android
+          # Google Play en az Android 7 (SDK 24) istiyor
+          sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 24/' android/variables.gradle
+          grep -n 'SdkVersion' android/variables.gradle
       - name: APK derle (imza anahtarı varsa Play paketi de)
         env:
           KS: ${{ secrets.KEYSTORE_B64 }}
@@ -40,7 +43,7 @@ jobs:
           cd android
           chmod +x gradlew
           # Her derlemede sürüm numarası artar (Play bunu ister)
-          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/; s/versionName \"[^\"]*\"/versionName \"3.${{ github.run_number }}\"/" app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/; s/versionName \"[^\"]*\"/versionName \"$(node -p "require('../package.json').version")\"/" app/build.gradle
           if [ -n "$KS" ]; then
             echo "$KS" | base64 -d > ../ks.jks
             ./gradlew assembleRelease bundleRelease --no-daemon
