@@ -105,7 +105,7 @@ await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, maxWidth: 
 await p.evaluate(() => { const d = document.createElement("div"); d.style.cssText = "position:absolute;right:0;bottom:0;width:2px;height:2px;opacity:.01"; document.body.appendChild(d); let i = 0; setInterval(() => { d.style.background = i++ % 2 ? "#0b1730" : "#0b1731"; }, 33); });
 
 // 1) açılış
-await yaz(t("Türkiye cebinde.", "Türkiye in your pocket."), t("81 il, 958 ilçe, 2.400'den fazla gezilecek yer. Hepsi tek uygulamada.", "81 provinces, 958 districts and 2,400+ places to visit, all in one app."));
+await yaz(t("Türkiye cebinde.", "Türkiye in your pocket."), t("81 il, 973 ilçe, 3.000'den fazla gezilecek yer. Hepsi tek uygulamada.", "81 provinces, 973 districts and 3,000+ places to visit, all in one app."));
 await bekle(7000);
 // 2) ana sayfa
 await yaz(t("Nereye gidiyorsun?", "Where are you going?"), t("İl, ilçe ya da yer ara. Konumunu açarsan en yakın yerleri sıralarız.", "Search any province, district or place. Turn on location to see what's nearby."));
