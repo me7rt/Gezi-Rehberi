@@ -32,8 +32,9 @@ jobs:
           grep -n "permission" android/app/src/main/AndroidManifest.xml
           npx @capacitor/assets generate --android --iconBackgroundColor '#1f4fa3' --splashBackgroundColor '#1f4fa3' || echo "simge uretilemedi, varsayilan kullanilacak"
           npx cap sync android
-          # Google Play en az Android 7 (SDK 24) istiyor
-          sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 24/' android/variables.gradle
+          # Google Play: en az Android 7 (SDK 24), hedef SDK 36
+          sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 24/; s/compileSdkVersion = [0-9]*/compileSdkVersion = 36/; s/targetSdkVersion = [0-9]*/targetSdkVersion = 36/' android/variables.gradle
+          printf '\nandroid.suppressUnsupportedCompileSdk=36\n' >> android/gradle.properties
           grep -n 'SdkVersion' android/variables.gradle
       - name: APK derle (imza anahtarı varsa Play paketi de)
         env:
